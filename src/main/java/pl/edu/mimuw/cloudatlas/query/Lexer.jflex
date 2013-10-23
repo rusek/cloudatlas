@@ -13,6 +13,7 @@ import java_cup.runtime.*;
 /* scanner specs */
 %class Lexer
 %unicode
+%cupsym Sym
 %cup
 %line
 %column
@@ -43,88 +44,90 @@ DecIntegerLiteral  = 0 | [1-9][0-9]*
 <YYINITIAL> {
     /* keywords */
     "SELECT"                       
-        { return this.token(sym.KEYWORD_SELECT); }
+        { return this.token(Sym.KEYWORD_SELECT); }
     "AS"                           
-        { return this.token(sym.KEYWORD_AS); }
+        { return this.token(Sym.KEYWORD_AS); }
     "WHERE"
-    	{ return this.token(sym.KEYWORD_WHERE); }
-   	"ORDER BY"
-   		{ return this.token(sym.KEYWORD_ORDER_BY); }
+    	{ return this.token(Sym.KEYWORD_WHERE); }
+   	"ORDER"
+   		{ return this.token(Sym.KEYWORD_ORDER); }
+        "BY"
+                { return this.token(Sym.KEYWORD_BY); }
    	"REGEXP"
-   		{ return this.token(sym.KEYWORD_REGEXP); }
+   		{ return this.token(Sym.KEYWORD_REGEXP); }
    	"ASC"
-   		{ return this.token(sym.KEYWORD_ASC); }
+   		{ return this.token(Sym.KEYWORD_ASC); }
    	"DESC"
-   		{ return this.token(sym.KEYWORD_DESC); }
+   		{ return this.token(Sym.KEYWORD_DESC); }
    	"FIRST"
-   		{ return this.token(sym.KEYWORD_FIRST); }
+   		{ return this.token(Sym.KEYWORD_FIRST); }
    	"LAST"
-   		{ return this.token(sym.KEYWORD_LAST); }
+   		{ return this.token(Sym.KEYWORD_LAST); }
    	"NULLS"
-   		{ return this.token(sym.KEYWORD_NULLS); }
+   		{ return this.token(Sym.KEYWORD_NULLS); }
    	"AND"
-   		{ return this.token(sym.KEYWORD_AND); }
+   		{ return this.token(Sym.KEYWORD_AND); }
    	"OR"
-   		{ return this.token(sym.KEYWORD_OR); }
+   		{ return this.token(Sym.KEYWORD_OR); }
     /* identifiers */ 
     {Identifier}                   
-        { return this.token(sym.IDENTIFIER, this.yytext()); }
+        { return this.token(Sym.IDENTIFIER, this.yytext()); }
     "+"                            
-        { return this.token(sym.PLUS); }
+        { return this.token(Sym.PLUS); }
     "-"                            
-        { return this.token(sym.MINUS); }
+        { return this.token(Sym.MINUS); }
     "*"                            
-        { return this.token(sym.STAR); }
+        { return this.token(Sym.STAR); }
     "/"
-    	{ return this.token(sym.SLASH); }
+    	{ return this.token(Sym.SLASH); }
     "%"
-    	{ return this.token(sym.PERCENT); }
+    	{ return this.token(Sym.PERCENT); }
     ";"                            
-        { return this.token(sym.SEMI); }
+        { return this.token(Sym.SEMICOLON); }
     "("                            
-        { return this.token(sym.LEFT_PARENTHESIS); }
+        { return this.token(Sym.LEFT_PARENTHESIS); }
     ")"                            
-        { return this.token(sym.RIGHT_PARENTHESIS); }
+        { return this.token(Sym.RIGHT_PARENTHESIS); }
     "["
-    	{ return this.token(sym.LEFT_SQUARE); }
+    	{ return this.token(Sym.LEFT_BRACKET); }
     "]"
-    	{ return this.token(sym.RIGHT_SQUARE); }
+    	{ return this.token(Sym.RIGHT_BRACKET); }
     "{"
-    	{ return this.token(sym.LEFT_BRACE); }
+    	{ return this.token(Sym.LEFT_BRACE); }
     "}"
-    	{ return this.token(sym.RIGHT_BRACE); }
+    	{ return this.token(Sym.RIGHT_BRACE); }
     "="                            
-        { return this.token(sym.EQ); }
+        { return this.token(Sym.EQUAL); }
     "<>"                           
-        { return this.token(sym.NOT_EQ); }
+        { return this.token(Sym.NOT_EQUAL); }
     "<"
-    	{ return this.token(sym.LESS); }
+    	{ return this.token(Sym.LESS); }
     "<="
-    	{ return this.token(sym.LESSEQ); }
+    	{ return this.token(Sym.LESS_EQUAL); }
     ">"
-    	{ return this.token(sym.GREATER); }
+    	{ return this.token(Sym.GREATER); }
     ">="
-    	{ return this.token(sym.GREATEREQ); }
+    	{ return this.token(Sym.GREATER_EQUAL); }
     ","
-    	{ return this.token(sym.COMA); }
+    	{ return this.token(Sym.COMMA); }
     /* constants */
     {DecIntegerLiteral}            
         { return this.token(
-            sym.INTEGER_LITERAL, new Integer(this.yytext())); }
+            Sym.INTEGER_LITERAL, new Integer(this.yytext())); }
     \"                             
         { this.string.setLength(0); this.yybegin(STRING); }
     /* whitespace */
     {WhiteSpace}                   
         { /* ignore */ }
     <<EOF>>                        
-        { return this.token(sym.EOF); }
+        { return this.token(Sym.EOF); }
 }
 
 <STRING> {
     /* end of string */
     \"                             
         { this.yybegin(YYINITIAL); return this.token(
-            sym.STRING_LITERAL, this.string.toString()); }
+            Sym.STRING_LITERAL, this.string.toString()); }
     /* regular characters */
     [^\n\r\"\\]+                   
         { this.string.append(this.yytext()); }

@@ -1,33 +1,42 @@
 /* A parser for the **CloudAtlas** query language */
+import java.util.*;
 import java_cup.runtime.*;
 
 /* Terminals (tokens returned by the scanner) */
-terminal           SEMI, PLUS, MINUS, LEFT_PARENTHESIS, RIGHT_PARENTHESIS;
-terminal String    IDENTIFIER;
+terminal           SEMICOLON, COMMA, PLUS, MINUS, STAR, SLASH, PERCENT, LEFT_PARENTHESIS, RIGHT_PARENTHESIS,
+                   LESS, LESS_EQUAL, GREATER, GREATER_EQUAL, EQUAL, NOT_EQUAL, 
+                   KEYWORD_AND, KEYWORD_OR, KEYWORD_NOT, KEYWORD_ASC, KEYWORD_DESC, KEYWORD_NULLS,
+                   KEYWORD_SELECT, KEYWORD_WHERE, KEYWORD_ORDER, KEYWORD_BY, KEYWORD_AS, KEYWORD_FIRST,
+                   KEYWORD_LAST, KEYWORD_REGEXP, LEFT_BRACKET, RIGHT_BRACKET, LEFT_BRACE, RIGHT_BRACE;
+terminal String    IDENTIFIER, STRING_LITERAL;
+terminal Long      INTEGER_LITERAL;
+terminal Double    DOUBLE_LITERAL;
+terminal Boolean   BOOLEAN_LITERAL;
+
 /* Non-terminals (elements generating AST nodes) */
-non terminal StatementList   statement_list;
-non terminal Statement       statement;
-non terminal Expression      basic_expr, fact_expr, neg_expr, term_expr;
-non terminal ExpressionList  expr_list;
+non terminal List<Stmt>   statement_list;
+non terminal Stmt         statement;
+non terminal Expr         basic_expr, fact_expr, neg_expr, term_expr;
+non terminal List<Expr>   expr_list;
 
 /* . . . */
 
 statement_list ::=
-    statement:s SEMI statement_list:sl
-    {: sl.addFirst(s); RESULT = sl; :}
+    statement:s SEMICOLON statement_list:sl
+    {: sl.add(0, s); RESULT = sl; :}
     |
     statement:s
-    {: StatementList sl = new StatementList(); sl.add(s); RESULT = sl; :}
+    {: List<Stmt> sl = new LinkedList<Stmt>(); sl.add(s); RESULT = sl; :}
     ;
 
 /* . . . */
 
 basic_expr ::=
     basic_expr:le PLUS fact_expr:re
-    {: RESULT = new AdditionExpression(le, re); :}
+    {: RESULT = new BinExpr(le, re, BinOp.ADD); :}
     |
     basic_expr:le MINUS fact_expr:re
-    {: RESULT = new SubtractionExpression(le, re); :}
+    {: RESULT = new BinExpr(le, re, BinOp.SUB); :}
     |
     fact_expr:e
     {: RESULT = e; :}
@@ -37,13 +46,13 @@ basic_expr ::=
 
 term_expr ::=
     IDENTIFIER:attrName
-    {: RESULT = new AttributeValue(attrName); :}
+    {: RESULT = new AttributeExpr(attrName); :}
     |
     IDENTIFIER:funcName LEFT_PARENTHESIS RIGHT_PARENTHESIS
-    {: RESULT = new FunctionCall(funcName, new ExpressionList()); :}
+    {: RESULT = new CallExpr(funcName, new LinkedList<Expr>()); :}
     |
     IDENTIFIER:funcName LEFT_PARENTHESIS expr_list:params RIGHT_PARENTHESIS
-    {: RESULT = new FunctionCall(funcName, params); :}
+    {: RESULT = new CallExpr(funcName, params); :}
     |
 
     /* . . . */
