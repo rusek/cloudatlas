@@ -1,0 +1,53 @@
+/* A parser for the **CloudAtlas** query language */
+import java_cup.runtime.*;
+
+/* Terminals (tokens returned by the scanner) */
+terminal           SEMI, PLUS, MINUS, LEFT_PARENTHESIS, RIGHT_PARENTHESIS;
+terminal String    IDENTIFIER;
+/* Non-terminals (elements generating AST nodes) */
+non terminal StatementList   statement_list;
+non terminal Statement       statement;
+non terminal Expression      basic_expr, fact_expr, neg_expr, term_expr;
+non terminal ExpressionList  expr_list;
+
+/* . . . */
+
+statement_list ::=
+    statement:s SEMI statement_list:sl
+    {: sl.addFirst(s); RESULT = sl; :}
+    |
+    statement:s
+    {: StatementList sl = new StatementList(); sl.add(s); RESULT = sl; :}
+    ;
+
+/* . . . */
+
+basic_expr ::=
+    basic_expr:le PLUS fact_expr:re
+    {: RESULT = new AdditionExpression(le, re); :}
+    |
+    basic_expr:le MINUS fact_expr:re
+    {: RESULT = new SubtractionExpression(le, re); :}
+    |
+    fact_expr:e
+    {: RESULT = e; :}
+    ;
+
+/* . . . */
+
+term_expr ::=
+    IDENTIFIER:attrName
+    {: RESULT = new AttributeValue(attrName); :}
+    |
+    IDENTIFIER:funcName LEFT_PARENTHESIS RIGHT_PARENTHESIS
+    {: RESULT = new FunctionCall(funcName, new ExpressionList()); :}
+    |
+    IDENTIFIER:funcName LEFT_PARENTHESIS expr_list:params RIGHT_PARENTHESIS
+    {: RESULT = new FunctionCall(funcName, params); :}
+    |
+
+    /* . . . */
+
+    LEFT_PARENTHESIS basic_expr:e RIGHT_PARENTHESIS
+    {: RESULT = e; :}
+    ;

@@ -3,3 +3,6 @@ target/
 .classpath
 .project
 README.md~
+src/main/java/pl/edu/mimuw/cloudatlas/query/Lexer.java
+src/main/java/pl/edu/mimuw/cloudatlas/query/Parser.java
+src/main/java/pl/edu/mimuw/cloudatlas/query/Sym.java

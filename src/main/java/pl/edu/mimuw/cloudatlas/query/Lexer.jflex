@@ -1,4 +1,4 @@
-package pl.edu.mimuw.cloudatlas.attributes;
+package pl.edu.mimuw.cloudatlas.query;
 /* A scanner for the **CloudAtlas** query language. */
 import java_cup.runtime.*;
 
@@ -11,8 +11,7 @@ import java_cup.runtime.*;
 %%
 
 /* scanner specs */
-%class Scanner
-%package pl.edu.mimuw.cloudatlas
+%class Lexer
 %unicode
 %cup
 %line
