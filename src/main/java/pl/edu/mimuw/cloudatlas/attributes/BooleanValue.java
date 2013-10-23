@@ -15,6 +15,20 @@ public class BooleanValue extends SimpleValue {
 		return this.wrapped;
 	}
 	
+	@Override
+	public boolean equals(Object other) {
+		if (other instanceof BooleanValue) {
+			return this.wrapped == ((BooleanValue) other).wrapped;
+		} else {
+			return false;
+		}
+	}
+	
+	@Override
+	public int hashCode() {
+		return this.wrapped ? 1 : 0;
+	}
+	
 	public void compactWrite(DataOutput output) throws IOException {
 		output.writeBoolean(wrapped);
 	}

@@ -3,22 +3,22 @@ package pl.edu.mimuw.cloudatlas.attributes;
 import java.io.DataOutput;
 import java.io.IOException;
 
-public class IntegerValue extends SimpleValue {
+public class DoubleValue extends SimpleValue {
 	
-	private long wrapped;
+	private double wrapped;
 	
-	public IntegerValue(long wrapped) {
+	public DoubleValue(double wrapped) {
 		this.wrapped = wrapped;
 	}
 	
-	long getInteger() {
+	double getDouble() {
 		return this.wrapped;
 	}
 	
 	@Override
 	public boolean equals(Object other) {
-		if (other instanceof IntegerValue) {
-			return this.wrapped == ((IntegerValue) other).wrapped;
+		if (other instanceof DoubleValue) {
+			return this.wrapped == ((DoubleValue) other).wrapped;
 		} else {
 			return false;
 		}
@@ -26,17 +26,17 @@ public class IntegerValue extends SimpleValue {
 	
 	@Override
 	public int hashCode() {
-		return (int) this.wrapped;
+		return new Double(wrapped).hashCode();
 	}
 
 	@Override
 	public void compactWrite(DataOutput output) throws IOException {
-		output.writeLong(this.wrapped);
+		output.writeDouble(wrapped);
 	}
 
 	@Override
-	public SimpleType<IntegerValue> getType() {
-		return SimpleType.INTEGER;
+	public SimpleType<DoubleValue> getType() {
+		return SimpleType.DOUBLE;
 	}
 
 }
