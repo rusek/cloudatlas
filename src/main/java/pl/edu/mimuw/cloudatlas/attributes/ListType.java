@@ -1,6 +1,7 @@
 package pl.edu.mimuw.cloudatlas.attributes;
 
 import java.io.DataInput;
+import java.io.DataOutput;
 import java.io.IOException;
 
 public class ListType<V extends SimpleValue> extends Type<ListValue<V>> {
@@ -30,6 +31,11 @@ public class ListType<V extends SimpleValue> extends Type<ListValue<V>> {
 	
 	public static <V extends SimpleValue> ListType<V> of(SimpleType<V> itemType) {
 		return new ListType<V>(itemType);
+	}
+
+	@Override
+	public void compactWrite(DataOutput output) throws IOException {
+		Types.compactWriteType(itemType, output);
 	}
 
 }

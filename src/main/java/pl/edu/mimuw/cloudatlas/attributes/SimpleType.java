@@ -1,10 +1,16 @@
 package pl.edu.mimuw.cloudatlas.attributes;
 
 import java.io.DataInput;
+import java.io.DataOutput;
 import java.io.IOException;
 import java.net.InetAddress;
 
 public abstract class SimpleType<V extends SimpleValue> extends Type<V> {
+	
+	@Override
+	public final void compactWrite(DataOutput output) throws IOException {
+		// Simple types have no state which requires serializing
+	}
 
 	public static final SimpleType<BooleanValue> BOOLEAN = new SimpleType<BooleanValue>() {
 
