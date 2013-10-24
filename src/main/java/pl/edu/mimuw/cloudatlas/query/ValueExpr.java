@@ -2,7 +2,7 @@ package pl.edu.mimuw.cloudatlas.query;
 
 import pl.edu.mimuw.cloudatlas.attributes.Value;
 
-public class ValueExpr {
+public class ValueExpr extends Expr {
 	
 	private Value value;
 	

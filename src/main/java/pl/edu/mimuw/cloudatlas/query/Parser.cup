@@ -1,4 +1,6 @@
 /* A parser for the **CloudAtlas** query language */
+
+import pl.edu.mimuw.cloudatlas.attributes.*;
 import java.util.*;
 import java_cup.runtime.*;
 
@@ -8,6 +10,7 @@ terminal           SEMICOLON, COMMA, PLUS, MINUS, STAR, SLASH, PERCENT, LEFT_PAR
                    KEYWORD_AND, KEYWORD_OR, KEYWORD_NOT, KEYWORD_ASC, KEYWORD_DESC, KEYWORD_NULLS,
                    KEYWORD_SELECT, KEYWORD_WHERE, KEYWORD_ORDER, KEYWORD_BY, KEYWORD_AS, KEYWORD_FIRST,
                    KEYWORD_LAST, KEYWORD_REGEXP, LEFT_BRACKET, RIGHT_BRACKET, LEFT_BRACE, RIGHT_BRACE;
+terminal           UNARY_MINUS; /* artificial */ 
 terminal String    IDENTIFIER, STRING_LITERAL;
 terminal Long      INTEGER_LITERAL;
 terminal Double    DOUBLE_LITERAL;
@@ -16,10 +19,23 @@ terminal Boolean   BOOLEAN_LITERAL;
 /* Non-terminals (elements generating AST nodes) */
 non terminal List<Stmt>   statement_list;
 non terminal Stmt         statement;
-non terminal Expr         basic_expr, fact_expr, neg_expr, term_expr;
+non terminal Expr         basic_expr, where_clause, cond_expr;
+non terminal BinOp        cmp_op;
 non terminal List<Expr>   expr_list;
+non terminal List<NamedExpr> sel_list;
+non terminal NamedExpr    sel_item;
+non terminal List<OrderExpr> order_clause, order_list;
+non terminal OrderExpr    order_item;
+non terminal Ord          ord;
+non terminal NullOrd      null_ord;
 
-/* . . . */
+precedence left KEYWORD_OR;
+precedence left KEYWORD_AND;
+precedence left KEYWORD_NOT;
+precedence left EQUAL, NOT_EQUAL, LESS, LESS_EQUAL, GREATER, GREATER_EQUAL, KEYWORD_REGEXP;
+precedence left PLUS, MINUS;
+precedence left STAR, SLASH, PERCENT;
+precedence left UNARY_MINUS;
 
 statement_list ::=
     statement:s SEMICOLON statement_list:sl
@@ -29,22 +45,135 @@ statement_list ::=
     {: List<Stmt> sl = new LinkedList<Stmt>(); sl.add(s); RESULT = sl; :}
     ;
 
-/* . . . */
+statement ::=
+    KEYWORD_SELECT sel_list:sl where_clause:wc order_clause:oc
+    {: RESULT = new SelectStmt(sl, wc, oc); :}
+    ;
 
-basic_expr ::=
-    basic_expr:le PLUS fact_expr:re
-    {: RESULT = new BinExpr(le, re, BinOp.ADD); :}
+sel_list ::=
+    sel_item:s COMMA sel_list:sl
+    {: sl.add(0, s); RESULT = sl; :}
     |
-    basic_expr:le MINUS fact_expr:re
-    {: RESULT = new BinExpr(le, re, BinOp.SUB); :}
+    sel_item:s
+    {: List<NamedExpr> sl = new LinkedList<NamedExpr>(); sl.add(s); RESULT = sl; :}
+    ;
+
+sel_item ::=
+    cond_expr:e 
+    {: RESULT = new NamedExpr(e, null); :}
     |
-    fact_expr:e
+    cond_expr:e KEYWORD_AS IDENTIFIER:name
+    {: RESULT = new NamedExpr(e, name); :}
+    ;
+
+where_clause ::=
+    KEYWORD_WHERE cond_expr:e
+    {: RESULT = e; :}
+    |
+    {: RESULT = null; :}
+    ;
+
+order_clause ::=
+    KEYWORD_ORDER KEYWORD_BY order_list:ol
+    {: RESULT = ol; :}
+    |
+    {: RESULT = null; :}
+    ;
+
+order_list ::=
+    order_item:oi COMMA order_list:ol
+    {: ol.add(0, oi); RESULT = ol; :}
+    |
+    order_item:oi
+    {: List<OrderExpr> ol = new LinkedList<OrderExpr>(); ol.add(oi); RESULT = ol; :}
+    ; 
+
+order_item ::=
+    cond_expr:e ord:o null_ord:no
+    {: RESULT = new OrderExpr(e, o, no); :}
+    ;
+
+ord ::=
+    KEYWORD_ASC
+    {: RESULT = Ord.ASC; :}
+    |
+    KEYWORD_DESC
+    {: RESULT = Ord.DESC; :}
+    |
+    {: RESULT = Ord.ASC; :}
+    ;
+
+null_ord ::=
+    KEYWORD_NULLS KEYWORD_FIRST
+    {: RESULT = NullOrd.NULLS_FIRST; :}
+    |
+    KEYWORD_NULLS KEYWORD_LAST
+    {: RESULT = NullOrd.NULLS_LAST; :}
+    |
+    {: RESULT = NullOrd.UNKNOWN; :}
+    ;
+
+cond_expr ::=
+    cond_expr:le KEYWORD_OR cond_expr:re
+    {: RESULT = new BinExpr(le, re, BinOp.OR); :}
+    |
+    cond_expr:le KEYWORD_AND cond_expr:re
+    {: RESULT = new BinExpr(le, re, BinOp.AND); :}
+    |
+    KEYWORD_NOT cond_expr:e
+    {: RESULT = new UnExpr(e, UnOp.NOT); :}
+    |
+    basic_expr:le cmp_op:op basic_expr:re
+    {: RESULT = new BinExpr(le, re, op); :}
+    |
+    basic_expr:e KEYWORD_REGEXP STRING_LITERAL:sl
+    {: RESULT = new RegexpExpr(e, sl); :} /* FIXME */
+    |
+    basic_expr:e
     {: RESULT = e; :}
     ;
 
-/* . . . */
+cmp_op ::=
+    LESS
+    {: RESULT = BinOp.LT; :}
+    |
+    LESS_EQUAL
+    {: RESULT = BinOp.LE; :}
+    |
+    GREATER
+    {: RESULT = BinOp.GT; :}
+    |
+    GREATER_EQUAL
+    {: RESULT = BinOp.GE; :}
+    |
+    EQUAL
+    {: RESULT = BinOp.EQ; :}
+    |
+    NOT_EQUAL
+    {: RESULT = BinOp.NE; :}
+    ;
 
-term_expr ::=
+basic_expr ::=
+    basic_expr:le PLUS basic_expr:re
+    {: RESULT = new BinExpr(le, re, BinOp.ADD); :}
+    |
+    basic_expr:le MINUS basic_expr:re
+    {: RESULT = new BinExpr(le, re, BinOp.SUB); :}
+    |
+    basic_expr:le STAR basic_expr:re
+    {: RESULT = new BinExpr(le, re, BinOp.MUL); :}
+    |
+    basic_expr:le SLASH basic_expr:re
+    {: RESULT = new BinExpr(le, re, BinOp.DIV); :}
+    |
+    basic_expr:le PERCENT basic_expr:re
+    {: RESULT = new BinExpr(le, re, BinOp.MOD); :}
+    |
+    MINUS basic_expr:e
+    {: RESULT = new UnExpr(e, UnOp.NEG); :}
+    %prec UNARY_MINUS
+    
+    |
     IDENTIFIER:attrName
     {: RESULT = new AttributeExpr(attrName); :}
     |
@@ -54,9 +183,24 @@ term_expr ::=
     IDENTIFIER:funcName LEFT_PARENTHESIS expr_list:params RIGHT_PARENTHESIS
     {: RESULT = new CallExpr(funcName, params); :}
     |
-
-    /* . . . */
-
-    LEFT_PARENTHESIS basic_expr:e RIGHT_PARENTHESIS
+    LEFT_PARENTHESIS cond_expr:e RIGHT_PARENTHESIS
     {: RESULT = e; :}
+    |
+    INTEGER_LITERAL:v
+    {: RESULT = new ValueExpr(new IntegerValue(v)); :}
+    |
+    DOUBLE_LITERAL:v
+    {: RESULT = new ValueExpr(new DoubleValue(v)); :}
+    |
+    STRING_LITERAL:v
+    {: RESULT = new ValueExpr(new StringValue(v)); :}
+    |
+    BOOLEAN_LITERAL:v
+    {: RESULT = new ValueExpr(new BooleanValue(v)); :}
+    |
+    LEFT_BRACKET RIGHT_BRACKET
+    {: RESULT = null; :} /* FIXME */
+    |
+    LEFT_BRACE RIGHT_BRACE
+    {: RESULT = null; :} /* FIXME */
     ;
