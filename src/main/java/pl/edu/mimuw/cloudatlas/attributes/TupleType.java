@@ -40,4 +40,30 @@ public class TupleType extends Type<TupleValue> implements Iterable<SimpleType<?
 		return itemTypes.iterator();
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result
+				+ ((itemTypes == null) ? 0 : itemTypes.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		TupleType other = (TupleType) obj;
+		if (itemTypes == null) {
+			if (other.itemTypes != null)
+				return false;
+		} else if (!itemTypes.equals(other.itemTypes))
+			return false;
+		return true;
+	}
+
 }

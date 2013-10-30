@@ -8,6 +8,16 @@ import java.net.InetAddress;
 public abstract class SimpleType<V extends SimpleValue> extends Type<V> {
 	
 	@Override
+	public boolean equals(Object obj) {
+		return this == obj;
+	}
+	
+	@Override
+	public int hashCode() {
+		return this.getClass().hashCode();
+	}
+	
+	@Override
 	public final void compactWrite(DataOutput output) throws IOException {
 		// Simple types have no state which requires serializing
 	}
