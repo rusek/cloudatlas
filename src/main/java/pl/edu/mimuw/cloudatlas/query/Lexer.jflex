@@ -113,7 +113,7 @@ DecIntegerLiteral  = 0 | [1-9][0-9]*
     /* constants */
     {DecIntegerLiteral}            
         { return this.token(
-            Sym.INTEGER_LITERAL, new Integer(this.yytext())); }
+            Sym.INTEGER_LITERAL, new Long(this.yytext())); }
     \"                             
         { this.string.setLength(0); this.yybegin(STRING); }
     /* whitespace */

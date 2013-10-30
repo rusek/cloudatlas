@@ -19,4 +19,9 @@ public class NamedExpr {
 	public Expr getExpr() {
 		return expr;
 	}
+
+	@Override
+	public String toString() {
+		return "NamedExpr [expr=" + expr + ", name=" + name + "]";
+	}
 }

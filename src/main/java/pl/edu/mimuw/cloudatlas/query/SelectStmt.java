@@ -22,6 +22,12 @@ public class SelectStmt extends Stmt {
 		return where;
 	}
 
+	@Override
+	public String toString() {
+		return "SelectStmt [selection=" + selection + ", where=" + where
+				+ ", ordering=" + ordering + "]";
+	}
+
 	public List<OrderExpr> getOrdering() {
 		return ordering;
 	}

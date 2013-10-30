@@ -4,6 +4,14 @@ import pl.edu.mimuw.cloudatlas.attributes.*;
 import java.util.*;
 import java_cup.runtime.*;
 
+parser code {:
+
+    public void syntax_error(Symbol cur_token) {
+        report_error("Line " + (cur_token.left + 1) + ", column " + (cur_token.right + 1) + ": syntax error", null);
+    }
+
+:};
+
 /* Terminals (tokens returned by the scanner) */
 terminal           SEMICOLON, COMMA, PLUS, MINUS, STAR, SLASH, PERCENT, LEFT_PARENTHESIS, RIGHT_PARENTHESIS,
                    LESS, LESS_EQUAL, GREATER, GREATER_EQUAL, EQUAL, NOT_EQUAL, 
@@ -19,9 +27,9 @@ terminal Boolean   BOOLEAN_LITERAL;
 /* Non-terminals (elements generating AST nodes) */
 non terminal List<Stmt>   statement_list;
 non terminal Stmt         statement;
-non terminal Expr         basic_expr, where_clause, cond_expr;
-non terminal BinOp        cmp_op;
-non terminal List<Expr>   expr_list;
+non terminal Expr         basic_expr, where_clause, cond_expr, cond_expr_ngt;
+non terminal BinOp        cmp_op, cmp_op_ngt;
+non terminal List<Expr>   expr_list, expr_list_ngt;
 non terminal List<NamedExpr> sel_list;
 non terminal NamedExpr    sel_item;
 non terminal List<OrderExpr> order_clause, order_list;
@@ -37,12 +45,30 @@ precedence left PLUS, MINUS;
 precedence left STAR, SLASH, PERCENT;
 precedence left UNARY_MINUS;
 
+start with statement_list;
+
 statement_list ::=
     statement:s SEMICOLON statement_list:sl
     {: sl.add(0, s); RESULT = sl; :}
     |
     statement:s
     {: List<Stmt> sl = new LinkedList<Stmt>(); sl.add(s); RESULT = sl; :}
+    ;
+
+expr_list ::=
+    cond_expr:e SEMICOLON expr_list:el
+    {: el.add(0, e); RESULT = el; :}
+    |
+    cond_expr:e
+    {: List<Expr> el = new LinkedList<Expr>(); el.add(e); RESULT = el; :}
+    ;
+
+expr_list_ngt ::=
+    cond_expr_ngt:e SEMICOLON expr_list_ngt:el
+    {: el.add(0, e); RESULT = el; :}
+    |
+    cond_expr_ngt:e
+    {: List<Expr> el = new LinkedList<Expr>(); el.add(e); RESULT = el; :}
     ;
 
 statement ::=
@@ -113,6 +139,26 @@ null_ord ::=
     {: RESULT = NullOrd.UNKNOWN; :}
     ;
 
+cond_expr_ngt ::=
+    cond_expr_ngt:le KEYWORD_OR cond_expr_ngt:re
+    {: RESULT = new BinExpr(le, re, BinOp.OR); :}
+    |
+    cond_expr_ngt:le KEYWORD_AND cond_expr_ngt:re
+    {: RESULT = new BinExpr(le, re, BinOp.AND); :}
+    |
+    KEYWORD_NOT cond_expr_ngt:e
+    {: RESULT = new UnExpr(e, UnOp.NOT); :}
+    |
+    basic_expr:le cmp_op_ngt:op basic_expr:re
+    {: RESULT = new BinExpr(le, re, op); :}
+    |
+    basic_expr:e KEYWORD_REGEXP STRING_LITERAL:sl
+    {: RESULT = new RegexpExpr(e, sl); :}
+    |
+    basic_expr:e
+    {: RESULT = e; :}
+    ;
+
 cond_expr ::=
     cond_expr:le KEYWORD_OR cond_expr:re
     {: RESULT = new BinExpr(le, re, BinOp.OR); :}
@@ -127,21 +173,18 @@ cond_expr ::=
     {: RESULT = new BinExpr(le, re, op); :}
     |
     basic_expr:e KEYWORD_REGEXP STRING_LITERAL:sl
-    {: RESULT = new RegexpExpr(e, sl); :} /* FIXME */
+    {: RESULT = new RegexpExpr(e, sl); :}
     |
     basic_expr:e
     {: RESULT = e; :}
     ;
 
-cmp_op ::=
+cmp_op_ngt ::=
     LESS
     {: RESULT = BinOp.LT; :}
     |
     LESS_EQUAL
     {: RESULT = BinOp.LE; :}
-    |
-    GREATER
-    {: RESULT = BinOp.GT; :}
     |
     GREATER_EQUAL
     {: RESULT = BinOp.GE; :}
@@ -151,6 +194,14 @@ cmp_op ::=
     |
     NOT_EQUAL
     {: RESULT = BinOp.NE; :}
+    ;
+
+cmp_op ::=
+    cmp_op_ngt:op
+    {: RESULT = op; :}
+    |
+    GREATER
+    {: RESULT = BinOp.GT; :}
     ;
 
 basic_expr ::=
@@ -202,5 +253,8 @@ basic_expr ::=
     {: RESULT = null; :} /* FIXME */
     |
     LEFT_BRACE RIGHT_BRACE
+    {: RESULT = null; :} /* FIXME */
+    |
+    LESS expr_list_ngt GREATER
     {: RESULT = null; :} /* FIXME */
     ;
