@@ -28,6 +28,11 @@ public class TimeValue extends SimpleValue {
 	public int hashCode() {
 		return (int) this.timestamp;
 	}
+	
+	@Override
+	public String toString() {
+		return "TimeValue [" + timestamp + "]";
+	}
 
 	@Override
 	public void compactWrite(DataOutput output) throws IOException {

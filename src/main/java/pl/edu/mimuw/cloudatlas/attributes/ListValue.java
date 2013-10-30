@@ -44,6 +44,11 @@ public class ListValue<V extends SimpleValue> extends Value {
 		result = prime * result + ((items == null) ? 0 : items.hashCode());
 		return result;
 	}
+	
+	@Override
+	public String toString() {
+		return "ListValue " + items.toString();
+	}
 
 	@Override
 	public boolean equals(Object obj) {

@@ -28,6 +28,11 @@ public class IntegerValue extends SimpleValue {
 	public int hashCode() {
 		return (int) this.wrapped;
 	}
+	
+	@Override
+	public String toString() {
+		return "IntegerValue [" + wrapped + "]";
+	}
 
 	@Override
 	public void compactWrite(DataOutput output) throws IOException {

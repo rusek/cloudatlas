@@ -30,6 +30,11 @@ public class StringValue extends SimpleValue {
 	public int hashCode() {
 		return this.wrapped.hashCode();
 	}
+	
+	@Override
+	public String toString() {
+		return "StringValue [" + wrapped + "]";
+	}
 
 	@Override
 	public void compactWrite(DataOutput output) throws IOException {

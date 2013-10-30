@@ -56,7 +56,7 @@ statement_list ::=
     ;
 
 expr_list ::=
-    cond_expr:e SEMICOLON expr_list:el
+    cond_expr:e COMMA expr_list:el
     {: el.add(0, e); RESULT = el; :}
     |
     cond_expr:e
@@ -64,7 +64,7 @@ expr_list ::=
     ;
 
 expr_list_ngt ::=
-    cond_expr_ngt:e SEMICOLON expr_list_ngt:el
+    cond_expr_ngt:e COMMA expr_list_ngt:el
     {: el.add(0, e); RESULT = el; :}
     |
     cond_expr_ngt:e
@@ -253,11 +253,11 @@ basic_expr ::=
     {: RESULT = new ValueExpr(new BooleanValue(v)); :}
     |
     LEFT_BRACKET RIGHT_BRACKET
-    {: RESULT = null; :} /* FIXME */
+    {: RESULT = new ValueExpr(new IntegerValue(123456)); :} /* FIXME */
     |
     LEFT_BRACE RIGHT_BRACE
-    {: RESULT = null; :} /* FIXME */
+    {: RESULT = new ValueExpr(new IntegerValue(123456)); :} /* FIXME */
     |
-    LESS expr_list_ngt GREATER
-    {: RESULT = null; :} /* FIXME */
+    LESS expr_list_ngt:el GREATER
+    {: RESULT = new TupleExpr(el); :}
     ;

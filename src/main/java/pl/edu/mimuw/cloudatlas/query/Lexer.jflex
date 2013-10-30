@@ -69,6 +69,8 @@ DecIntegerLiteral  = 0 | [1-9][0-9]*
    		{ return this.token(Sym.KEYWORD_AND); }
    	"OR"
    		{ return this.token(Sym.KEYWORD_OR); }
+   	"NOT"
+                { return this.token(Sym.KEYWORD_NOT); }
     /* identifiers */ 
     {Identifier}                   
         { return this.token(Sym.IDENTIFIER, this.yytext()); }
@@ -140,7 +142,7 @@ DecIntegerLiteral  = 0 | [1-9][0-9]*
         { this.string.append('\r'); }
     \\\"                           
         { this.string.append('\"'); }
-    \\                             
+    \\\\                             
         { this.string.append('\\'); }
     <<EOF>>                        
         { throw new Error("Unterminated string at the end of input"); }

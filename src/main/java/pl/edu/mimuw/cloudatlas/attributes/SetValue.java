@@ -67,6 +67,11 @@ public class SetValue<V extends SimpleValue> extends Value {
 			return false;
 		return true;
 	}
+	
+	@Override
+	public String toString() {
+		return "SetValue " + items.toString();
+	}
 
 	public static <V extends SimpleValue> SetValue<V> of(SimpleType<V> itemType) {
 		return new SetValue<V>(itemType);

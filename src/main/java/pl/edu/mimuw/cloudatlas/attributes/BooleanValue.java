@@ -29,6 +29,11 @@ public class BooleanValue extends SimpleValue {
 		return this.wrapped ? 1 : 0;
 	}
 	
+	@Override
+	public String toString() {
+		return "BooleanValue [" + wrapped + "]";
+	}
+	
 	public void compactWrite(DataOutput output) throws IOException {
 		output.writeBoolean(wrapped);
 	}

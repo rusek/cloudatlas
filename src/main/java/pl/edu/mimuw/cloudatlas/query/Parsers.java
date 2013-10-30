@@ -9,6 +9,7 @@ public class Parsers {
 	private Parsers() {	
 	}
 	
+	@SuppressWarnings("unchecked")
 	public static List<Stmt> parseQuery(String source) throws ParseException  {
 		Parser parser = new Parser(new Lexer(new StringReader(source)));
 		Symbol symbol;
@@ -17,7 +18,6 @@ public class Parsers {
 		} catch (Exception e) {
 			throw new ParseException(e);
 		}
-		System.out.println(symbol.value);
-		return null;
+		return (List<Stmt>) symbol.value;
 	}
 }

@@ -1,11 +1,10 @@
 package pl.edu.mimuw.cloudatlas.query;
 
-public class OrderExpr extends Expr {
+public class OrderExpr {
 
 	private Expr expr;
 	private Ord ord;
 	private NullOrd nullOrd;
-	
 	
 	public OrderExpr(Expr expr, Ord ord, NullOrd nullOrd) {
 		assert expr != null;

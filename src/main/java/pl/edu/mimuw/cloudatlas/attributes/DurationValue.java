@@ -28,6 +28,11 @@ public class DurationValue extends SimpleValue {
 	public int hashCode() {
 		return (int) miliseconds;
 	}
+	
+	@Override
+	public String toString() {
+		return "DurationValue [" + miliseconds + "]";
+	}
 
 	@Override
 	public void compactWrite(DataOutput output) throws IOException {

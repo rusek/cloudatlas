@@ -59,5 +59,10 @@ public class TupleValue extends Value {
 			return false;
 		return true;
 	}
+	
+	@Override
+	public String toString() {
+		return "TupleValue " + values.toString();
+	}
 
 }

@@ -28,6 +28,11 @@ public class DoubleValue extends SimpleValue {
 	public int hashCode() {
 		return new Double(wrapped).hashCode();
 	}
+	
+	@Override
+	public String toString() {
+		return "DoubleValue [" + wrapped + "]";
+	}
 
 	@Override
 	public void compactWrite(DataOutput output) throws IOException {
