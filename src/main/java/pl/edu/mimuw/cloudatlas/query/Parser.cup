@@ -237,6 +237,9 @@ basic_expr ::=
     LEFT_PARENTHESIS cond_expr:e RIGHT_PARENTHESIS
     {: RESULT = e; :}
     |
+    LEFT_PARENTHESIS statement:s RIGHT_PARENTHESIS
+    {: RESULT = new StmtExpr(s); :}
+    |
     INTEGER_LITERAL:v
     {: RESULT = new ValueExpr(new IntegerValue(v)); :}
     |
