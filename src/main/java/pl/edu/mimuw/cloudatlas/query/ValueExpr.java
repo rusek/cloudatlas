@@ -11,6 +11,10 @@ public class ValueExpr extends Expr {
 		
 		this.value = value;
 	}
+	
+	public Result evaluate(Env env) throws EvaluationException {
+		return new OneResult(value.getType(), value);
+	}
 
 	public Value getValue() {
 		return value;

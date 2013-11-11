@@ -29,6 +29,11 @@ public abstract class SimpleType<V extends SimpleValue> extends Type<V> {
 			return new BooleanValue(input.readBoolean());
 		}
 		
+		@Override
+		public String toString() {
+			return "BooleanType";
+		}
+		
 	};
 	
 	public static final SimpleType<IntegerValue> INTEGER = new SimpleType<IntegerValue>() {
@@ -36,6 +41,11 @@ public abstract class SimpleType<V extends SimpleValue> extends Type<V> {
 		@Override
 		public IntegerValue compactReadValue(DataInput input) throws IOException {
 			return new IntegerValue(input.readLong());
+		}
+		
+		@Override
+		public String toString() {
+			return "IntegerType";
 		}
 		
 	};
@@ -47,6 +57,11 @@ public abstract class SimpleType<V extends SimpleValue> extends Type<V> {
 			return new DoubleValue(input.readDouble());
 		}
 		
+		@Override
+		public String toString() {
+			return "DoubleType";
+		}
+		
 	};
 	
 	public static final SimpleType<StringValue> STRING = new SimpleType<StringValue>() {
@@ -54,6 +69,11 @@ public abstract class SimpleType<V extends SimpleValue> extends Type<V> {
 		@Override
 		public StringValue compactReadValue(DataInput input) throws IOException {
 			return new StringValue(input.readUTF());
+		}
+		
+		@Override
+		public String toString() {
+			return "StringType";
 		}
 		
 	};
@@ -71,6 +91,11 @@ public abstract class SimpleType<V extends SimpleValue> extends Type<V> {
 			return new ContactValue(InetAddress.getByAddress(bytes));
 		}
 		
+		@Override
+		public String toString() {
+			return "ContactType";
+		}
+		
 	};
 	
 	public static final SimpleType<TimeValue> TIME = new SimpleType<TimeValue>() {
@@ -80,6 +105,11 @@ public abstract class SimpleType<V extends SimpleValue> extends Type<V> {
 			return new TimeValue(input.readLong());
 		}
 		
+		@Override
+		public String toString() {
+			return "TimeType";
+		}
+		
 	};
 	
 	public static final SimpleType<DurationValue> DURATION = new SimpleType<DurationValue>() {
@@ -87,6 +117,11 @@ public abstract class SimpleType<V extends SimpleValue> extends Type<V> {
 		@Override
 		public DurationValue compactReadValue(DataInput input) throws IOException {
 			return new DurationValue(input.readLong());
+		}
+		
+		@Override
+		public String toString() {
+			return "DurationType";
 		}
 		
 	};

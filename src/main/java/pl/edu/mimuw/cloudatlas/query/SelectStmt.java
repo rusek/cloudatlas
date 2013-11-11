@@ -1,5 +1,6 @@
 package pl.edu.mimuw.cloudatlas.query;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class SelectStmt extends Stmt {
@@ -9,9 +10,23 @@ public class SelectStmt extends Stmt {
 	private List<OrderExpr> ordering;
 
 	public SelectStmt(List<NamedExpr> selection, Expr where, List<OrderExpr> ordering) {
+		assert selection != null;
+		
 		this.selection = selection;
 		this.where = where;
 		this.ordering = ordering;
+	}
+	
+	public List<SelectionResult> evaluate(Env env) throws EvaluationException {
+		if (this.where != null || this.ordering != null) {
+			throw new RuntimeException("Not implemented for now :("); // FIXME implement this
+		}
+		
+		List<SelectionResult> retVal = new ArrayList<SelectionResult>();
+		for (NamedExpr namedExpr : this.selection) {
+			retVal.add(namedExpr.evaluate(env));
+		}
+		return retVal;
 	}
 	
 	public List<NamedExpr> getSelection() {

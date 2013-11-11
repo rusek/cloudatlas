@@ -1,5 +1,8 @@
 package pl.edu.mimuw.cloudatlas.query;
 
+import pl.edu.mimuw.cloudatlas.attributes.Type;
+import pl.edu.mimuw.cloudatlas.attributes.Value;
+
 public class BinExpr extends Expr {
 
 	private Expr left;
@@ -14,6 +17,93 @@ public class BinExpr extends Expr {
 		this.left = left;
 		this.right = right;
 		this.op = op;
+	}
+	
+	private Function2<? extends Value, ? extends Value, ? extends Value> getFuncForTypesOrThrow(
+			Type<? extends Value> type1, Type<? extends Value> type2) throws EvaluationException {
+		Function2<? extends Value, ? extends Value, ? extends Value> retVal = op.getFuncForTypes(type1, type2);
+		if (retVal == null) {
+			throw new EvaluationException("Cannot evaluate " + op + " on " + type1 + " and " + type2);
+		}
+		return retVal;
+	}
+	
+	@Override
+	public Result evaluate(Env env) throws EvaluationException {
+		final Result leftResult = this.left.evaluate(env);
+		final Result rightResult = this.right.evaluate(env);
+		
+		// No type safety here - types of leftResult and rightResult are known only in runtime
+		@SuppressWarnings("unchecked")
+		final Function2<Value, Value, Value> func = (Function2<Value, Value, Value>)
+				getFuncForTypesOrThrow(leftResult.getType(), rightResult.getType());
+		
+		return leftResult.accept(new ResultVisitor<Result, EvaluationException>() {
+
+			public Result visit(final OneResult leftResult) throws EvaluationException {
+				return rightResult.accept(new ResultVisitor<Result, EvaluationException>() {
+
+					public Result visit(OneResult rightResult)
+							throws EvaluationException {
+						return OneResult.createFromFunc(func, leftResult.getValue(), rightResult.getValue());
+					}
+
+					public Result visit(ListResult rightResult)
+							throws EvaluationException {
+						return ListResult.createFromFunc(func, leftResult.getValue(), rightResult.getValues());
+					}
+
+					public Result visit(ColumnResult rightResult)
+							throws EvaluationException {
+						return ColumnResult.createFromFunc(func, leftResult.getValue(), rightResult.getValues());
+					}
+					
+				});
+			}
+
+			public Result visit(final ListResult leftResult) throws EvaluationException {
+				return rightResult.accept(new ResultVisitor<Result, EvaluationException>() {
+
+					public Result visit(OneResult rightResult)
+							throws EvaluationException {
+						return ListResult.createFromFunc(func, leftResult.getValues(), rightResult.getValue());
+					}
+
+					public Result visit(ListResult rightResult)
+							throws EvaluationException {
+						throw new EvaluationException("Cannot apply binary operation to ListResult and ListResult");
+					}
+
+					public Result visit(ColumnResult rightResult)
+							throws EvaluationException {
+						throw new EvaluationException("Cannot apply binary operation to ListResult and ColumnResult");
+					}
+					
+				});
+			}
+
+			public Result visit(final ColumnResult leftResult) throws EvaluationException {
+				return rightResult.accept(new ResultVisitor<Result, EvaluationException>() {
+
+					public Result visit(OneResult rightResult)
+							throws EvaluationException {
+						return ColumnResult.createFromFunc(func, leftResult.getValues(), rightResult.getValue());
+					}
+
+					public Result visit(ListResult rightResult)
+							throws EvaluationException {
+						throw new EvaluationException("Cannot apply binary operation to ColumnResult and ListResult");
+					}
+
+					public Result visit(ColumnResult rightResult)
+							throws EvaluationException {
+						return ColumnResult.createFromFunc(func, leftResult.getValues(), rightResult.getValues());
+					}
+					
+				});
+			}
+			
+		});
 	}
 	
 	public Expr getLeft() {

@@ -12,6 +12,26 @@ public class NamedExpr {
 		this.name = name;
 	}
 	
+	public SelectionResult evaluate(Env env) throws EvaluationException {
+		return this.expr.evaluate(env).accept(new ResultVisitor<SelectionResult, EvaluationException>() {
+
+			public SelectionResult visit(OneResult result)
+					throws EvaluationException {
+				return new SelectionResult(result.getType(), result.getValue(), name);
+			}
+
+			public SelectionResult visit(ListResult result)
+					throws EvaluationException {
+				throw new EvaluationException("Cannot return ListResult from SELECT clause");
+			}
+
+			public SelectionResult visit(ColumnResult result)
+					throws EvaluationException {
+				throw new EvaluationException("Cannot return ListResult from SELECT clause");
+			}
+		});
+	}
+	
 	public String getName() {
 		return name;
 	}

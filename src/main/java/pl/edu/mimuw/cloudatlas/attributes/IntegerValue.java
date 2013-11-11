@@ -11,7 +11,7 @@ public class IntegerValue extends SimpleValue {
 		this.wrapped = wrapped;
 	}
 	
-	long getInteger() {
+	public long getInteger() {
 		return this.wrapped;
 	}
 	
