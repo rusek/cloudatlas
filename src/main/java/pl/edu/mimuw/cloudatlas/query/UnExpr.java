@@ -19,25 +19,11 @@ public class UnExpr extends Expr {
 	public Result evaluate(Env env) throws EvaluationException {
 		Result result = expr.evaluate(env);
 		
-		@SuppressWarnings("unchecked")
-		final Function1<Value, Value> func = (Function1<Value, Value>) op.getFuncByArgType(result.getType());
+		Function1<? extends Value, ? extends Value> func = op.getFuncByArgType(result.getType());
 		if (func == null) {
 			throw new EvaluationException("Cannot apply " + op + " operator to type " + result.getType());
 		}
-		return result.accept(new ResultVisitor<Result, EvaluationException>() {
-
-			public Result visit(OneResult result) throws EvaluationException {
-				return OneResult.createFromFunc(func, result.getValue());
-			}
-
-			public Result visit(ListResult result) throws EvaluationException {
-				return ListResult.createFromFunc(func, result.getValues());
-			}
-
-			public Result visit(ColumnResult result) throws EvaluationException {
-				return ListResult.createFromFunc(func, result.getValues());
-			}
-		});
+		return Functions.evaluate(func, result);
 	}
 
 	public Expr getExpr() {

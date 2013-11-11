@@ -1,6 +1,5 @@
 package pl.edu.mimuw.cloudatlas.query;
 
-import java.util.List;
 import java.util.regex.Pattern;
 
 import pl.edu.mimuw.cloudatlas.attributes.BooleanValue;
@@ -31,7 +30,7 @@ public class RegexpExpr extends Expr {
 			throw new EvaluationException("Cannot execute regexp on type " + exprResult.getType());
 		}
 		
-		final Function1<StringValue, BooleanValue> func = new Function1<StringValue, BooleanValue>() {
+		Function1<StringValue, BooleanValue> func = new Function1<StringValue, BooleanValue>() {
 			public Type<BooleanValue> getReturnType() {
 				return SimpleType.BOOLEAN;
 			}
@@ -46,22 +45,7 @@ public class RegexpExpr extends Expr {
 			}
 		};
 		
-		return exprResult.accept(new ResultVisitor<Result, EvaluationException>() {
-
-			public Result visit(OneResult result) throws EvaluationException {
-				return OneResult.createFromFunc(func, (StringValue) result.getValue());
-			}
-
-			@SuppressWarnings({ "unchecked", "rawtypes" })
-			public Result visit(ListResult result) throws EvaluationException {
-				return ListResult.createFromFunc(func, (List) result.getValues());
-			}
-
-			@SuppressWarnings({ "unchecked", "rawtypes" })
-			public Result visit(ColumnResult result) throws EvaluationException {
-				return ColumnResult.createFromFunc(func, (List) result.getValues());
-			}
-		});
+		return Functions.evaluate(func, exprResult);
 	}
 
 	public String getPatternSource() {
