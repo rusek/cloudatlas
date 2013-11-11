@@ -32,4 +32,9 @@ public class OneResult extends Result {
 			Function2<A1, A2, R> func, A1 arg1, A2 arg2) throws EvaluationException {
 		return new OneResult(func.getReturnType(), func.evaluate(arg1, arg2));
 	}
+	
+	public static <A extends Value, R extends Value> OneResult createFromFunc(
+			Function1<A, R> func, A arg) throws EvaluationException {
+		return new OneResult(func.getReturnType(), func.evaluate(arg));
+	}
 }

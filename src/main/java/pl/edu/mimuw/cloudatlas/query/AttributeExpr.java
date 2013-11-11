@@ -10,6 +10,11 @@ public class AttributeExpr extends Expr {
 		this.attributeName = attributeName;
 	}
 
+	@Override
+	public Result evaluate(Env env) throws EvaluationException {
+		return env.evaluateAttribute(attributeName);
+	}
+
 	public String getAttributeName() {
 		return attributeName;
 	}

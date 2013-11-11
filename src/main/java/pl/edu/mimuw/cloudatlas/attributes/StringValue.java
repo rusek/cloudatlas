@@ -3,7 +3,7 @@ package pl.edu.mimuw.cloudatlas.attributes;
 import java.io.DataOutput;
 import java.io.IOException;
 
-public class StringValue extends SimpleValue {
+public class StringValue extends SimpleValue implements Comparable<StringValue> {
 	
 	private String wrapped;
 	
@@ -44,6 +44,10 @@ public class StringValue extends SimpleValue {
 	@Override
 	public SimpleType<StringValue> getType() {
 		return SimpleType.STRING;
+	}
+
+	public int compareTo(StringValue o) {
+		return this.wrapped.compareTo(o.wrapped);
 	}
 
 }

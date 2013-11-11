@@ -3,7 +3,7 @@ package pl.edu.mimuw.cloudatlas.attributes;
 import java.io.DataOutput;
 import java.io.IOException;
 
-public class DurationValue extends SimpleValue {
+public class DurationValue extends SimpleValue implements Comparable<DurationValue> {
 	
 	private long miliseconds;
 	
@@ -43,6 +43,10 @@ public class DurationValue extends SimpleValue {
 	@Override
 	public SimpleType<DurationValue> getType() {
 		return SimpleType.DURATION;
+	}
+
+	public int compareTo(DurationValue o) {
+		return Long.compare(miliseconds, o.miliseconds);
 	}
 
 }

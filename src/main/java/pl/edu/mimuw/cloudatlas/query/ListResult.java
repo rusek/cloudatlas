@@ -57,5 +57,15 @@ public class ListResult extends Result {
 			Function2<A1, A2, R> func, List<A1> arg1, A2 arg2) throws EvaluationException {
 		return createFromFunc(func, arg1, Collections.nCopies(arg1.size(), arg2));
 	}
+	
+	public static <A extends Value, R extends Value> ListResult createFromFunc(
+			Function1<A, R> func, List<A> arg) throws EvaluationException {
+		List<Value> values = new ArrayList<Value>();
+		for (A argItem : arg) {
+			values.add(func.evaluate(argItem));
+		}
+		
+		return new ListResult(func.getReturnType(), values);
+	}
 
 }

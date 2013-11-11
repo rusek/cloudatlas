@@ -33,6 +33,11 @@ public abstract class SimpleType<V extends SimpleValue> extends Type<V> {
 		public String toString() {
 			return "BooleanType";
 		}
+
+		@Override
+		public boolean isComparable() {
+			return true;
+		}
 		
 	};
 	
@@ -46,6 +51,11 @@ public abstract class SimpleType<V extends SimpleValue> extends Type<V> {
 		@Override
 		public String toString() {
 			return "IntegerType";
+		}
+
+		@Override
+		public boolean isComparable() {
+			return true;
 		}
 		
 	};
@@ -61,6 +71,11 @@ public abstract class SimpleType<V extends SimpleValue> extends Type<V> {
 		public String toString() {
 			return "DoubleType";
 		}
+
+		@Override
+		public boolean isComparable() {
+			return true;
+		}
 		
 	};
 	
@@ -74,6 +89,11 @@ public abstract class SimpleType<V extends SimpleValue> extends Type<V> {
 		@Override
 		public String toString() {
 			return "StringType";
+		}
+
+		@Override
+		public boolean isComparable() {
+			return true;
 		}
 		
 	};
@@ -109,6 +129,11 @@ public abstract class SimpleType<V extends SimpleValue> extends Type<V> {
 		public String toString() {
 			return "TimeType";
 		}
+
+		@Override
+		public boolean isComparable() {
+			return true;
+		}
 		
 	};
 	
@@ -122,6 +147,11 @@ public abstract class SimpleType<V extends SimpleValue> extends Type<V> {
 		@Override
 		public String toString() {
 			return "DurationType";
+		}
+
+		@Override
+		public boolean isComparable() {
+			return true;
 		}
 		
 	};

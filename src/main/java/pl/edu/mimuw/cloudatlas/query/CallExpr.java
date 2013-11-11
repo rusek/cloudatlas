@@ -59,4 +59,9 @@ public class CallExpr extends Expr {
 			return false;
 		return true;
 	}
+
+	@Override
+	public Result evaluate(Env env) throws EvaluationException {
+		throw new EvaluationException("Not implemented yet");
+	}
 }

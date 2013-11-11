@@ -3,9 +3,7 @@ package pl.edu.mimuw.cloudatlas.attributes;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class Types {
@@ -77,22 +75,6 @@ public class Types {
 			public Type<? extends Value> compactReadType(DataInput input) throws IOException {
 				SimpleType<? extends SimpleValue> itemType = Types.compactReadSimpleType(input);
 				return SetType.of(itemType);
-			}
-		});
-		registerType((byte) 103, TupleType.class, new TypeReader() {
-			public Type<? extends Value> compactReadType(DataInput input) throws IOException {
-				int length = input.readInt();
-				if (length < 1) {
-					throw new IOException("Non-positive length");
-				}
-				
-				List<SimpleType<? extends SimpleValue> > itemTypes =
-						new ArrayList<SimpleType<? extends SimpleValue> >();
-				for (int i = 0; i < length; i++) {
-					itemTypes.add(Types.compactReadSimpleType(input));
-				}
-				
-				return new TupleType(itemTypes);
 			}
 		});
 	}

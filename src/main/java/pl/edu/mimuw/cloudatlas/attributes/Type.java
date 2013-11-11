@@ -10,6 +10,10 @@ public abstract class Type<V extends Value> {
 	public abstract void compactWrite(DataOutput output) throws IOException;
 	
 	public abstract V compactReadValue(DataInput input) throws IOException;
+	
+	public boolean isComparable() {
+		return false;
+	}
 
 	public abstract int hashCode();
 	public abstract boolean equals(Object obj);

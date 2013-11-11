@@ -1,9 +1,18 @@
 package pl.edu.mimuw.cloudatlas.query;
 
+import java.util.List;
+import java.util.regex.Pattern;
+
+import pl.edu.mimuw.cloudatlas.attributes.BooleanValue;
+import pl.edu.mimuw.cloudatlas.attributes.SimpleType;
+import pl.edu.mimuw.cloudatlas.attributes.StringValue;
+import pl.edu.mimuw.cloudatlas.attributes.Type;
+
 public class RegexpExpr extends Expr {
 
 	private Expr expr;
 	private String patternSource;
+	private Pattern pattern;
 	
 	public RegexpExpr(Expr expr, String patternSource) {
 		assert expr != null;
@@ -11,11 +20,54 @@ public class RegexpExpr extends Expr {
 		
 		this.expr = expr;
 		this.patternSource = patternSource;
+		// Make sure PatternSyntaxException looks nicely as parse error
+		this.pattern = Pattern.compile(patternSource);
 	}
 	
+	@Override
+	public Result evaluate(Env env) throws EvaluationException {
+		Result exprResult = expr.evaluate(env);
+		if (!exprResult.getType().equals(SimpleType.STRING)) {
+			throw new EvaluationException("Cannot execute regexp on type " + exprResult.getType());
+		}
+		
+		final Function1<StringValue, BooleanValue> func = new Function1<StringValue, BooleanValue>() {
+			public Type<BooleanValue> getReturnType() {
+				return SimpleType.BOOLEAN;
+			}
+
+			public BooleanValue evaluate(StringValue arg)
+					throws EvaluationException {
+				if (arg == null) {
+					return null;
+				} else {
+					return new BooleanValue(pattern.matcher(arg.getString()) != null);
+				}
+			}
+		};
+		
+		return exprResult.accept(new ResultVisitor<Result, EvaluationException>() {
+
+			public Result visit(OneResult result) throws EvaluationException {
+				return OneResult.createFromFunc(func, (StringValue) result.getValue());
+			}
+
+			@SuppressWarnings({ "unchecked", "rawtypes" })
+			public Result visit(ListResult result) throws EvaluationException {
+				return ListResult.createFromFunc(func, (List) result.getValues());
+			}
+
+			@SuppressWarnings({ "unchecked", "rawtypes" })
+			public Result visit(ColumnResult result) throws EvaluationException {
+				return ColumnResult.createFromFunc(func, (List) result.getValues());
+			}
+		});
+	}
+
 	public String getPatternSource() {
 		return patternSource;
 	}
+	
 	public Expr getExpr() {
 		return expr;
 	}

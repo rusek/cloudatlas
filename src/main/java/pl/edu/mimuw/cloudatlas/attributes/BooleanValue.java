@@ -3,7 +3,7 @@ package pl.edu.mimuw.cloudatlas.attributes;
 import java.io.DataOutput;
 import java.io.IOException;
 
-public class BooleanValue extends SimpleValue {
+public class BooleanValue extends SimpleValue implements Comparable<BooleanValue> {
 
 	private boolean wrapped;
 	
@@ -41,5 +41,9 @@ public class BooleanValue extends SimpleValue {
 	@Override
 	public Type<? extends Value> getType() {
 		return SimpleType.BOOLEAN;
+	}
+
+	public int compareTo(BooleanValue o) {
+		return Boolean.compare(wrapped, o.wrapped);
 	}
 }
