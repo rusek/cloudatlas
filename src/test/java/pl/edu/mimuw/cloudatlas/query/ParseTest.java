@@ -31,12 +31,6 @@ public class ParseTest extends TestCase {
 		Parsers.parseQuery("SELECT now()");
 		Parsers.parseQuery("SELECT avg(x + 2)");
 		Parsers.parseQuery("SELECT first(2, 2)");
-		Parsers.parseQuery("SELECT <1, 2>");
-		Parsers.parseQuery("SELECT <1, 2> > -3");
-		Parsers.parseQuery("SELECT <1, 2 >= 5> > -3");
-		Parsers.parseQuery("SELECT <1, 2 >= 5> > -3");
-		Parsers.parseQuery("SELECT []");
-		Parsers.parseQuery("SELECT {}");
 		Parsers.parseQuery("SELECT \"aaa\" REGEXP \"bbb\" ");
 		Parsers.parseQuery("SELECT \"aaa\" REGEXP \"bbb\" ");
 	}

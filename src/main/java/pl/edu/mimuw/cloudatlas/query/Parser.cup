@@ -17,7 +17,7 @@ terminal           SEMICOLON, COMMA, PLUS, MINUS, STAR, SLASH, PERCENT, LEFT_PAR
                    LESS, LESS_EQUAL, GREATER, GREATER_EQUAL, EQUAL, NOT_EQUAL, 
                    KEYWORD_AND, KEYWORD_OR, KEYWORD_NOT, KEYWORD_ASC, KEYWORD_DESC, KEYWORD_NULLS,
                    KEYWORD_SELECT, KEYWORD_WHERE, KEYWORD_ORDER, KEYWORD_BY, KEYWORD_AS, KEYWORD_FIRST,
-                   KEYWORD_LAST, KEYWORD_REGEXP, LEFT_BRACKET, RIGHT_BRACKET, LEFT_BRACE, RIGHT_BRACE, LEFT_ANGLE, RIGHT_ANGLE;
+                   KEYWORD_LAST, KEYWORD_REGEXP, LEFT_BRACKET, RIGHT_BRACKET, LEFT_BRACE, RIGHT_BRACE;
 terminal           UNARY_MINUS; /* artificial */ 
 terminal String    IDENTIFIER, STRING_LITERAL;
 terminal Long      INTEGER_LITERAL;
@@ -27,9 +27,9 @@ terminal Boolean   BOOLEAN_LITERAL;
 /* Non-terminals (elements generating AST nodes) */
 non terminal List<Stmt>   statement_list;
 non terminal Stmt         statement;
-non terminal Expr         basic_expr, where_clause, cond_expr, cond_expr_ngt;
-non terminal BinOp        cmp_op, cmp_op_ngt;
-non terminal List<Expr>   expr_list, expr_list_ngt;
+non terminal Expr         basic_expr, where_clause, cond_expr;
+non terminal BinOp        cmp_op;
+non terminal List<Expr>   expr_list;
 non terminal List<NamedExpr> sel_list;
 non terminal NamedExpr    sel_item;
 non terminal List<OrderExpr> order_clause, order_list;
@@ -60,14 +60,6 @@ expr_list ::=
     {: el.add(0, e); RESULT = el; :}
     |
     cond_expr:e
-    {: List<Expr> el = new LinkedList<Expr>(); el.add(e); RESULT = el; :}
-    ;
-
-expr_list_ngt ::=
-    cond_expr_ngt:e COMMA expr_list_ngt:el
-    {: el.add(0, e); RESULT = el; :}
-    |
-    cond_expr_ngt:e
     {: List<Expr> el = new LinkedList<Expr>(); el.add(e); RESULT = el; :}
     ;
 
@@ -139,26 +131,6 @@ null_ord ::=
     {: RESULT = NullOrd.UNKNOWN; :}
     ;
 
-cond_expr_ngt ::=
-    cond_expr_ngt:le KEYWORD_OR cond_expr_ngt:re
-    {: RESULT = new BinExpr(le, re, BinOp.OR); :}
-    |
-    cond_expr_ngt:le KEYWORD_AND cond_expr_ngt:re
-    {: RESULT = new BinExpr(le, re, BinOp.AND); :}
-    |
-    KEYWORD_NOT cond_expr_ngt:e
-    {: RESULT = new UnExpr(e, UnOp.NOT); :}
-    |
-    basic_expr:le cmp_op_ngt:op basic_expr:re
-    {: RESULT = new BinExpr(le, re, op); :}
-    |
-    basic_expr:e KEYWORD_REGEXP STRING_LITERAL:sl
-    {: RESULT = new RegexpExpr(e, sl); :}
-    |
-    basic_expr:e
-    {: RESULT = e; :}
-    ;
-
 cond_expr ::=
     cond_expr:le KEYWORD_OR cond_expr:re
     {: RESULT = new BinExpr(le, re, BinOp.OR); :}
@@ -179,7 +151,7 @@ cond_expr ::=
     {: RESULT = e; :}
     ;
 
-cmp_op_ngt ::=
+cmp_op ::=
     LESS
     {: RESULT = BinOp.LT; :}
     |
@@ -194,11 +166,6 @@ cmp_op_ngt ::=
     |
     NOT_EQUAL
     {: RESULT = BinOp.NE; :}
-    ;
-
-cmp_op ::=
-    cmp_op_ngt:op
-    {: RESULT = op; :}
     |
     GREATER
     {: RESULT = BinOp.GT; :}
@@ -251,13 +218,4 @@ basic_expr ::=
     |
     BOOLEAN_LITERAL:v
     {: RESULT = new ValueExpr(new BooleanValue(v)); :}
-    |
-    LEFT_BRACKET RIGHT_BRACKET
-    {: RESULT = new ValueExpr(new IntegerValue(123456)); :} /* FIXME */
-    |
-    LEFT_BRACE RIGHT_BRACE
-    {: RESULT = new ValueExpr(new IntegerValue(123456)); :} /* FIXME */
-    |
-    LEFT_ANGLE expr_list_ngt:el RIGHT_ANGLE
-    {: RESULT = new TupleExpr(el); :}
     ;

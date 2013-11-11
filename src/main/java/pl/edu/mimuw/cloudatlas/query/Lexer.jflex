@@ -98,10 +98,6 @@ DecIntegerLiteral  = 0 | [1-9][0-9]*
     	{ return this.token(Sym.LEFT_BRACE); }
     "}"
     	{ return this.token(Sym.RIGHT_BRACE); }
-    "<<"
-    	{ return this.token(Sym.LEFT_ANGLE); }
-    ">>"
-    	{ return this.token(Sym.RIGHT_ANGLE); }
     "="                            
         { return this.token(Sym.EQUAL); }
     "<>"                           
