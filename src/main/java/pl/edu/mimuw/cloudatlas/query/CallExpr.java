@@ -1,6 +1,9 @@
 package pl.edu.mimuw.cloudatlas.query;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import pl.edu.mimuw.cloudatlas.attributes.Value;
 
 public class CallExpr extends Expr {
 
@@ -59,9 +62,77 @@ public class CallExpr extends Expr {
 			return false;
 		return true;
 	}
+	
+	private Result evaluateAsModifier(List<Result> argResults) throws EvaluationException {
+		CallModifier callModifier = CallModifier.getByName(funcName);
+		if (callModifier == null) {
+			return null;
+		}
+		if (argResults.size() == 1) {
+			return callModifier.evaluate(argResults.get(0));
+		} else if (argResults.size() == 2) {
+			return callModifier.evaluate(argResults.get(0), argResults.get(1));
+		} else {
+			throw new EvaluationException("Function " + funcName + " is not applicable to " +
+					argResults.size() + " argument(s).");
+		}
+	}
+	
+	private Result evaluateAsRegularFunc(List<Result> argResults) throws EvaluationException {
+		CallFunc callFunc = CallFunc.getByName(funcName);
+		if (callFunc == null) {
+			return null;
+		}
+		if (argResults.size() == 0) {
+			Function0<? extends Value> func = callFunc.getNoArgFunc();
+			if (func == null) {
+				throw new EvaluationException("Function " + funcName + " is not applicable to 0 arguments");
+			}
+			
+			return new OneResult(func.getReturnType(), func.evaluate());
+		} else if (argResults.size() == 1) {
+			Result result = argResults.get(0);
+			Function1<? extends Value, ? extends Value> func = callFunc.getFuncByArgType(result.getType());
+			if (func == null) {
+				throw new EvaluationException("Function " + funcName + " is not applicable to argument of type " +
+						result.getType());
+			}
+			
+			return Functions.evaluate(func, argResults.get(0));
+		} else if (argResults.size() == 2) {
+			Result result1 = argResults.get(0);
+			Result result2 = argResults.get(1);
+			Function2<? extends Value, ? extends Value, ? extends Value> func = 
+					callFunc.getFuncByArgTypes(result1.getType(), result2.getType());
+			if (func == null) {
+				throw new EvaluationException("Function " + funcName + " is not applicable to arguments of types " +
+						result1.getType() + " and " + result2.getType());
+			}
+			
+			return Functions.evaluate(func, result1, result2);
+		} else {
+			throw new EvaluationException("Function " + funcName + " is not applicable to " +
+					argResults.size() + " argument(s).");
+		}
+	}
 
 	@Override
 	public Result evaluate(Env env) throws EvaluationException {
-		throw new EvaluationException("Not implemented yet");
+		List<Result> argResults = new ArrayList<Result>();
+		for (Expr argExpr : args) {
+			argResults.add(argExpr.evaluate(env));
+		}
+		
+		Result result = evaluateAsModifier(argResults);
+		if (result != null) {
+			return result;
+		}
+		
+		result = evaluateAsRegularFunc(argResults);
+		if (result != null) {
+			return result;
+		}
+		
+		throw new EvaluationException("Unrecognized function: " + funcName);
 	}
 }
