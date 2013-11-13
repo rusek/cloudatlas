@@ -12,7 +12,11 @@ public class AttributeExpr extends Expr {
 
 	@Override
 	public Result evaluate(Env env) throws EvaluationException {
-		return env.evaluateAttribute(attributeName);
+		Result result = env.getAttributeAsResult(attributeName);
+		if (result == null) {
+			throw new EvaluationException("Invalid attribute name: " + attributeName);
+		}
+		return result;
 	}
 
 	public String getAttributeName() {
