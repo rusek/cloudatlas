@@ -70,7 +70,11 @@ DecIntegerLiteral  = 0 | [1-9][0-9]*
    	"OR"
    		{ return this.token(Sym.KEYWORD_OR); }
    	"NOT"
-                { return this.token(Sym.KEYWORD_NOT); }
+        { return this.token(Sym.KEYWORD_NOT); }
+    "true"
+    	{ return this.token(Sym.BOOLEAN_LITERAL, true); }
+    "false"
+    	{ return this.token(Sym.BOOLEAN_LITERAL, false); }
     /* identifiers */ 
     {Identifier}                   
         { return this.token(Sym.IDENTIFIER, this.yytext()); }
