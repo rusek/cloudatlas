@@ -3,6 +3,7 @@ package pl.edu.mimuw.cloudatlas.attributes;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class ListValue<V extends SimpleValue> extends Value {
@@ -47,7 +48,17 @@ public class ListValue<V extends SimpleValue> extends Value {
 	
 	@Override
 	public String toString() {
-		return "ListValue " + items.toString();
+		StringBuilder builder = new StringBuilder();
+		builder.append("[ ");
+		Iterator<V> it = items.iterator();
+		if (it.hasNext()) {
+			builder.append(it.next());
+			while (it.hasNext()) {
+				builder.append(", ").append(it.next());
+			}
+		}
+		builder.append(" ]");
+		return builder.toString();
 	}
 
 	@Override

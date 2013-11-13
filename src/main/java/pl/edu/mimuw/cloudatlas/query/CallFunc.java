@@ -21,9 +21,8 @@ public enum CallFunc {
 				public StringValue evaluate(Value arg)
 						throws EvaluationException {
 					if (arg == null) {
-						return null;
+						return new StringValue("NULL");
 					} else {
-						// TODO fix toString() in values to return proper results
 						return new StringValue(arg.toString());
 					}
 				}

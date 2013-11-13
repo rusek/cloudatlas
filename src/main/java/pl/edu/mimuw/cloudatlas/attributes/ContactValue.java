@@ -19,6 +19,11 @@ public class ContactValue extends SimpleValue {
 	}
 	
 	@Override
+	public String toString() {
+		return this.wrapped.toString();
+	}
+	
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;

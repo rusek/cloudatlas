@@ -42,7 +42,7 @@ public class DoubleValue extends SimpleValue implements Comparable<DoubleValue> 
 
 	@Override
 	public String toString() {
-		return "DoubleValue [" + wrapped + "]";
+		return Double.toString(wrapped);
 	}
 
 	@Override

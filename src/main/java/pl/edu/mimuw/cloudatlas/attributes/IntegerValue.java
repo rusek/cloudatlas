@@ -39,7 +39,7 @@ public class IntegerValue extends SimpleValue implements Comparable<IntegerValue
 
 	@Override
 	public String toString() {
-		return "IntegerValue [" + wrapped + "]";
+		return Long.toString(wrapped);
 	}
 
 	@Override

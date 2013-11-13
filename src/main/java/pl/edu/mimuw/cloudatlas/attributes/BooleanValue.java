@@ -39,7 +39,7 @@ public class BooleanValue extends SimpleValue implements Comparable<BooleanValue
 
 	@Override
 	public String toString() {
-		return "BooleanValue [" + wrapped + "]";
+		return wrapped ? "true" : "false";
 	}
 	
 	public void compactWrite(DataOutput output) throws IOException {

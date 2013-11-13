@@ -39,7 +39,29 @@ public class DurationValue extends SimpleValue implements Comparable<DurationVal
 
 	@Override
 	public String toString() {
-		return "DurationValue [" + miliseconds + "]";
+		long miliseconds = Math.abs(this.miliseconds);
+		
+		long seconds = miliseconds / 1000;
+		miliseconds -= seconds * 1000;
+		
+		long minutes = seconds / 60;
+		seconds -= minutes * 60;
+		
+		long hours = minutes / 60;
+		seconds -= hours * 60;
+		
+		long days = hours / 24;
+		hours -= days * 24;
+		
+		return String.format(
+				"%c%d %02d:%02d:%02d.%03d",
+				this.miliseconds >= 0 ? '+' : '-',
+				days,
+				hours,
+				minutes,
+				seconds,
+				miliseconds
+		);
 	}
 
 	@Override

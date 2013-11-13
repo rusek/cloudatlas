@@ -44,7 +44,7 @@ public class StringValue extends SimpleValue implements Comparable<StringValue> 
 
 	@Override
 	public String toString() {
-		return "StringValue [" + wrapped + "]";
+		return wrapped;
 	}
 
 	@Override

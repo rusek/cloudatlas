@@ -2,6 +2,10 @@ package pl.edu.mimuw.cloudatlas.attributes;
 
 import java.io.DataOutput;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
 
 public class TimeValue extends SimpleValue implements Comparable<TimeValue> {
 	
@@ -39,7 +43,7 @@ public class TimeValue extends SimpleValue implements Comparable<TimeValue> {
 
 	@Override
 	public String toString() {
-		return "TimeValue [" + timestamp + "]";
+		return createDateFormat().format(new Date(timestamp));
 	}
 
 	@Override
@@ -56,4 +60,9 @@ public class TimeValue extends SimpleValue implements Comparable<TimeValue> {
 		return Long.compare(timestamp, o.timestamp);
 	}
 
+	public static DateFormat createDateFormat() {
+		DateFormat format = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS z");
+		format.setTimeZone(TimeZone.getTimeZone("CET"));
+		return format;
+	}
 }

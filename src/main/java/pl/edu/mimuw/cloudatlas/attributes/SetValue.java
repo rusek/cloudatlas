@@ -3,6 +3,7 @@ package pl.edu.mimuw.cloudatlas.attributes;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 public class SetValue<V extends SimpleValue> extends Value {
@@ -70,8 +71,19 @@ public class SetValue<V extends SimpleValue> extends Value {
 	
 	@Override
 	public String toString() {
-		return "SetValue " + items.toString();
+		StringBuilder builder = new StringBuilder();
+		builder.append("{ ");
+		Iterator<V> it = items.iterator();
+		if (it.hasNext()) {
+			builder.append(it.next());
+			while (it.hasNext()) {
+				builder.append(", ").append(it.next());
+			}
+		}
+		builder.append(" }");
+		return builder.toString();
 	}
+
 
 	public static <V extends SimpleValue> SetValue<V> of(SimpleType<V> itemType) {
 		return new SetValue<V>(itemType);
