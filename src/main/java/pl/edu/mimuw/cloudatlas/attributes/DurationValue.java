@@ -16,19 +16,27 @@ public class DurationValue extends SimpleValue implements Comparable<DurationVal
 	}
 	
 	@Override
-	public boolean equals(Object other) {
-		if (other instanceof DurationValue) {
-			return this.miliseconds == ((DurationValue) other).miliseconds;
-		} else {
-			return false;
-		}
-	}
-	
-	@Override
 	public int hashCode() {
-		return (int) miliseconds;
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (int) (miliseconds ^ (miliseconds >>> 32));
+		return result;
 	}
-	
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		DurationValue other = (DurationValue) obj;
+		if (miliseconds != other.miliseconds)
+			return false;
+		return true;
+	}
+
 	@Override
 	public String toString() {
 		return "DurationValue [" + miliseconds + "]";

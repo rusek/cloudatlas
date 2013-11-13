@@ -19,19 +19,30 @@ public class ContactValue extends SimpleValue {
 	}
 	
 	@Override
-	public boolean equals(Object other) {
-		if (other instanceof ContactValue) {
-			return this.wrapped.equals(((ContactValue) other).wrapped);
-		} else {
-			return false;
-		}
-	}
-	
-	@Override
 	public int hashCode() {
-		return this.wrapped.hashCode();
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((wrapped == null) ? 0 : wrapped.hashCode());
+		return result;
 	}
-	
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ContactValue other = (ContactValue) obj;
+		if (wrapped == null) {
+			if (other.wrapped != null)
+				return false;
+		} else if (!wrapped.equals(other.wrapped))
+			return false;
+		return true;
+	}
+
 	@Override
 	public void compactWrite(DataOutput output) throws IOException {
 		byte[] bytes = this.wrapped.getAddress();

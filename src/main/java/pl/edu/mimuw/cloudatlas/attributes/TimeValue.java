@@ -16,19 +16,27 @@ public class TimeValue extends SimpleValue implements Comparable<TimeValue> {
 	}
 	
 	@Override
-	public boolean equals(Object other) {
-		if (other instanceof TimeValue) {
-			return this.timestamp == ((TimeValue) other).timestamp;
-		} else {
-			return false;
-		}
-	}
-	
-	@Override
 	public int hashCode() {
-		return (int) this.timestamp;
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (int) (timestamp ^ (timestamp >>> 32));
+		return result;
 	}
-	
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		TimeValue other = (TimeValue) obj;
+		if (timestamp != other.timestamp)
+			return false;
+		return true;
+	}
+
 	@Override
 	public String toString() {
 		return "TimeValue [" + timestamp + "]";

@@ -16,19 +16,30 @@ public class DoubleValue extends SimpleValue implements Comparable<DoubleValue> 
 	}
 	
 	@Override
-	public boolean equals(Object other) {
-		if (other instanceof DoubleValue) {
-			return this.wrapped == ((DoubleValue) other).wrapped;
-		} else {
-			return false;
-		}
-	}
-	
-	@Override
 	public int hashCode() {
-		return new Double(wrapped).hashCode();
+		final int prime = 31;
+		int result = 1;
+		long temp;
+		temp = Double.doubleToLongBits(wrapped);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		return result;
 	}
-	
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		DoubleValue other = (DoubleValue) obj;
+		if (Double.doubleToLongBits(wrapped) != Double
+				.doubleToLongBits(other.wrapped))
+			return false;
+		return true;
+	}
+
 	@Override
 	public String toString() {
 		return "DoubleValue [" + wrapped + "]";

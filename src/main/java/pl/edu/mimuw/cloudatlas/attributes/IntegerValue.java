@@ -16,19 +16,27 @@ public class IntegerValue extends SimpleValue implements Comparable<IntegerValue
 	}
 	
 	@Override
-	public boolean equals(Object other) {
-		if (other instanceof IntegerValue) {
-			return this.wrapped == ((IntegerValue) other).wrapped;
-		} else {
-			return false;
-		}
-	}
-	
-	@Override
 	public int hashCode() {
-		return (int) this.wrapped;
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (int) (wrapped ^ (wrapped >>> 32));
+		return result;
 	}
-	
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		IntegerValue other = (IntegerValue) obj;
+		if (wrapped != other.wrapped)
+			return false;
+		return true;
+	}
+
 	@Override
 	public String toString() {
 		return "IntegerValue [" + wrapped + "]";

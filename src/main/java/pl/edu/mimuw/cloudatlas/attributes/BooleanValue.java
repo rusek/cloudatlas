@@ -16,19 +16,27 @@ public class BooleanValue extends SimpleValue implements Comparable<BooleanValue
 	}
 	
 	@Override
-	public boolean equals(Object other) {
-		if (other instanceof BooleanValue) {
-			return this.wrapped == ((BooleanValue) other).wrapped;
-		} else {
-			return false;
-		}
-	}
-	
-	@Override
 	public int hashCode() {
-		return this.wrapped ? 1 : 0;
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (wrapped ? 1231 : 1237);
+		return result;
 	}
-	
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		BooleanValue other = (BooleanValue) obj;
+		if (wrapped != other.wrapped)
+			return false;
+		return true;
+	}
+
 	@Override
 	public String toString() {
 		return "BooleanValue [" + wrapped + "]";
