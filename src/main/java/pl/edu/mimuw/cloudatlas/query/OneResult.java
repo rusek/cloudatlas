@@ -14,6 +14,13 @@ public class OneResult extends Result {
 		this.type = type;
 		this.value = value;
 	}
+	
+	public OneResult(Value value) {
+		assert value != null;
+		
+		this.type = value.getType();
+		this.value = value;
+	}
 
 	public Type<? extends Value> getType() {
 		return type;
