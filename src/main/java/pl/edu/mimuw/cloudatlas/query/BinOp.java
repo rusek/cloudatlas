@@ -1,6 +1,9 @@
 package pl.edu.mimuw.cloudatlas.query;
 
 import pl.edu.mimuw.cloudatlas.attributes.BooleanValue;
+import pl.edu.mimuw.cloudatlas.attributes.DoubleValue;
+import pl.edu.mimuw.cloudatlas.attributes.DurationValue;
+import pl.edu.mimuw.cloudatlas.attributes.TimeValue;
 import pl.edu.mimuw.cloudatlas.attributes.IntegerValue;
 import pl.edu.mimuw.cloudatlas.attributes.SimpleType;
 import pl.edu.mimuw.cloudatlas.attributes.Type;
@@ -27,25 +30,290 @@ public enum BinOp {
 					}
 					
 				};
-			} else {
+			}
+			
+			else if (type1.equals(SimpleType.DOUBLE) && type2.equals(SimpleType.DOUBLE)) {
+				return new Function2<DoubleValue, DoubleValue, DoubleValue>() {
+					
+					public Type<DoubleValue> getReturnType() {
+						return SimpleType.DOUBLE;
+					}
+					
+					public DoubleValue evaluate(DoubleValue arg1,
+							DoubleValue arg2) throws EvaluationException {
+						if(arg1 == null || arg2 == null) {
+							return null;
+						}
+						else {
+							return new DoubleValue(arg1.getDouble() + arg2.getDouble());
+						}
+							
+					}
+				};
+			}
+			
+			else if (type1.equals(SimpleType.DURATION) && type2.equals(SimpleType.DURATION)) {
+				return new Function2<DurationValue, DurationValue, DurationValue>() {
+					
+					public Type<DurationValue> getReturnType() {
+						return SimpleType.DURATION;
+					}
+					
+					public DurationValue evaluate(DurationValue arg1,
+							DurationValue arg2) throws EvaluationException {
+						if(arg1 == null || arg2 == null) {
+							return null;
+						}
+						else {
+							return new DurationValue(arg1.getTotalMiliseconds() + arg2.getTotalMiliseconds());
+						}
+					}
+							
+					
+				};
+			}
+			
+			else if (type1.equals(SimpleType.DURATION) && type2.equals(SimpleType.TIME)) {
+				return new Function2<DurationValue, TimeValue, TimeValue>() {
+					
+					public Type<TimeValue> getReturnType() {
+						return SimpleType.TIME;
+					}
+					
+					public TimeValue evaluate(DurationValue arg1,
+							TimeValue arg2) throws EvaluationException {
+						if(arg1 == null || arg2 == null) {
+							return null;
+						}
+						else {
+							return new TimeValue(arg1.getTotalMiliseconds() + arg2.getTimestamp());
+						}
+							
+					}
+				};
+			}
+			
+			else if (type1.equals(SimpleType.TIME) && type2.equals(SimpleType.DURATION)) {
+				return new Function2<TimeValue, DurationValue, TimeValue>() {
+					
+					public Type<TimeValue> getReturnType() {
+						return SimpleType.TIME;
+					}
+					
+					public TimeValue evaluate(TimeValue arg1,
+							DurationValue arg2) throws EvaluationException {
+						if(arg1 == null || arg2 == null) {
+							return null;
+						}
+						else {
+							return new TimeValue(arg2.getTotalMiliseconds() + arg1.getTimestamp());
+						}
+							
+					}
+				};
+			}
+			
+			else {
 				return null;
 			}
+			
 		}
+		
 	},
 	SUB {
 		@Override
 		public Function2<? extends Value, ? extends Value, ? extends Value> getFuncForTypes(
 				Type<? extends Value> type1, Type<? extends Value> type2) {
-			// TODO Auto-generated method stub
-			return null;
+			if (type1.equals(SimpleType.INTEGER) && type2.equals(SimpleType.INTEGER)) {
+				return new Function2<IntegerValue, IntegerValue, IntegerValue>() {
+
+					public Type<IntegerValue> getReturnType() {
+						return SimpleType.INTEGER;
+					}
+
+					public IntegerValue evaluate(IntegerValue arg1,
+							IntegerValue arg2) throws EvaluationException {
+						if (arg1 == null || arg2 == null) {
+							return null;
+						} else {
+							return new IntegerValue(arg1.getInteger() - arg2.getInteger());
+						}
+					}
+					
+				};
+			}
+			
+			else if (type1.equals(SimpleType.DOUBLE) && type2.equals(SimpleType.DOUBLE)) {
+				return new Function2<DoubleValue, DoubleValue, DoubleValue>() {
+					
+					public Type<DoubleValue> getReturnType() {
+						return SimpleType.DOUBLE;
+					}
+					
+					public DoubleValue evaluate(DoubleValue arg1,
+							DoubleValue arg2) throws EvaluationException {
+						if(arg1 == null || arg2 == null) {
+							return null;
+						}
+						else {
+							return new DoubleValue(arg1.getDouble() - arg2.getDouble());
+						}
+							
+					}
+				};
+			}
+			
+			else if (type1.equals(SimpleType.DURATION) && type2.equals(SimpleType.DURATION)) {
+				return new Function2<DurationValue, DurationValue, DurationValue>() {
+					
+					public Type<DurationValue> getReturnType() {
+						return SimpleType.DURATION;
+					}
+					
+					public DurationValue evaluate(DurationValue arg1,
+							DurationValue arg2) throws EvaluationException {
+						if(arg1 == null || arg2 == null) {
+							return null;
+						}
+						else {
+							return new DurationValue(arg1.getTotalMiliseconds() - arg2.getTotalMiliseconds());
+						}
+					}
+							
+					
+				};
+			}
+			
+			
+			else if (type1.equals(SimpleType.TIME) && type2.equals(SimpleType.DURATION)) {
+				return new Function2<TimeValue, DurationValue, TimeValue>() {
+					
+					public Type<TimeValue> getReturnType() {
+						return SimpleType.TIME;
+					}
+					
+					public TimeValue evaluate(TimeValue arg1,
+							DurationValue arg2) throws EvaluationException {
+						if(arg1 == null || arg2 == null) {
+							return null;
+						}
+						else {
+							return new TimeValue(arg2.getTotalMiliseconds() - arg1.getTimestamp());
+						}
+							
+					}
+				};
+			}
+			
+			else if (type1.equals(SimpleType.TIME) && type2.equals(SimpleType.TIME)) {
+				return new Function2<TimeValue, TimeValue, DurationValue>() {
+					
+					public Type<DurationValue> getReturnType() {
+						return SimpleType.DURATION;
+					}
+					
+					public DurationValue evaluate(TimeValue arg1,
+							TimeValue arg2) throws EvaluationException {
+						if(arg1 == null || arg2 == null) {
+							return null;
+						}
+						else {
+							return new DurationValue(arg2.getTimestamp() - arg1.getTimestamp());
+						}
+							
+					}
+				};
+			}
+			
+			else {
+				return null;
+			}
 		}
 	},
 	MUL {
 		@Override
 		public Function2<? extends Value, ? extends Value, ? extends Value> getFuncForTypes(
 				Type<? extends Value> type1, Type<? extends Value> type2) {
-			// TODO Auto-generated method stub
-			return null;
+			if (type1.equals(SimpleType.INTEGER) && type2.equals(SimpleType.INTEGER)) {
+				return new Function2<IntegerValue, IntegerValue, IntegerValue>() {
+
+					public Type<IntegerValue> getReturnType() {
+						return SimpleType.INTEGER;
+					}
+
+					public IntegerValue evaluate(IntegerValue arg1,
+							IntegerValue arg2) throws EvaluationException {
+						if (arg1 == null || arg2 == null) {
+							return null;
+						} else {
+							return new IntegerValue(arg1.getInteger() * arg2.getInteger());
+						}
+					}
+					
+				};
+			}
+			
+			else if (type1.equals(SimpleType.DOUBLE) && type2.equals(SimpleType.DOUBLE)) {
+				return new Function2<DoubleValue, DoubleValue, DoubleValue>() {
+					
+					public Type<DoubleValue> getReturnType() {
+						return SimpleType.DOUBLE;
+					}
+					
+					public DoubleValue evaluate(DoubleValue arg1,
+							DoubleValue arg2) throws EvaluationException {
+						if(arg1 == null || arg2 == null) {
+							return null;
+						}
+						else {
+							return new DoubleValue(arg1.getDouble() * arg2.getDouble());
+						}
+							
+					}
+				};
+			}
+			
+			if (type1.equals(SimpleType.INTEGER) && type2.equals(SimpleType.DURATION)) {
+				return new Function2<IntegerValue, DurationValue, DurationValue>() {
+
+					public Type<DurationValue> getReturnType() {
+						return SimpleType.DURATION;
+					}
+
+					public DurationValue evaluate(IntegerValue arg1,
+							DurationValue arg2) throws EvaluationException {
+						if (arg1 == null || arg2 == null) {
+							return null;
+						} else {
+							return new DurationValue(arg1.getInteger() * arg2.getTotalMiliseconds());
+						}
+					}
+					
+				};
+			}
+			
+			if (type2.equals(SimpleType.INTEGER) && type1.equals(SimpleType.DURATION)) {
+				return new Function2<DurationValue, IntegerValue, DurationValue>() {
+
+					public Type<DurationValue> getReturnType() {
+						return SimpleType.DURATION;
+					}
+
+					public DurationValue evaluate(DurationValue arg1,
+							IntegerValue arg2) throws EvaluationException {
+						if (arg1 == null || arg2 == null) {
+							return null;
+						} else {
+							return new DurationValue(arg2.getInteger() * arg1.getTotalMiliseconds());
+						}
+					}
+					
+				};
+			}
+			
+			else {
+				return null;
+			}
 		}
 	},
 	DIV {
