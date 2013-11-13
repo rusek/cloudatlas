@@ -35,6 +35,7 @@ LineTerminator     = \r|\n|\r\n|\n\r
 WhiteSpace         = {LineTerminator} | [ \t\f]
 Identifier         = [a-zA-Z][a-zA-Z0-9_]*
 DecIntegerLiteral  = 0 | [1-9][0-9]*
+DecFloatLiteral    = (0 | [1-9][0-9]*)\.[0-9]*([eE][+-]?[0-9]+)?
 
 /* additional high-level states */
 %state STRING
@@ -120,6 +121,9 @@ DecIntegerLiteral  = 0 | [1-9][0-9]*
     {DecIntegerLiteral}            
         { return this.token(
             Sym.INTEGER_LITERAL, new Long(this.yytext())); }
+    {DecFloatLiteral}
+    	{ return this.token(
+    		Sym.DOUBLE_LITERAL, new Double(this.yytext())); }
     \"                             
         { this.string.setLength(0); this.yybegin(STRING); }
     /* whitespace */

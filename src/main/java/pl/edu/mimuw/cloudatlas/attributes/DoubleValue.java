@@ -11,7 +11,7 @@ public class DoubleValue extends SimpleValue implements Comparable<DoubleValue> 
 		this.wrapped = wrapped;
 	}
 	
-	double getDouble() {
+	public double getDouble() {
 		return this.wrapped;
 	}
 	
