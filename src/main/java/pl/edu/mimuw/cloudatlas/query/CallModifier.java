@@ -1,6 +1,7 @@
 package pl.edu.mimuw.cloudatlas.query;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -14,6 +15,7 @@ import pl.edu.mimuw.cloudatlas.attributes.ListValue;
 import pl.edu.mimuw.cloudatlas.attributes.SetType;
 import pl.edu.mimuw.cloudatlas.attributes.SetValue;
 import pl.edu.mimuw.cloudatlas.attributes.SimpleType;
+import pl.edu.mimuw.cloudatlas.attributes.SimpleValue;
 import pl.edu.mimuw.cloudatlas.attributes.Type;
 import pl.edu.mimuw.cloudatlas.attributes.Value;
 
@@ -75,11 +77,15 @@ public enum CallModifier {
 					
 					if (type instanceof ListType) {
 						for (Value value : values) {
-							resultValues.addAll(((ListValue<? extends Value>) value).getItems());
+							if (value != null) {
+								resultValues.addAll(((ListValue<? extends Value>) value).getItems());
+							}
 						}
 					} else if (type instanceof SetType) {
 						for (Value value : values) {
-							resultValues.addAll(((SetValue<? extends Value>) value).getItems());
+							if (value != null) {
+								resultValues.addAll(((SetValue<? extends Value>) value).getItems());
+							}
 						}
 					} else {
 						throw new EvaluationException("Cannot unfold type " + type);
@@ -320,19 +326,44 @@ public enum CallModifier {
 		}
 	},
 	first {
-		/*
 		public Result evaluate(Result arg1, Result arg2) throws EvaluationException {
-			//int quantity = extractQuantity(arg1);
-			//List<Value> values = extractValues(arg2);
-			// ListValue<Value> 
-			if (quantity >= values.size()) {
+			int quantity = extractQuantity(arg1);
+			List<SimpleValue> values = extractSimpleValues(arg2);
+			@SuppressWarnings("unchecked")
+			ListValue<SimpleValue> returnedValue = ListValue.of((SimpleType<SimpleValue>) arg2.getType());
+			returnedValue.addNotNulls(values);
+			if (quantity < returnedValue.getItems().size()) {
+				returnedValue.getItems().subList(quantity, returnedValue.getItems().size()).clear();
 			}
-		}*/
+			return new OneResult(returnedValue);
+		}
 	},
 	last {
-		
+		public Result evaluate(Result arg1, Result arg2) throws EvaluationException {
+			int quantity = extractQuantity(arg1);
+			List<SimpleValue> values = extractSimpleValues(arg2);
+			@SuppressWarnings("unchecked")
+			ListValue<SimpleValue> returnedValue = ListValue.of((SimpleType<SimpleValue>) arg2.getType());
+			returnedValue.addNotNulls(values);
+			if (quantity < returnedValue.getItems().size()) {
+				returnedValue.getItems().subList(0, returnedValue.getItems().size() - quantity);
+			}
+			return new OneResult(returnedValue);
+		}
 	},
 	random {
+		public Result evaluate(Result arg1, Result arg2) throws EvaluationException {
+			int quantity = extractQuantity(arg1);
+			List<SimpleValue> values = extractSimpleValues(arg2);
+			@SuppressWarnings("unchecked")
+			ListValue<SimpleValue> returnedValue = ListValue.of((SimpleType<SimpleValue>) arg2.getType());
+			returnedValue.addNotNulls(values);
+			Collections.shuffle(returnedValue.getItems());
+			if (quantity < values.size()) {
+				returnedValue.getItems().subList(quantity, values.size()).clear();
+			}
+			return new OneResult(returnedValue);
+		}
 		
 	},
 	min {
@@ -488,4 +519,15 @@ public enum CallModifier {
 			
 		});
 	}
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	protected List<SimpleValue> extractSimpleValues(Result arg) throws EvaluationException {
+		if (!(arg.getType() instanceof SimpleType)) {
+			throw new EvaluationException("Function " + name() + "can aggregate only simple types, not " +
+					arg.getType());
+		}
+		// Because (List<SimpleValue>) extractValues(arg) is treated by Eclipse as an error
+		return (List) extractValues(arg);
+	}
+
 }

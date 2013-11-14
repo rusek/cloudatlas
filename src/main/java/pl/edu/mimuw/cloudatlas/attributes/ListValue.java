@@ -3,6 +3,7 @@ package pl.edu.mimuw.cloudatlas.attributes;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -20,7 +21,17 @@ public class ListValue<V extends SimpleValue> extends Value {
 	}
 	
 	public void addItem(V item) {
+		assert item != null;
+		
 		items.add(item);
+	}
+	
+	public void addNotNulls(Collection<? extends V> items) {
+		for (V item : items) {
+			if (item != null) {
+				this.items.add(item);
+			}
+		}
 	}
 
 	@Override
