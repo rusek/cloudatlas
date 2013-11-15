@@ -1,7 +1,9 @@
 package pl.edu.mimuw.cloudatlas.query;
 
 import pl.edu.mimuw.cloudatlas.attributes.BooleanValue;
+import pl.edu.mimuw.cloudatlas.attributes.DurationValue;
 import pl.edu.mimuw.cloudatlas.attributes.IntegerValue;
+import pl.edu.mimuw.cloudatlas.attributes.DoubleValue;
 import pl.edu.mimuw.cloudatlas.attributes.SimpleType;
 import pl.edu.mimuw.cloudatlas.attributes.Type;
 import pl.edu.mimuw.cloudatlas.attributes.Value;
@@ -24,7 +26,39 @@ public enum UnOp {
 					}
 					
 				};
-			} else {
+			}
+			
+			else if (type.equals(SimpleType.DOUBLE)) {
+				return new Function1<DoubleValue, DoubleValue>() {
+
+					public Type<DoubleValue> getReturnType() {
+						return SimpleType.DOUBLE;
+					}
+
+					public DoubleValue evaluate(DoubleValue arg)
+							throws EvaluationException {
+						return new DoubleValue(-arg.getDouble());
+					}
+					
+				};
+			}
+			
+			else if (type.equals(SimpleType.DURATION)) {
+				return new Function1<DurationValue, DurationValue>() {
+
+					public Type<DurationValue> getReturnType() {
+						return SimpleType.DURATION;
+					}
+
+					public DurationValue evaluate(DurationValue arg)
+							throws EvaluationException {
+						return new DurationValue(-arg.getTotalMiliseconds());
+					}
+					
+				};
+			}
+			
+			else {
 				return null;
 			}
 		}
