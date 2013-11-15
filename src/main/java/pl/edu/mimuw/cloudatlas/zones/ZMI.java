@@ -16,6 +16,8 @@ public class ZMI {
 	}
 	
 	public <V extends Value> void addAttribute(String name, Type<V> type, V value) {
+		assert !attributes.containsKey(name);
+		
 		attributes.put(name, new Attribute(name, type, value));
 	}
 	
@@ -24,6 +26,8 @@ public class ZMI {
 	}
 	
 	public void addAttribute(String name, Value value) {
+		assert !attributes.containsKey(name); 
+		
 		attributes.put(name, new Attribute(name, value));
 	}
 	

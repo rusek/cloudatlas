@@ -14,6 +14,10 @@ public class ListType<V extends SimpleValue> extends Type<ListValue<V>> {
 		this.itemType = itemType;
 	}
 
+	public SimpleType<V> getItemType() {
+		return itemType;
+	}
+
 	@Override
 	public ListValue<V> compactReadValue(DataInput input) throws IOException {
 		int length = input.readInt();
@@ -63,5 +67,10 @@ public class ListType<V extends SimpleValue> extends Type<ListValue<V>> {
 		} else if (!itemType.equals(other.itemType))
 			return false;
 		return true;
+	}
+	
+	@Override
+	public String toString() {
+		return "ListType[" + itemType + "]";
 	}
 }

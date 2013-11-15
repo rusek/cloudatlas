@@ -16,6 +16,7 @@ public class ListResult extends Result {
 	public ListResult(Type<? extends Value> type, List<Value> values) {
 		assert type != null;
 		assert values != null;
+		assert type.equalsAllValueTypes(values);
 		
 		this.type = type;
 		this.values = values;

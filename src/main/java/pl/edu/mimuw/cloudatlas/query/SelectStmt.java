@@ -226,7 +226,7 @@ public class SelectStmt extends Stmt {
 				} else {
 					int comparison = obj0.compareTo(obj1);
 					if (comparison != 0) {
-						return comparison;
+						return orderExpr.getOrd() == Ord.ASC ? comparison : -comparison;
 					}
 				}
 			}

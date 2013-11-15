@@ -74,14 +74,17 @@ public enum CallModifier {
 				@SuppressWarnings("unchecked")
 				private Result evaluate(Type<? extends Value> type, List<Value> values) throws EvaluationException {
 					List<Value> resultValues = new ArrayList<Value>();
+					Type<? extends Value> resultType;
 					
 					if (type instanceof ListType) {
+						resultType = ((ListType<? extends Value>) type).getItemType();
 						for (Value value : values) {
 							if (value != null) {
 								resultValues.addAll(((ListValue<? extends Value>) value).getItems());
 							}
 						}
 					} else if (type instanceof SetType) {
+						resultType = ((SetType<? extends Value>) type).getItemType();
 						for (Value value : values) {
 							if (value != null) {
 								resultValues.addAll(((SetValue<? extends Value>) value).getItems());
@@ -91,7 +94,7 @@ public enum CallModifier {
 						throw new EvaluationException("Cannot unfold type " + type);
 					}
 					
-					return new ListResult(type, resultValues);
+					return new ListResult(resultType, resultValues);
 				}
 				
 			});
@@ -170,6 +173,7 @@ public enum CallModifier {
 							}
 						}
 					} else {
+						// TODO duration?
 						throw new EvaluationException("Function avg cannot be applied to argument of type " + type);
 					}
 					
@@ -346,7 +350,7 @@ public enum CallModifier {
 			ListValue<SimpleValue> returnedValue = ListValue.of((SimpleType<SimpleValue>) arg2.getType());
 			returnedValue.addNotNulls(values);
 			if (quantity < returnedValue.getItems().size()) {
-				returnedValue.getItems().subList(0, returnedValue.getItems().size() - quantity);
+				returnedValue.getItems().subList(0, returnedValue.getItems().size() - quantity).clear();
 			}
 			return new OneResult(returnedValue);
 		}
@@ -359,8 +363,8 @@ public enum CallModifier {
 			ListValue<SimpleValue> returnedValue = ListValue.of((SimpleType<SimpleValue>) arg2.getType());
 			returnedValue.addNotNulls(values);
 			Collections.shuffle(returnedValue.getItems());
-			if (quantity < values.size()) {
-				returnedValue.getItems().subList(quantity, values.size()).clear();
+			if (quantity < returnedValue.getItems().size()) {
+				returnedValue.getItems().subList(quantity, returnedValue.getItems().size()).clear();
 			}
 			return new OneResult(returnedValue);
 		}
@@ -523,7 +527,7 @@ public enum CallModifier {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected List<SimpleValue> extractSimpleValues(Result arg) throws EvaluationException {
 		if (!(arg.getType() instanceof SimpleType)) {
-			throw new EvaluationException("Function " + name() + "can aggregate only simple types, not " +
+			throw new EvaluationException("Function " + name() + " can aggregate only simple types, not " +
 					arg.getType());
 		}
 		// Because (List<SimpleValue>) extractValues(arg) is treated by Eclipse as an error

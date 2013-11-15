@@ -14,6 +14,10 @@ public class SetType<V extends SimpleValue> extends Type<SetValue<V>> {
 		this.itemType = itemType;
 	}
 
+	public SimpleType<V> getItemType() {
+		return itemType;
+	}
+
 	@Override
 	public SetValue<V> compactReadValue(DataInput input) throws IOException {
 		int length = input.readInt();
@@ -65,4 +69,8 @@ public class SetType<V extends SimpleValue> extends Type<SetValue<V>> {
 		return true;
 	}
 
+	@Override
+	public String toString() {
+		return "SetType[" + itemType + "]";
+	}
 }

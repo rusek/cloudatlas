@@ -2,6 +2,7 @@ package pl.edu.mimuw.cloudatlas.query;
 
 import java.util.Date;
 
+import pl.edu.mimuw.cloudatlas.attributes.BooleanValue;
 import pl.edu.mimuw.cloudatlas.attributes.SimpleType;
 import pl.edu.mimuw.cloudatlas.attributes.StringValue;
 import pl.edu.mimuw.cloudatlas.attributes.TimeValue;
@@ -25,6 +26,23 @@ public enum CallFunc {
 					} else {
 						return new StringValue(arg.toString());
 					}
+				}
+				
+			};
+		}
+	},
+	is_null {
+		public Function1<? extends Value, ? extends Value> getFuncByArgType(
+				Type<? extends Value> type) {
+			return new Function1<Value, BooleanValue>() {
+
+				public Type<BooleanValue> getReturnType() {
+					return SimpleType.BOOLEAN;
+				}
+
+				public BooleanValue evaluate(Value arg)
+						throws EvaluationException {
+					return new BooleanValue(arg == null);
 				}
 				
 			};
