@@ -232,12 +232,14 @@ public class EvalTest extends TestCase {
 			
 		}
 		assertSelectThrows("SELECT random(min(nullInt), int)", zmis);
-		// TODO waiting for size(...)
-		//assertSelectReturns("SELECT size((random(2, int))", zmis, new IntegerValue(2));
-		//assertSelectReturns("SELECT size(random(3, int))", zmis, new IntegerValue(2));
+		// CHECKME waiting for size(...)
+		assertSelectReturns("SELECT size(random(2, int))", zmis, new IntegerValue(2));
+		assertSelectReturns("SELECT size(random(3, int))", zmis, new IntegerValue(2));
 		assertSelectReturns("SELECT random(0, int)", zmis, ListValue.of(SimpleType.INTEGER));
 		assertSelectReturns("SELECT random(-2147483649, int)", zmis, ListValue.of(SimpleType.INTEGER));
-		//assertSelectReturns("SELECT size(random(2147483648, int))", zmis, new IntegerValue(2));
+		assertSelectReturns("SELECT size(random(2147483648, int))", zmis, new IntegerValue(2));
+		
+		//TODO Test for string concatenation and mathematical functions
 		
 	}
 	

@@ -14,6 +14,10 @@ public abstract class Type<V extends Value> {
 	public boolean isComparable() {
 		return false;
 	}
+	
+	public boolean isCollection() {
+		return false;
+	}
 
 	public abstract int hashCode();
 	public abstract boolean equals(Object obj);

@@ -1,14 +1,11 @@
 package pl.edu.mimuw.cloudatlas.query;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.sql.Timestamp;
 
 import pl.edu.mimuw.cloudatlas.attributes.BooleanValue;
+import pl.edu.mimuw.cloudatlas.attributes.CollectionValue;
 import pl.edu.mimuw.cloudatlas.attributes.SimpleType;
 import pl.edu.mimuw.cloudatlas.attributes.StringValue;
-import pl.edu.mimuw.cloudatlas.attributes.BooleanValue;
 import pl.edu.mimuw.cloudatlas.attributes.IntegerValue;
 import pl.edu.mimuw.cloudatlas.attributes.DoubleValue;
 import pl.edu.mimuw.cloudatlas.attributes.DurationValue;
@@ -240,19 +237,17 @@ public enum CallFunc {
 			if(type.equals(SimpleType.STRING)) {
 				return new Function1<StringValue, TimeValue>() {
 
-					@Override
 					public Type<TimeValue> getReturnType() {
 						return SimpleType.TIME;
 					}
 
-					@Override
 					public TimeValue evaluate(StringValue arg)
 							throws EvaluationException {
 	
 							try {
 								return new TimeValue(TimeValue.createDateFormat().parse(arg.getString()).getTime());
 							} catch (Exception e) {
-								return null;
+								throw new EvaluationException("String " + arg.getString() + " couldn't be parsed as Time.");
 							}
 					}
 				};
@@ -273,7 +268,142 @@ public enum CallFunc {
 
 				public TimeValue evaluate() throws EvaluationException {
 					return new TimeValue(new Date().getTime());
-				}};
+				}
+			};
+		}
+	
+	
+	},
+	
+	epoch {
+		private static final long EPOCH_TIME = 946681200000l;
+		public Function0<? extends Value> getNoArgFunc() {
+			return new Function0<TimeValue>() {
+
+				public Type<TimeValue> getReturnType() {
+					return SimpleType.TIME;
+				}
+
+				public TimeValue evaluate() throws EvaluationException {
+					return new TimeValue(EPOCH_TIME);
+				}
+				
+			};
+		}
+	},
+	
+	size {
+		public Function1<? extends Value, ? extends Value> getFuncByArgType(
+				Type<? extends Value> type) {
+			if(type.equals(SimpleType.STRING)) {
+				return new Function1<StringValue, IntegerValue>() {
+
+					@Override
+					public Type<IntegerValue> getReturnType() {
+						return SimpleType.INTEGER;
+					}
+
+					@Override
+					public IntegerValue evaluate(StringValue arg)
+							throws EvaluationException {
+						return new IntegerValue(arg.getString().length());
+					}
+					
+				};
+			}
+			
+			//XXX działa, ale nie jestem 100% pewny, czy to (i ta hierachia z Collection) jest dobrze:)
+			else if(type.isCollection()) {
+				return new Function1<CollectionValue, IntegerValue>() {
+	
+					@Override
+					public Type<IntegerValue> getReturnType() {
+						return SimpleType.INTEGER;
+					}
+	
+					@Override
+					public IntegerValue evaluate(CollectionValue arg)
+							throws EvaluationException {
+						return new IntegerValue(arg.size());
+					}
+					
+				};
+			}
+			else {
+				return null;
+			}
+		}
+	},
+	
+	round {
+		public Function1<? extends Value, ? extends Value> getFuncByArgType(
+				Type<? extends Value> type) {
+			if(type.equals(SimpleType.DOUBLE)) {
+				return new Function1<DoubleValue, DoubleValue>() {
+
+					@Override
+					public Type<DoubleValue> getReturnType() {
+						return SimpleType.DOUBLE;
+					}
+
+					@Override
+					public DoubleValue evaluate(DoubleValue arg)
+							throws EvaluationException {
+						return new DoubleValue(Math.round(arg.getDouble()));
+					}
+				};
+			}
+			else {
+				return null;
+			}
+		}
+	},
+	
+	floor {
+		public Function1<? extends Value, ? extends Value> getFuncByArgType(
+				Type<? extends Value> type) {
+			if(type.equals(SimpleType.DOUBLE)) {
+				return new Function1<DoubleValue, DoubleValue>() {
+
+					@Override
+					public Type<DoubleValue> getReturnType() {
+						return SimpleType.DOUBLE;
+					}
+
+					@Override
+					public DoubleValue evaluate(DoubleValue arg)
+							throws EvaluationException {
+						return new DoubleValue(Math.floor(arg.getDouble()));
+					}
+				};
+			}
+			else {
+				return null;
+			}
+		}
+	},
+	
+	ceil {
+		public Function1<? extends Value, ? extends Value> getFuncByArgType(
+				Type<? extends Value> type) {
+			if(type.equals(SimpleType.DOUBLE)) {
+				return new Function1<DoubleValue, DoubleValue>() {
+
+					@Override
+					public Type<DoubleValue> getReturnType() {
+						return SimpleType.DOUBLE;
+					}
+
+					@Override
+					public DoubleValue evaluate(DoubleValue arg)
+							throws EvaluationException {
+						return new DoubleValue(Math.ceil(arg.getDouble()));
+					}
+				};
+			}
+			else {
+				return null;
+			}
 		}
 	};
 

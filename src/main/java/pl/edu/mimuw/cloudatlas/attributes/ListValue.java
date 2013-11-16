@@ -7,7 +7,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-public class ListValue<V extends SimpleValue> extends Value {
+public class ListValue<V extends SimpleValue> extends CollectionValue {
 	
 	private final SimpleType<V> itemType;
 	private final List<V> items = new ArrayList<V>();
@@ -32,6 +32,11 @@ public class ListValue<V extends SimpleValue> extends Value {
 				this.items.add(item);
 			}
 		}
+	}
+	
+	@Override
+	public int size() {
+		return items.size();
 	}
 
 	@Override

@@ -5,12 +5,13 @@ import pl.edu.mimuw.cloudatlas.attributes.DoubleValue;
 import pl.edu.mimuw.cloudatlas.attributes.DurationValue;
 import pl.edu.mimuw.cloudatlas.attributes.TimeValue;
 import pl.edu.mimuw.cloudatlas.attributes.IntegerValue;
+import pl.edu.mimuw.cloudatlas.attributes.StringValue;
 import pl.edu.mimuw.cloudatlas.attributes.SimpleType;
 import pl.edu.mimuw.cloudatlas.attributes.Type;
 import pl.edu.mimuw.cloudatlas.attributes.Value;
 
 public enum BinOp {
-	// I + I = I; D + D = D; Dur + Dur = Dur; T + Dur = T; Dur + T = T;
+	// I + I = I; D + D = D; Dur + Dur = Dur; T + Dur = T; Dur + T = T; S + S = S
 	ADD {
 		public Function2<? extends Value, ? extends Value, ? extends Value> getFuncForTypes(
 				Type<? extends Value> type1, Type<? extends Value> type2) {
@@ -111,6 +112,25 @@ public enum BinOp {
 						}
 							
 					}
+				};
+			}
+			
+			else if (type1.equals(SimpleType.STRING) && type2.equals(SimpleType.STRING)) {
+				return new Function2<StringValue, StringValue, StringValue>() {
+
+					public Type<StringValue> getReturnType() {
+						return SimpleType.STRING;
+					}
+
+					public StringValue evaluate(StringValue arg1,
+							StringValue arg2) throws EvaluationException {
+						if (arg1 == null || arg2 == null) {
+							return null;
+						} else {
+							return new StringValue(arg1.getString() + arg2.getString());
+						}
+					}
+					
 				};
 			}
 			

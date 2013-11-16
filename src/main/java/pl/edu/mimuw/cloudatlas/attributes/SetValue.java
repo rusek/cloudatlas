@@ -6,7 +6,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-public class SetValue<V extends SimpleValue> extends Value {
+public class SetValue<V extends SimpleValue> extends CollectionValue {
 	
 	private final SimpleType<V> itemType;
 	private final Set<V> items = new HashSet<V>();
@@ -21,6 +21,11 @@ public class SetValue<V extends SimpleValue> extends Value {
 	
 	public void addItem(V item) {
 		items.add(item);
+	}
+	
+	@Override
+	public int size() {
+		return items.size();
 	}
 
 	@Override
