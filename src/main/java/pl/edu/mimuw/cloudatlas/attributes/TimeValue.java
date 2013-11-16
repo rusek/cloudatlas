@@ -65,4 +65,10 @@ public class TimeValue extends SimpleValue implements Comparable<TimeValue> {
 		format.setTimeZone(TimeZone.getTimeZone("CET"));
 		return format;
 	}
+	
+	public static DateFormat createNoZoneDateFormat() {
+		DateFormat format = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS");
+		format.setTimeZone(TimeZone.getTimeZone("CET"));
+		return format;
+	}
 }
