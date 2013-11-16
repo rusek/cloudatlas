@@ -394,11 +394,85 @@ public class EvalTest extends TestCase {
 		
 		assertSelectTrue("SELECT count(id) = 1 WHERE to_time(\"1999/01/01 02:12:34.123 CET\") - to_time(\"1999/01/01 02:12:38.123 CET\") = to_duration(-4000)", zmi);
 		
-		assertSelectTrue("SELECT \"f\" + \"oo\" = \"foo\"", zmi);
-		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(\"f\" + nullStr)", zmi);
-		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(nullStr + \"f\")", zmi);
+		assertSelectThrows("SELECT false - true");
 		
-		assertSelectThrows("SELECT false + true");
+		// MUL
+		
+		assertSelectReturns("SELECT 7 * 2", new IntegerValue(14));
+		assertSelectThrows("SELECT 7 * false");
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(7 * nullInt)", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(nullInt * 7)", zmi);
+		assertSelectThrows("SELECT count(id) = 1 WHERE is_null(7 * nullBool)", zmi);
+
+		assertSelectTrue("SELECT count(id) = 1 WHERE 2.0 * 4.5 = 9.0", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(2.0 * nullFloat)", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(nullFloat * 2.0)", zmi);
+		
+		assertSelectTrue("SELECT count(id) = 1 WHERE to_duration(100) * 3 = to_duration(300)", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(to_duration(100) * nullInt)", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(nullDur * 3)", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE 3 * to_duration(100) = to_duration(300)", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(nullInt * to_duration(100))", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(77 * nullDur)", zmi);
+		
+		assertSelectThrows("SELECT false * false");
+		
+		// DIV
+		
+		assertSelectReturns("SELECT 7 / 2", new DoubleValue(3.5));
+		assertSelectThrows("SELECT 7 / false");
+		assertSelectThrows("SELECT 7 / 0");
+		assertSelectTrue("SELECT 0 / 2 = 0.0");
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(7 / nullInt)", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(nullInt / 0)", zmi);
+		
+		assertSelectTrue("SELECT count(id) = 1 WHERE 4.0 / 8.0 = 0.5", zmi);
+		assertSelectThrows("SELECT 7.0 / 0.0");
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(0.0 / nullFloat)", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(nullFloat / 0.0)", zmi);
+		
+		assertSelectTrue("SELECT count(id) = 1 WHERE to_duration(200) / to_duration(10) = 20.0", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE to_duration(200) / to_duration(400) = 0.5", zmi);
+		assertSelectThrows("SELECT count(id) = 1 WHERE to_duration(200) / to_duration(0) = 20.0", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(nullDur / to_duration(0))", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(to_duration(0) / nullDur)", zmi);
+		
+		assertSelectTrue("SELECT count(id) = 1 WHERE to_duration(200) / 10 = to_duration(20)", zmi);
+		assertSelectThrows("SELECT count(id) = 1 WHERE to_duration(200) / 0 = to_duration(20)", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(to_duration(200) / nullInt)", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(nullDur / 0)", zmi);
+		
+		// MOD
+		
+		assertSelectReturns("SELECT 7 % 3", new IntegerValue(7 % 3));
+		assertSelectThrows("SELECT 7 % false");
+		assertSelectThrows("SELECT 7 % 0");
+		assertSelectTrue("SELECT 0 % 2 = 0");
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(7 % nullInt)", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(nullInt % 0)", zmi);
+
+		assertSelectTrue("SELECT count(id) = 1 WHERE 7.5 % 3.5 = 0.5", zmi);
+		assertSelectThrows("SELECT 7.0 % 0.0");
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(0.0 % nullFloat)", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(nullFloat % 0.0)", zmi);
+
+		assertSelectTrue("SELECT to_duration(7) % to_duration(3) = to_duration(1)");
+		assertSelectThrows("SELECT to_duration(7) % to_duration(0)");
+		assertSelectTrue("SELECT to_duration(0) % to_duration(666) = to_duration(0)");
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(to_duration(0) % nullDur)", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(nullDur % to_duration(0))", zmi);
+		
+		// NEG
+		assertSelectReturns("SELECT -(7)", new IntegerValue(-7));
+		assertSelectReturns("SELECT ----------(7)", new IntegerValue(7));
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(-nullInt)", zmi);
+		
+		assertSelectReturns("SELECT -(7.5)", new DoubleValue(-7.5));
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(-nullFloat)", zmi);
+		
+		assertSelectReturns("SELECT -(to_duration(6789))", new DurationValue(-6789));
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(-nullDur)", zmi);
+		
 	}
 	
 	// Helpers

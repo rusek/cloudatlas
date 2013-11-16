@@ -339,24 +339,28 @@ public enum BinOp {
 			}
 		}
 	},
-	// I / I = I; D / D = D; Dur / Dur = I; Dur / I = Dur;
+	// I / I = D; D / D = D; Dur / Dur = D; Dur / I = Dur;
 	DIV {
 		@Override
 		public Function2<? extends Value, ? extends Value, ? extends Value> getFuncForTypes(
 				Type<? extends Value> type1, Type<? extends Value> type2) {
 			if (type1.equals(SimpleType.INTEGER) && type2.equals(SimpleType.INTEGER)) {
-				return new Function2<IntegerValue, IntegerValue, IntegerValue>() {
+				// The result is double - for consistency with avg(...):
+				//     avg(intAttr) = sum(intAttr) / count(intAttr)
+				return new Function2<IntegerValue, IntegerValue, DoubleValue>() {
 
-					public Type<IntegerValue> getReturnType() {
-						return SimpleType.INTEGER;
+					public Type<DoubleValue> getReturnType() {
+						return SimpleType.DOUBLE;
 					}
 
-					public IntegerValue evaluate(IntegerValue arg1,
+					public DoubleValue evaluate(IntegerValue arg1,
 							IntegerValue arg2) throws EvaluationException {
 						if (arg1 == null || arg2 == null) {
 							return null;
+						} else if (arg2.getInteger() == 0) {
+							throw new EvaluationException("Cannot divide by zero");
 						} else {
-							return new IntegerValue(arg1.getInteger() / arg2.getInteger());
+							return new DoubleValue(((double) arg1.getInteger()) / ((double) arg2.getInteger()));
 						}
 					}
 					
@@ -374,6 +378,8 @@ public enum BinOp {
 							DoubleValue arg2) throws EvaluationException {
 						if(arg1 == null || arg2 == null) {
 							return null;
+						} else if (arg2.getDouble() == 0.0) {
+							throw new EvaluationException("Cannot divide by zero");
 						}
 						else {
 							return new DoubleValue(arg1.getDouble() / arg2.getDouble());
@@ -383,19 +389,22 @@ public enum BinOp {
 			}
 			
 			else if(type1.equals(SimpleType.DURATION) && type2.equals(SimpleType.DURATION)) {
-				return new Function2<DurationValue, DurationValue, IntegerValue>() {
+				return new Function2<DurationValue, DurationValue, DoubleValue>() {
 
-					public Type<IntegerValue> getReturnType() {
-						return SimpleType.INTEGER;
+					public Type<DoubleValue> getReturnType() {
+						return SimpleType.DOUBLE;
 					}
 
-					public IntegerValue evaluate(DurationValue arg1,
+					public DoubleValue evaluate(DurationValue arg1,
 							DurationValue arg2) throws EvaluationException {
 						if(arg1 == null || arg2 == null) {
 							return null;
+						} else if (arg2.getTotalMiliseconds() == 0) {
+							throw new EvaluationException("Cannot divide by zero");
 						}
 						else {
-							return new IntegerValue(arg1.getTotalMiliseconds() / arg2.getTotalMiliseconds());
+							return new DoubleValue(((double) arg1.getTotalMiliseconds()) /
+									((double) arg2.getTotalMiliseconds()));
 						}
 					}
 					
@@ -413,6 +422,8 @@ public enum BinOp {
 							IntegerValue arg2) throws EvaluationException {
 						if (arg1 == null || arg2 == null) {
 							return null;
+						} else if (arg2.getInteger() == 0) {
+							throw new EvaluationException("Cannot divide by zero");
 						} else {
 							return new DurationValue(arg1.getTotalMiliseconds() / arg2.getInteger());
 						}
@@ -426,7 +437,7 @@ public enum BinOp {
 			}
 		}
 	},
-	//I % I = I; Dur % Dur = Dur;
+	//I % I = I; D % D = D; Dur % Dur = Dur;
 	MOD {
 		@Override
 		public Function2<? extends Value, ? extends Value, ? extends Value> getFuncForTypes(
@@ -442,8 +453,32 @@ public enum BinOp {
 							IntegerValue arg2) throws EvaluationException {
 						if (arg1 == null || arg2 == null) {
 							return null;
+						} else if (arg2.getInteger() == 0) {
+							throw new EvaluationException("Modulo by zero");
 						} else {
 							return new IntegerValue(arg1.getInteger() % arg2.getInteger());
+						}
+					}
+					
+				};
+			}
+			
+			else if(type1.equals(SimpleType.DOUBLE) && type2.equals(SimpleType.DOUBLE)) {
+				return new Function2<DoubleValue, DoubleValue, DoubleValue>() {
+
+					public Type<DoubleValue> getReturnType() {
+						return SimpleType.DOUBLE;
+					}
+
+					public DoubleValue evaluate(DoubleValue arg1,
+							DoubleValue arg2) throws EvaluationException {
+						if(arg1 == null || arg2 == null) {
+							return null;
+						} else if (arg2.getDouble() == 0.0) {
+							throw new EvaluationException("Modulo by zero");
+						}
+						else {
+							return new DoubleValue(arg1.getDouble() % arg2.getDouble());
 						}
 					}
 					
@@ -461,6 +496,8 @@ public enum BinOp {
 							DurationValue arg2) throws EvaluationException {
 						if(arg1 == null || arg2 == null) {
 							return null;
+						} else if (arg2.getTotalMiliseconds() == 0) {
+							throw new EvaluationException("Modulo by zero");
 						}
 						else {
 							return new DurationValue(arg1.getTotalMiliseconds() % arg2.getTotalMiliseconds());

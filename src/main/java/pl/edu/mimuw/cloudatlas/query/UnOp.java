@@ -22,6 +22,9 @@ public enum UnOp {
 
 					public IntegerValue evaluate(IntegerValue arg)
 							throws EvaluationException {
+						if (arg == null) {
+							return null;
+						}
 						return new IntegerValue(-arg.getInteger());
 					}
 					
@@ -37,6 +40,9 @@ public enum UnOp {
 
 					public DoubleValue evaluate(DoubleValue arg)
 							throws EvaluationException {
+						if (arg == null) {
+							return null;
+						}
 						return new DoubleValue(-arg.getDouble());
 					}
 					
@@ -52,6 +58,9 @@ public enum UnOp {
 
 					public DurationValue evaluate(DurationValue arg)
 							throws EvaluationException {
+						if (arg == null) {
+							return null;
+						}
 						return new DurationValue(-arg.getTotalMiliseconds());
 					}
 					
