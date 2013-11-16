@@ -220,7 +220,7 @@ public enum BinOp {
 							return null;
 						}
 						else {
-							return new TimeValue(arg2.getTotalMiliseconds() - arg1.getTimestamp());
+							return new TimeValue(arg1.getTimestamp() - arg2.getTotalMiliseconds());
 						}
 							
 					}
@@ -240,7 +240,7 @@ public enum BinOp {
 							return null;
 						}
 						else {
-							return new DurationValue(arg2.getTimestamp() - arg1.getTimestamp());
+							return new DurationValue(arg1.getTimestamp() - arg2.getTimestamp());
 						}
 							
 					}

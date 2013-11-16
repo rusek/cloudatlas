@@ -232,7 +232,6 @@ public class EvalTest extends TestCase {
 			
 		}
 		assertSelectThrows("SELECT random(min(nullInt), int)", zmis);
-		// CHECKME waiting for size(...)
 		assertSelectReturns("SELECT size(random(2, int))", zmis, new IntegerValue(2));
 		assertSelectReturns("SELECT size(random(3, int))", zmis, new IntegerValue(2));
 		assertSelectReturns("SELECT random(0, int)", zmis, ListValue.of(SimpleType.INTEGER));
@@ -241,6 +240,165 @@ public class EvalTest extends TestCase {
 		
 		//TODO Test for string concatenation and mathematical functions
 		
+	}
+	
+	public static void testEqualityAndComparison() throws Exception {
+		ZMI zmi = new ZMI();
+		zmi.addAttribute("id", new IntegerValue(1));
+		zmi.addAttribute("intList", listWith(new IntegerValue(1), new IntegerValue(2)));
+		zmi.addAttribute("nullInt", SimpleType.INTEGER);
+		
+		assertSelectTrue("SELECT 1 = 1");
+		assertSelectFalse("SELECT 1 = 2");
+		assertSelectTrue("SELECT 1 <= 1");
+		assertSelectTrue("SELECT 1 <= 2");
+		assertSelectFalse("SELECT 1 < 1");
+		assertSelectTrue("SELECT 1 < 2");
+		assertSelectTrue("SELECT 1 >= 1");
+		assertSelectFalse("SELECT 1 > 1");
+		assertSelectTrue("SELECT 1 > 0");
+		assertSelectFalse("SELECT 1 >= 2");
+		assertSelectFalse("SELECT 1 <> 1");
+		assertSelectTrue("SELECT 1 <> 2");
+		
+		assertSelectTrue("SELECT true > false");
+		assertSelectFalse("SELECT true < false");
+		
+		assertSelectTrue("SELECT 1.0 > 0.0");
+		assertSelectTrue("SELECT 1.0 = 1.0");
+		assertSelectFalse("SELECT 1.0 < 0.0");
+		
+		assertSelectTrue("SELECT to_duration(100) = to_duration(100)");
+		assertSelectFalse("SELECT to_duration(100) = to_duration(200)");
+		assertSelectFalse("SELECT to_duration(100) < to_duration(100)");
+		assertSelectFalse("SELECT to_duration(100) > to_duration(100)");
+		assertSelectTrue("SELECT to_duration(200) > to_duration(100)");
+		
+		assertSelectTrue("SELECT \"aa\" = \"aa\"");
+		assertSelectTrue("SELECT \"a	a\" = \"a\ta\"");
+		assertSelectFalse("SELECT \"a	a\" <> \"a\ta\"");
+		assertSelectTrue("SELECT \"a\" < \"aa\"");
+		assertSelectFalse("SELECT \"aa\" < \"aa\"");
+		
+		assertSelectTrue("SELECT to_time(\"1999/01/01 02:12:34.123 CET\") < to_time(\"1999/02/01 02:12:34.123 CET\")");
+		assertSelectTrue("SELECT to_time(\"1999/01/01 02:12:34.123 CET\") < to_time(\"1999/02/01 02:12:34.123 CET\")");
+		assertSelectFalse("SELECT to_time(\"1999/01/01 02:12:34.123 CET\") > to_time(\"1999/02/01 02:12:34.123 CET\")");
+		assertSelectTrue("SELECT to_time(\"1999/02/01 02:12:34.123 CET\") = to_time(\"1999/02/01 02:12:34.123 CET\")");
+		
+		assertSelectThrows("SELECT 1 = false");
+		assertSelectThrows("SELECT 1 = false");
+		
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(nullInt)", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(1 = nullInt)", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(1 <> nullInt)", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(1 > nullInt)", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(1 < nullInt)", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(1 <= nullInt)", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(1 >= nullInt)", zmi);
+		assertSelectThrows("SELECT true = nullInt", zmi);
+	}
+	
+	public static void testLogicalOperators() throws Exception {
+		ZMI zmi = new ZMI();
+		zmi.addAttribute("id", new IntegerValue(1));
+		zmi.addAttribute("nullBool", SimpleType.BOOLEAN);
+		
+		assertSelectTrue("SELECT count(id) = 0 WHERE false OR false", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE true OR false", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE false OR true", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE true OR true", zmi);
+		assertSelectTrue("SELECT count(id) = 0 WHERE nullBool OR false", zmi);
+		assertSelectTrue("SELECT count(id) = 0 WHERE nullBool OR true", zmi);
+		assertSelectTrue("SELECT count(id) = 0 WHERE false OR nullBool", zmi);
+		assertSelectTrue("SELECT count(id) = 0 WHERE true OR nullBool", zmi);
+		assertSelectTrue("SELECT count(id) = 0 WHERE nullBool OR nullBool", zmi);
+
+		assertSelectTrue("SELECT count(id) = 0 WHERE false AND false", zmi);
+		assertSelectTrue("SELECT count(id) = 0 WHERE true AND false", zmi);
+		assertSelectTrue("SELECT count(id) = 0 WHERE false AND true", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE true AND true", zmi);
+		assertSelectTrue("SELECT count(id) = 0 WHERE nullBool AND false", zmi);
+		assertSelectTrue("SELECT count(id) = 0 WHERE nullBool AND true", zmi);
+		assertSelectTrue("SELECT count(id) = 0 WHERE false AND nullBool", zmi);
+		assertSelectTrue("SELECT count(id) = 0 WHERE true AND nullBool", zmi);
+		assertSelectTrue("SELECT count(id) = 0 WHERE nullBool AND nullBool", zmi);
+		
+		assertSelectTrue("SELECT count(id) = 1 WHERE NOT false", zmi);
+		assertSelectTrue("SELECT count(id) = 0 WHERE NOT true", zmi);
+		assertSelectTrue("SELECT count(id) = 0 WHERE NOT nullBool", zmi);
+		
+		assertSelectThrows("SELECT 1 AND 2");
+		assertSelectThrows("SELECT 1 OR 2");
+		assertSelectThrows("SELECT NOT 2");
+	}
+	
+	public static void testArithmeticOperators() throws Exception {
+		ZMI zmi = new ZMI();
+		zmi.addAttribute("id", new IntegerValue(1));
+		zmi.addAttribute("nullBool", SimpleType.BOOLEAN);
+		zmi.addAttribute("nullInt", SimpleType.INTEGER);
+		zmi.addAttribute("nullFloat", SimpleType.DOUBLE);
+		zmi.addAttribute("nullDur", SimpleType.DURATION);
+		zmi.addAttribute("nullTime", SimpleType.TIME);
+		zmi.addAttribute("nullStr", SimpleType.STRING);
+		
+		// ADD
+		
+		assertSelectReturns("SELECT 1 + 1", new IntegerValue(2));
+		assertSelectThrows("SELECT 1 + false");
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(1 + nullInt)", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(nullInt + 1)", zmi);
+		assertSelectThrows("SELECT count(id) = 1 WHERE is_null(1 + nullBool)", zmi);
+		
+		assertSelectTrue("SELECT count(id) = 1 WHERE 2.0 + 3.5 = 5.5", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(2.0 + nullFloat)", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(nullFloat + 2.0)", zmi);
+		
+		assertSelectTrue("SELECT count(id) = 1 WHERE to_duration(100) + to_duration(200) = to_duration(300)", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(to_duration(100) + nullDur)", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(nullDur + to_duration(100))", zmi);
+		
+		assertSelectTrue("SELECT count(id) = 1 WHERE to_duration(100) + to_time(\"1999/01/01 02:12:34.123 CET\") = to_time(\"1999/01/01 02:12:34.223 CET\")", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(to_duration(100) + nullTime)", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(nullDur + to_time(\"1999/01/01 02:12:34.123 CET\"))", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE to_time(\"1999/01/01 02:12:34.123 CET\") + to_duration(100) = to_time(\"1999/01/01 02:12:34.223 CET\")", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(nullTime + to_duration(100))", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(to_time(\"1999/01/01 02:12:34.123 CET\") + nullDur)", zmi);
+		
+		assertSelectTrue("SELECT \"f\" + \"oo\" = \"foo\"", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(\"f\" + nullStr)", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(nullStr + \"f\")", zmi);
+		
+		assertSelectThrows("SELECT false + true");
+		
+		// SUB
+
+		assertSelectReturns("SELECT 1 - 5", new IntegerValue(-4));
+		assertSelectThrows("SELECT 1 - false");
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(1 - nullInt)", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(nullInt - 1)", zmi);
+		assertSelectThrows("SELECT count(id) = 1 WHERE is_null(1 - nullBool)", zmi);
+		
+		assertSelectTrue("SELECT count(id) = 1 WHERE 2.0 - 3.5 = -1.5", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(2.0 - nullFloat)", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(nullFloat - 2.0)", zmi);
+		
+		assertSelectTrue("SELECT count(id) = 1 WHERE to_duration(100) - to_duration(200) = to_duration(-100)", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(to_duration(100) - nullDur)", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(nullDur - to_duration(100))", zmi);
+		
+		assertSelectThrows("SELECT count(id) = 1 WHERE is_null(to_duration(100) - nullTime)", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE to_time(\"1999/01/01 02:12:34.123 CET\") - to_duration(100) = to_time(\"1999/01/01 02:12:34.023 CET\")", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(nullTime - to_duration(100))", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(to_time(\"1999/01/01 02:12:34.123 CET\") - nullDur)", zmi);
+		
+		assertSelectTrue("SELECT count(id) = 1 WHERE to_time(\"1999/01/01 02:12:34.123 CET\") - to_time(\"1999/01/01 02:12:38.123 CET\") = to_duration(-4000)", zmi);
+		
+		assertSelectTrue("SELECT \"f\" + \"oo\" = \"foo\"", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(\"f\" + nullStr)", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(nullStr + \"f\")", zmi);
+		
+		assertSelectThrows("SELECT false + true");
 	}
 	
 	// Helpers
@@ -281,7 +439,7 @@ public class EvalTest extends TestCase {
 		}
 		catch (EvaluationException ex) {
 			// Uncomment to see error messages
-			// System.out.println(ex.getMessage());
+			System.out.println(ex.getMessage());
 		}
 	}
 	
@@ -299,6 +457,22 @@ public class EvalTest extends TestCase {
 	private static void assertSelectReturns(String source, List<ZMI> zmis, Value expected) throws EvaluationException, ParseException {
 		Value actual = evaluateOneValueSelect(source, zmis);
 		assertEquals(expected, actual);
+	}
+	
+	private static void assertSelectTrue(String source, List<ZMI> zmis) throws EvaluationException, ParseException {
+		assertSelectReturns(source, zmis, new BooleanValue(true));
+	}
+	
+	private static void assertSelectTrue(String source, ZMI zmi) throws EvaluationException, ParseException {
+		assertSelectReturns(source, zmi, new BooleanValue(true));
+	}
+	
+	private static void assertSelectFalse(String source) throws EvaluationException, ParseException {
+		assertSelectReturns(source, new BooleanValue(false));
+	}
+	
+	private static void assertSelectTrue(String source) throws EvaluationException, ParseException {
+		assertSelectReturns(source, new BooleanValue(true));
 	}
 
 	private static Value evaluateOneValueSelect(String source, List<ZMI> zmis) throws EvaluationException, ParseException {
