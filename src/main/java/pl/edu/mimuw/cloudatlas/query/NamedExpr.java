@@ -27,7 +27,7 @@ public class NamedExpr {
 
 			public SelectionResult visit(ColumnResult result)
 					throws EvaluationException {
-				throw new EvaluationException("Cannot return ListResult from SELECT clause");
+				throw new EvaluationException("Cannot return ColumnResult from SELECT clause");
 			}
 		});
 	}

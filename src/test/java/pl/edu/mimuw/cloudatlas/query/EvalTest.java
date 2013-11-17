@@ -240,9 +240,6 @@ public class EvalTest extends TestCase {
 		assertSelectReturns("SELECT random(0, int)", zmis, ListValue.of(SimpleType.INTEGER));
 		assertSelectReturns("SELECT random(-2147483649, int)", zmis, ListValue.of(SimpleType.INTEGER));
 		assertSelectReturns("SELECT size(random(2147483648, int))", zmis, new IntegerValue(2));
-		
-		//TODO Test for string concatenation and mathematical functions
-		
 	}
 	
 	public static void testEqualityAndComparison() throws Exception {
@@ -616,6 +613,71 @@ public class EvalTest extends TestCase {
 		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(ceil(nullFloat))", zmi);
 	}
 	
+	public static void testMisc() throws Exception {
+		ZMI zmi1 = new ZMI();
+		zmi1.addAttribute("id", new IntegerValue(1));
+		zmi1.addAttribute("nullStr", SimpleType.STRING);
+		zmi1.addAttribute("intList", listWith(new IntegerValue(1), new IntegerValue(2)));
+		zmi1.addAttribute("int1", new IntegerValue(5));
+		zmi1.addAttribute("int2", new IntegerValue(7));
+		zmi1.addAttribute("float", new DoubleValue(1.3));
+		
+		ZMI zmi2 = new ZMI();
+		zmi2.addAttribute("id", new IntegerValue(2));
+		zmi2.addAttribute("intList", listWith(new IntegerValue(3), new IntegerValue(4), new IntegerValue(5)));
+		zmi2.addAttribute("int1", new IntegerValue(10));
+		zmi2.addAttribute("int2", new IntegerValue(8));
+		zmi2.addAttribute("float", new DoubleValue(2.5));
+		
+		List<ZMI> zmis = new ArrayList<ZMI>();
+		zmis.add(zmi1); zmis.add(zmi2);
+		
+		// RegexpExpr
+		
+		assertSelectTrue("SELECT \"aaa\" REGEXP \"aaa\"");
+		// FIXME why this one fails??
+		// assertSelectTrue("SELECT \"aaaaa\" REGEXP \"aaa\"");
+		assertSelectTrue("SELECT NOT \"aaa\" REGEXP \"b*\"");
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(nullStr REGEXP \"aa\")", zmi1);
+		
+		// OneResult, ColumnResult, ListResult mixing
+		
+		assertSelectTrue("SELECT sum(int1 - int2) = 0", zmis);
+		assertSelectThrows("SELECT sum(int1 - distinct(int2)) = 0", zmis);
+		assertSelectTrue("SELECT min(int1 - int2) = -2", zmis);
+		assertSelectTrue("SELECT max(int1 - int2) = 2", zmis);
+		assertSelectTrue("SELECT sum(int1 * 2) = 30", zmis);
+		assertSelectTrue("SELECT sum(2 * int1) = 30", zmis);
+		assertSelectThrows("SELECT sum(int1 - unfold(intList))", zmis);
+		assertSelectThrows("SELECT sum(unfold(intList) - int1)", zmis);
+		assertSelectTrue("SELECT sum(unfold(intList) * 2) = 30", zmis);
+		assertSelectTrue("SELECT min(unfold(intList) - 5) = -4", zmis);
+		assertSelectTrue("SELECT min(5 - unfold(intList)) = 0", zmis);
+		
+		assertSelectTrue("SELECT avg(floor(float)) = 1.5", zmis);
+		assertSelectTrue("SELECT avg(round(float)) = 2.0", zmis);
+	}
+	
+	public static void testSelect() throws Exception {
+		ZMI zmi = new ZMI();
+		zmi.addAttribute("id", new IntegerValue(1));
+		List<ZMI> zmis = new ArrayList<ZMI>();
+		
+		assertSelectTrue("SELECT (SELECT true)");
+		assertSelectTrue("SELECT (SELECT true AS xyz)");
+		assertSelectThrows("SELECT (SELECT id AS xyz)", zmi);
+		assertSelectThrows("SELECT (SELECT distinct(id) AS xyz)", zmi);
+		
+		List<SelectionResult> result = evaluateSelect("SELECT 1 AS a, 2, 3 AS b", zmis);
+		assertEquals(3, result.size());
+		assertEquals(result.get(0).getName(), "a");
+		assertEquals(result.get(0).getValue(), new IntegerValue(1));
+		assertEquals(result.get(1).getName(), null);
+		assertEquals(result.get(1).getValue(), new IntegerValue(2));
+		assertEquals(result.get(2).getName(), "b");
+		assertEquals(result.get(2).getValue(), new IntegerValue(3));
+	}
+	
 	// Helpers
 	
 	private static <V extends SimpleValue> ListValue<V> listWith(V... items) {
@@ -691,8 +753,12 @@ public class EvalTest extends TestCase {
 	}
 
 	private static Value evaluateOneValueSelect(String source, List<ZMI> zmis) throws EvaluationException, ParseException {
+		return evaluateSelect(source, zmis).get(0).getValue();
+	}
+	
+	private static List<SelectionResult> evaluateSelect(String source, List<ZMI> zmis) throws EvaluationException, ParseException {
 		SelectStmt select = (SelectStmt) Parsers.parseQuery(source).get(0);
 		Env env = Env.createFromZMIs(zmis);
-		return select.evaluate(env).get(0).getValue();
+		return select.evaluate(env);
 	}
 }
