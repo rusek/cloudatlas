@@ -6,7 +6,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-public class SetValue<V extends SimpleValue> extends CollectionValue {
+public class SetValue<V extends SimpleValue> extends CollectionValue<V> {
 	
 	private final SimpleType<V> itemType;
 	private final Set<V> items = new HashSet<V>();

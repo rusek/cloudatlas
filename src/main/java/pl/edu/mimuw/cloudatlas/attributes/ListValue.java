@@ -7,7 +7,9 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-public class ListValue<V extends SimpleValue> extends CollectionValue {
+import pl.edu.mimuw.cloudatlas.query.Function2;
+
+public class ListValue<V extends SimpleValue> extends CollectionValue<V> {
 	
 	private final SimpleType<V> itemType;
 	private final List<V> items = new ArrayList<V>();

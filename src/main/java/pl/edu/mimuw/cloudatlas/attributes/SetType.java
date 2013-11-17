@@ -4,14 +4,10 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-public class SetType<V extends SimpleValue> extends CollectionType<SetValue<V>> {
-	
-	private final SimpleType<V> itemType;
+public class SetType<V extends SimpleValue> extends CollectionType<V> {
 	
 	private SetType(SimpleType<V> itemType) {
-		assert itemType != null;
-		
-		this.itemType = itemType;
+		super(itemType);
 	}
 
 	public SimpleType<V> getItemType() {
@@ -40,15 +36,6 @@ public class SetType<V extends SimpleValue> extends CollectionType<SetValue<V>> 
 	@Override
 	public void compactWrite(DataOutput output) throws IOException {
 		Types.compactWriteType(itemType, output);
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result
-				+ ((itemType == null) ? 0 : itemType.hashCode());
-		return result;
 	}
 
 	@Override
