@@ -2,8 +2,11 @@ package pl.edu.mimuw.cloudatlas.attributes;
 
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.regex.Pattern;
 
 public class DurationValue extends SimpleValue implements Comparable<DurationValue> {
+	
+	public final static Pattern PATTERN = Pattern.compile("^([+-])(0|[1-9]\\d*) (\\d{2}):(\\d{2}):(\\d{2})\\.(\\d{3})$"); 
 	
 	private long miliseconds;
 	

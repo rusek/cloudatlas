@@ -1,6 +1,7 @@
 package pl.edu.mimuw.cloudatlas.query;
 
 import java.util.Date;
+import java.util.regex.Matcher;
 
 import pl.edu.mimuw.cloudatlas.attributes.BooleanValue;
 import pl.edu.mimuw.cloudatlas.attributes.CollectionValue;
@@ -65,6 +66,9 @@ public enum CallFunc {
 
 							public IntegerValue evaluate(DoubleValue arg)
 									throws EvaluationException {
+								if (arg == null) {
+									return null;
+								}
 								return new IntegerValue(Math.round(arg.getDouble()));
 							}
 							
@@ -80,6 +84,9 @@ public enum CallFunc {
 
 							public IntegerValue evaluate(DurationValue arg)
 									throws EvaluationException {
+								if (arg == null) {
+									return null;
+								}
 								return new IntegerValue(arg.getTotalMiliseconds());
 							}
 							
@@ -95,7 +102,15 @@ public enum CallFunc {
 
 							public IntegerValue evaluate(StringValue arg)
 									throws EvaluationException {
-								return new IntegerValue(Integer.parseInt(arg.getString()));
+								if (arg == null) {
+									return null;
+								}
+								try {
+									return new IntegerValue(Integer.parseInt(arg.getString()));
+								} catch (NumberFormatException ex) {
+									throw new EvaluationException("Cannot convert string to integer: " +
+											arg.getString());
+								}
 							}
 							
 						};
@@ -121,6 +136,9 @@ public enum CallFunc {
 
 					public DoubleValue evaluate(IntegerValue arg)
 							throws EvaluationException {
+						if (arg == null) {
+							return null;
+						}
 						return new DoubleValue(new Double(arg.getInteger()));
 						
 					}
@@ -137,7 +155,14 @@ public enum CallFunc {
 
 					public DoubleValue evaluate(StringValue arg)
 							throws EvaluationException {
-						return new DoubleValue(Double.parseDouble(arg.getString()));
+						if (arg == null) {
+							return null;
+						}
+						try {
+							return new DoubleValue(Double.parseDouble(arg.getString()));
+						} catch (NumberFormatException ex) {
+							throw new EvaluationException("Cannot convert string to double: " + arg.getString());
+						}
 					}
 					
 				};
@@ -164,7 +189,15 @@ public enum CallFunc {
 
 					public BooleanValue evaluate(StringValue arg)
 							throws EvaluationException {
-						return new BooleanValue(Boolean.parseBoolean(arg.getString()));
+						if (arg == null) {
+							return null;
+						} else if (arg.getString().equals("true")) {
+							return new BooleanValue(true);
+						} else if (arg.getString().equals("false")) {
+							return new BooleanValue(false);
+						} else {
+							throw new EvaluationException("Cannot convert string to boolean: " + arg.getString());
+						}
 					}
 					
 				};
@@ -188,6 +221,9 @@ public enum CallFunc {
 
 					public DurationValue evaluate(IntegerValue arg)
 							throws EvaluationException {
+						if (arg == null) {
+							return null;
+						}
 						return new DurationValue(arg.getInteger());
 					}
 				};
@@ -203,22 +239,26 @@ public enum CallFunc {
 
 					public DurationValue evaluate(StringValue arg)
 							throws EvaluationException {
-						String s = arg.getString();
-						int start = 1;
-						int mul = 1;
-						if(s.charAt(0) == '-')
-							mul = -1;
-						else if(s.charAt(0) != '+')
-							start = 0;
-						String[] tmp = s.substring(start).split(" ");
-						int days = Integer.parseInt(tmp[0]);
-						String[] time = tmp[1].split(":");
-						int hours = Integer.parseInt(time[0]);
-						int mins = Integer.parseInt(time[1]);
-						String[] sec = time[2].split(".");
-						int secs = Integer.parseInt(sec[0]);
-						int mils = Integer.parseInt(sec[1]);
-						return new DurationValue(mul * (((((days * 24) + hours) * 60 + mins) * 60 + secs) * 1000 + mils));	
+						if (arg == null) {
+							return null;
+						}
+						Matcher match = DurationValue.PATTERN.matcher(arg.getString());
+						if (!match.matches()) {
+							throw new EvaluationException("Cannot convert string to duration: " + arg.getString());
+						}
+						
+						long sign = match.group(1).equals("+") ? 1 : -1;
+						long days = Integer.parseInt(match.group(2));
+						long hours = Integer.parseInt(match.group(3));
+						long mins = Integer.parseInt(match.group(4));
+						long secs = Integer.parseInt(match.group(5));
+						long mils = Integer.parseInt(match.group(6));
+						
+						if (hours > 23 || mins > 59 || secs > 59) {
+							throw new EvaluationException("Cannot convert string to duration: " + arg.getString());
+						}
+						
+						return new DurationValue(sign * (((((days * 24) + hours) * 60 + mins) * 60 + secs) * 1000 + mils));	
 					}
 					
 				};
@@ -243,12 +283,14 @@ public enum CallFunc {
 
 					public TimeValue evaluate(StringValue arg)
 							throws EvaluationException {
-	
-							try {
-								return new TimeValue(TimeValue.createDateFormat().parse(arg.getString()).getTime());
-							} catch (Exception e) {
-								throw new EvaluationException("String " + arg.getString() + " couldn't be parsed as Time.");
-							}
+						if (arg == null) {
+							return null;
+						}
+						try {
+							return new TimeValue(TimeValue.createDateFormat().parse(arg.getString()).getTime());
+						} catch (Exception e) {
+							throw new EvaluationException("String " + arg.getString() + " couldn't be parsed as Time.");
+						}
 					}
 				};
 			}
@@ -306,13 +348,15 @@ public enum CallFunc {
 					@Override
 					public IntegerValue evaluate(StringValue arg)
 							throws EvaluationException {
+						if (arg == null) {
+							return null;
+						}
 						return new IntegerValue(arg.getString().length());
 					}
 					
 				};
 			}
 			
-			//XXX działa, ale nie jestem 100% pewny, czy to (i ta hierachia z Collection) jest dobrze:)
 			else if(type.isCollection()) {
 				return new Function1<CollectionValue, IntegerValue>() {
 	
@@ -324,6 +368,9 @@ public enum CallFunc {
 					@Override
 					public IntegerValue evaluate(CollectionValue arg)
 							throws EvaluationException {
+						if (arg == null) {
+							return null;
+						}
 						return new IntegerValue(arg.size());
 					}
 					
@@ -349,6 +396,9 @@ public enum CallFunc {
 					@Override
 					public DoubleValue evaluate(DoubleValue arg)
 							throws EvaluationException {
+						if (arg == null) {
+							return null;
+						}
 						return new DoubleValue(Math.round(arg.getDouble()));
 					}
 				};
@@ -373,6 +423,9 @@ public enum CallFunc {
 					@Override
 					public DoubleValue evaluate(DoubleValue arg)
 							throws EvaluationException {
+						if (arg == null) {
+							return null;
+						}
 						return new DoubleValue(Math.floor(arg.getDouble()));
 					}
 				};
@@ -397,6 +450,9 @@ public enum CallFunc {
 					@Override
 					public DoubleValue evaluate(DoubleValue arg)
 							throws EvaluationException {
+						if (arg == null) {
+							return null;
+						}
 						return new DoubleValue(Math.ceil(arg.getDouble()));
 					}
 				};

@@ -1,6 +1,7 @@
 package pl.edu.mimuw.cloudatlas.query;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import pl.edu.mimuw.cloudatlas.attributes.BooleanValue;
@@ -9,10 +10,12 @@ import pl.edu.mimuw.cloudatlas.attributes.DurationValue;
 import pl.edu.mimuw.cloudatlas.attributes.IntegerValue;
 import pl.edu.mimuw.cloudatlas.attributes.ListType;
 import pl.edu.mimuw.cloudatlas.attributes.ListValue;
+import pl.edu.mimuw.cloudatlas.attributes.SetType;
 import pl.edu.mimuw.cloudatlas.attributes.SetValue;
 import pl.edu.mimuw.cloudatlas.attributes.SimpleType;
 import pl.edu.mimuw.cloudatlas.attributes.SimpleValue;
 import pl.edu.mimuw.cloudatlas.attributes.StringValue;
+import pl.edu.mimuw.cloudatlas.attributes.TimeValue;
 import pl.edu.mimuw.cloudatlas.attributes.Value;
 import pl.edu.mimuw.cloudatlas.zones.ZMI;
 import junit.framework.TestCase;
@@ -472,7 +475,145 @@ public class EvalTest extends TestCase {
 		
 		assertSelectReturns("SELECT -(to_duration(6789))", new DurationValue(-6789));
 		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(-nullDur)", zmi);
+	}
+	
+	public static void testFunctions() throws Exception {
+		ZMI zmi = new ZMI();
+		zmi.addAttribute("id", new IntegerValue(1));
+		zmi.addAttribute("intList", listWith(new IntegerValue(1), new IntegerValue(2)));
+		zmi.addAttribute("nullIntList", ListType.of(SimpleType.INTEGER));
+		zmi.addAttribute("intSet", setWith(new IntegerValue(6)));
+		zmi.addAttribute("nullIntSet", SetType.of(SimpleType.INTEGER));
+		zmi.addAttribute("nullInt", SimpleType.INTEGER);
+		zmi.addAttribute("nullFloat", SimpleType.DOUBLE);
+		zmi.addAttribute("nullStr", SimpleType.STRING);
+		zmi.addAttribute("nullDur", SimpleType.DURATION);
+		zmi.addAttribute("curTime", new TimeValue(new Date().getTime()));
 		
+		// to_string
+		
+		assertSelectReturns("SELECT to_string(true)", zmi, new StringValue("true"));
+		assertSelectReturns("SELECT to_string(false)", zmi, new StringValue("false"));
+		assertSelectReturns("SELECT to_string(2.0)", zmi, new StringValue("2.0"));
+		assertSelectReturns("SELECT to_string(15)", zmi, new StringValue("15"));
+		assertSelectReturns("SELECT to_string(to_duration(15))", zmi, new StringValue("+0 00:00:00.015"));
+		assertSelectTrue("SELECT count(id) = 1 WHERE to_string(nullInt) = \"NULL\"", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE to_string(nullInt) <> \"null\"", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE to_string(intList) = \"[ 1, 2 ]\"", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE to_string(intSet) = \"{ 6 }\"", zmi);
+		
+		// is_null
+		
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(nullInt)", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(id) = false", zmi);
+		
+		// to_integer (from double, string, duration)
+		
+		assertSelectTrue("SELECT count(id) = 1 WHERE to_integer(\"123\") = 123", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE to_integer(\"-123\") = -123", zmi);
+		assertSelectThrows("SELECT count(id) = 1 WHERE to_integer(\"abc\") = -123", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(to_integer(nullStr))", zmi);
+		
+		assertSelectTrue("SELECT count(id) = 1 WHERE to_integer(123.1) = 123", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE to_integer(123.5) = 124", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(to_integer(nullFloat))", zmi);
+		
+		assertSelectTrue("SELECT count(id) = 1 WHERE to_integer(to_duration(123)) = 123", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE to_integer(to_duration(-123)) = -123", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(to_integer(nullDur))", zmi);
+		
+		assertSelectThrows("SELECT is_null(to_integer(false))");
+		
+		// to_double (from integer, string)
+		
+		assertSelectTrue("SELECT count(id) = 1 WHERE to_double(\"123.25\") = 123.25", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE to_double(\"-123.25\") = -123.25", zmi);
+		assertSelectThrows("SELECT count(id) = 1 WHERE to_double(\"abc\") = -123.25", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(to_double(nullStr))", zmi);
+		
+		assertSelectTrue("SELECT count(id) = 1 WHERE to_double(123) = 123.0", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE to_double(-123) = -123.0", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(to_double(nullInt))", zmi);
+
+		assertSelectThrows("SELECT is_null(to_double(false))");
+		
+		// to_boolean (from string)
+		
+		assertSelectTrue("SELECT count(id) = 1 WHERE to_boolean(\"true\") = true", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE to_boolean(\"false\") = false", zmi);
+		assertSelectThrows("SELECT count(id) = 1 WHERE to_boolean(\"abc\") = true", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(to_boolean(nullStr))", zmi);
+
+		assertSelectThrows("SELECT is_null(to_boolean(12))");
+		
+		// to_duration (from integer, string)
+		
+		assertSelectReturns("SELECT to_duration(1234)", new DurationValue(1234));
+		assertSelectReturns("SELECT to_duration(-1234)", new DurationValue(-1234));
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(to_duration(nullInt))", zmi);
+		
+		assertSelectReturns("SELECT to_duration(\"+1 23:45:12.345\")", zmi,
+				new DurationValue((((1 * 24 + 23) * 60 + 45) * 60 + 12) * 1000 + 345));
+		assertSelectReturns("SELECT to_duration(\"-1 23:45:12.345\")", zmi,
+				new DurationValue(-((((1 * 24 + 23) * 60 + 45) * 60 + 12) * 1000 + 345)));
+		assertSelectThrows("SELECT to_duration(\"abc\")", zmi);
+		assertSelectThrows("SELECT to_duration(\"+1 23:45:92.345\")", zmi);
+		assertSelectThrows("SELECT to_duration(\"+1 24:45:12.345\")", zmi);
+		assertSelectThrows("SELECT to_duration(\"+1 24:60:12.345\")", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(to_duration(nullStr))", zmi);
+		
+		assertSelectThrows("SELECT is_null(to_duration(false))");
+		
+		// to_time (from string)
+		
+		assertSelectTrue("SELECT count(id) = 1 WHERE to_time(to_string(curTime)) = curTime", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(to_time(nullStr))", zmi);
+		assertSelectThrows("SELECT count(id) = 1 WHERE to_time(\"yesterday\")", zmi);
+		
+		assertSelectThrows("SELECT is_null(to_time(false))");
+		
+		// FIXME to_set, to_list !!!!!!!!!!!!!!!!!!!!!!!!!!!
+		
+		// now
+		
+		assertSelectTrue("SELECT count(id) = 1 WHERE now() - to_duration(100) <= curTime AND curTime <= now()", zmi);
+		
+		// epoch
+		
+		assertSelectTrue("SELECT epoch() = to_time(\"2000/01/01 00:00:00.000 CET\")");
+		
+		// size
+		
+		assertSelectTrue("SELECT count(id) = 1 WHERE size(intList) = 2", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE size(intSet) = 1", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE size(\"two\") = 3", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(size(nullIntSet))", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(size(nullIntList))", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(size(nullStr))", zmi);
+		
+		// round
+		
+		assertSelectTrue("SELECT count(id) = 1 WHERE round(1.0) = 1.0", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE round(1.1) = 1.0", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE round(1.5) = 2.0", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE round(1.7) = 2.0", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(round(nullFloat))", zmi);
+		
+		// floor
+		
+		assertSelectTrue("SELECT count(id) = 1 WHERE floor(1.0) = 1.0", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE floor(1.1) = 1.0", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE floor(1.5) = 1.0", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE floor(1.7) = 1.0", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(floor(nullFloat))", zmi);
+		
+		// ceil
+		
+		assertSelectTrue("SELECT count(id) = 1 WHERE ceil(1.0) = 1.0", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE ceil(1.1) = 2.0", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE ceil(1.5) = 2.0", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE ceil(1.7) = 2.0", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(ceil(nullFloat))", zmi);
 	}
 	
 	// Helpers
