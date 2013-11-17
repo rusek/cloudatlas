@@ -4,7 +4,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-public class SetType<V extends SimpleValue> extends CollectionType<SetValue<V>> {
+public class SetType<V extends SimpleValue> extends CollectionType<V> {
 	
 	private final SimpleType<V> itemType;
 	

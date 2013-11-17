@@ -4,8 +4,10 @@ import java.util.Date;
 import java.util.regex.Matcher;
 
 import pl.edu.mimuw.cloudatlas.attributes.BooleanValue;
+import pl.edu.mimuw.cloudatlas.attributes.CollectionType;
 import pl.edu.mimuw.cloudatlas.attributes.CollectionValue;
 import pl.edu.mimuw.cloudatlas.attributes.SimpleType;
+import pl.edu.mimuw.cloudatlas.attributes.SimpleValue;
 import pl.edu.mimuw.cloudatlas.attributes.StringValue;
 import pl.edu.mimuw.cloudatlas.attributes.IntegerValue;
 import pl.edu.mimuw.cloudatlas.attributes.DoubleValue;
@@ -357,8 +359,8 @@ public enum CallFunc {
 				};
 			}
 			
-			else if(type.isCollection()) {
-				return new Function1<CollectionValue, IntegerValue>() {
+			else if(type instanceof CollectionType) {
+				return new Function1<CollectionValue<? extends SimpleValue>, IntegerValue>() {
 	
 					@Override
 					public Type<IntegerValue> getReturnType() {
@@ -366,7 +368,7 @@ public enum CallFunc {
 					}
 	
 					@Override
-					public IntegerValue evaluate(CollectionValue arg)
+					public IntegerValue evaluate(CollectionValue<? extends SimpleValue> arg)
 							throws EvaluationException {
 						if (arg == null) {
 							return null;
