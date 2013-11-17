@@ -42,4 +42,8 @@ public class Attribute {
 	public void setValue(Value value) {
 		this.value = value;
 	}
+	
+	public String toString() {
+		return name + ": " + value.toString() + " <" + type.toString() + ">";
+	}
 }

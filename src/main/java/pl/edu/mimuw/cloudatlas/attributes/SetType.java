@@ -5,17 +5,9 @@ import java.io.DataOutput;
 import java.io.IOException;
 
 public class SetType<V extends SimpleValue> extends CollectionType<V> {
-	
-	private final SimpleType<V> itemType;
-	
-	private SetType(SimpleType<V> itemType) {
-		assert itemType != null;
-		
-		this.itemType = itemType;
-	}
 
-	public SimpleType<V> getItemType() {
-		return itemType;
+	private SetType(SimpleType<V> itemType) {
+		super(itemType);
 	}
 
 	@Override
