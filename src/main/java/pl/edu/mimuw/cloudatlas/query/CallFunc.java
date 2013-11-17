@@ -6,6 +6,10 @@ import java.util.regex.Matcher;
 import pl.edu.mimuw.cloudatlas.attributes.BooleanValue;
 import pl.edu.mimuw.cloudatlas.attributes.CollectionType;
 import pl.edu.mimuw.cloudatlas.attributes.CollectionValue;
+import pl.edu.mimuw.cloudatlas.attributes.ListType;
+import pl.edu.mimuw.cloudatlas.attributes.ListValue;
+import pl.edu.mimuw.cloudatlas.attributes.SetType;
+import pl.edu.mimuw.cloudatlas.attributes.SetValue;
 import pl.edu.mimuw.cloudatlas.attributes.SimpleType;
 import pl.edu.mimuw.cloudatlas.attributes.SimpleValue;
 import pl.edu.mimuw.cloudatlas.attributes.StringValue;
@@ -302,6 +306,32 @@ public enum CallFunc {
 		}
 	},
 	
+	to_list {
+		public Function1<? extends Value, ? extends Value> getFuncByArgType(
+				Type<? extends Value> type) {
+			if (type instanceof SetType) {
+				@SuppressWarnings("unchecked")
+				SetType<? extends SimpleValue> setType = (SetType<? extends SimpleValue>) type;
+				return SetToList.withItemType(setType.getItemType());
+			} else {
+				return null;
+			}
+		}
+	},
+	
+	to_set {
+		public Function1<? extends Value, ? extends Value> getFuncByArgType(
+				Type<? extends Value> type) {
+			if (type instanceof ListType) {
+				@SuppressWarnings("unchecked")
+				ListType<? extends SimpleValue> listType = (ListType<? extends SimpleValue>) type;
+				return ListToSet.withItemType(listType.getItemType());
+			} else {
+				return null;
+			}
+		}
+	},
+	
 	now {
 		public Function0<? extends Value> getNoArgFunc() {
 			return new Function0<TimeValue>() {
@@ -486,4 +516,70 @@ public enum CallFunc {
 			return null;
 		}
 	}
+	
+	private static class ListToSet<V extends SimpleValue> implements Function1<ListValue<V>, SetValue<V>> {
+		
+		private final SimpleType<V> itemType;
+		
+		public ListToSet(SimpleType<V> itemType) {
+			assert itemType != null;
+			
+			this.itemType = itemType;
+		}
+		
+		public static <V extends SimpleValue> ListToSet<V> withItemType(SimpleType<V> itemType) {
+			return new ListToSet<V>(itemType);
+		}
+
+		@Override
+		public Type<SetValue<V>> getReturnType() {
+			return SetType.of(itemType);
+		}
+
+		@Override
+		public SetValue<V> evaluate(ListValue<V> arg)
+				throws EvaluationException {
+			if (arg == null) {
+				return null;
+			} else {
+				SetValue<V> result = SetValue.of(itemType);
+				result.getItems().addAll(arg.getItems());
+				return result;
+			}
+		}
+		
+	};
+	
+	private static class SetToList<V extends SimpleValue> implements Function1<SetValue<V>, ListValue<V>> {
+		
+		private final SimpleType<V> itemType;
+		
+		public SetToList(SimpleType<V> itemType) {
+			assert itemType != null;
+			
+			this.itemType = itemType;
+		}
+		
+		public static <V extends SimpleValue> SetToList<V> withItemType(SimpleType<V> itemType) {
+			return new SetToList<V>(itemType);
+		}
+
+		@Override
+		public Type<ListValue<V>> getReturnType() {
+			return ListType.of(itemType);
+		}
+
+		@Override
+		public ListValue<V> evaluate(SetValue<V> arg)
+				throws EvaluationException {
+			if (arg == null) {
+				return null;
+			} else {
+				ListValue<V> result = ListValue.of(itemType);
+				result.getItems().addAll(arg.getItems());
+				return result;
+			}
+		}
+		
+	};
 }

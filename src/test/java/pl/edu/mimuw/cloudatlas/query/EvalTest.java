@@ -635,9 +635,8 @@ public class EvalTest extends TestCase {
 		// RegexpExpr
 		
 		assertSelectTrue("SELECT \"aaa\" REGEXP \"aaa\"");
-		// FIXME why this one fails??
-		// assertSelectTrue("SELECT \"aaaaa\" REGEXP \"aaa\"");
-		assertSelectTrue("SELECT NOT \"aaa\" REGEXP \"b*\"");
+		assertSelectTrue("SELECT \"aaaaa\" REGEXP \"aaa\"");
+		assertSelectTrue("SELECT NOT \"aaa\" REGEXP \"b+\"");
 		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(nullStr REGEXP \"aa\")", zmi1);
 		
 		// OneResult, ColumnResult, ListResult mixing

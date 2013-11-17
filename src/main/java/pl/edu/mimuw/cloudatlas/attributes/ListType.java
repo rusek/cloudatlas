@@ -5,7 +5,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 
 
-public class ListType<V extends SimpleValue> extends CollectionType<V> {
+public class ListType<V extends SimpleValue> extends CollectionType<V, ListValue<V>> {
 	
 	private ListType(SimpleType<V> itemType) {
 		super(itemType);

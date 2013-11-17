@@ -1,10 +1,8 @@
 package pl.edu.mimuw.cloudatlas.query;
 
 import pl.edu.mimuw.cloudatlas.attributes.BooleanValue;
-import pl.edu.mimuw.cloudatlas.attributes.CollectionValue;
 import pl.edu.mimuw.cloudatlas.attributes.DoubleValue;
 import pl.edu.mimuw.cloudatlas.attributes.DurationValue;
-import pl.edu.mimuw.cloudatlas.attributes.ListType;
 import pl.edu.mimuw.cloudatlas.attributes.TimeValue;
 import pl.edu.mimuw.cloudatlas.attributes.IntegerValue;
 import pl.edu.mimuw.cloudatlas.attributes.StringValue;
@@ -13,7 +11,7 @@ import pl.edu.mimuw.cloudatlas.attributes.Type;
 import pl.edu.mimuw.cloudatlas.attributes.Value;
 
 public enum BinOp {
-	// I + I = I; D + D = D; Dur + Dur = Dur; T + Dur = T; Dur + T = T; S + S = S; List + List = List; Set + Set = Set
+	// I + I = I; D + D = D; Dur + Dur = Dur; T + Dur = T; Dur + T = T; S + S = S
 	ADD {
 		public Function2<? extends Value, ? extends Value, ? extends Value> getFuncForTypes(
 				Type<? extends Value> type1, Type<? extends Value> type2) {

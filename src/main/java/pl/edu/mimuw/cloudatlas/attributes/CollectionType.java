@@ -1,6 +1,6 @@
 package pl.edu.mimuw.cloudatlas.attributes;
 
-public abstract class CollectionType<V extends SimpleValue> extends Type<CollectionValue<V>> {
+public abstract class CollectionType<V extends SimpleValue, C extends CollectionValue<V>> extends Type<C> {
 	
 	protected final SimpleType<V> itemType;
 	

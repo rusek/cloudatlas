@@ -40,7 +40,7 @@ public class RegexpExpr extends Expr {
 				if (arg == null) {
 					return null;
 				} else {
-					return new BooleanValue(pattern.matcher(arg.getString()).matches());
+					return new BooleanValue(pattern.matcher(arg.getString()).find());
 				}
 			}
 		};
