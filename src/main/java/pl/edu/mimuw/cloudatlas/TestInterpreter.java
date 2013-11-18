@@ -133,7 +133,12 @@ public class TestInterpreter {
 	static void evaluateQuery(Zone zone, String querySource) throws TestException {
 		try {
 			List<Stmt> stmts = Parsers.parseQuery(querySource);
-			Env env = Env.createFromZMIs(zone.getChildZMIs());
+			Env env;
+			try {
+				env = Env.createFromZMIs(zone.getChildZMIs());
+			} catch (IllegalArgumentException ex) {
+				throw new TestException("Cannot create env for query evaluation. " + ex.getMessage());
+			}
 			
 			for (Stmt stmt : stmts) {
 				if (stmt instanceof SelectStmt) {

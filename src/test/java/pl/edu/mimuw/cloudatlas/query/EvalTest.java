@@ -395,6 +395,8 @@ public class EvalTest extends TestCase {
 		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(to_time(\"1999/01/01 02:12:34.123 CET\") - nullDur)", zmi);
 		
 		assertSelectTrue("SELECT count(id) = 1 WHERE to_time(\"1999/01/01 02:12:34.123 CET\") - to_time(\"1999/01/01 02:12:38.123 CET\") = to_duration(-4000)", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(to_time(\"1999/01/01 02:12:34.123 CET\") - nullTime)", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(nullTime - to_time(\"1999/01/01 02:12:34.123 CET\"))", zmi);
 		
 		assertSelectThrows("SELECT false - true");
 		
@@ -678,6 +680,14 @@ public class EvalTest extends TestCase {
 		
 		assertSelectTrue("SELECT avg(floor(float)) = 1.5", zmis);
 		assertSelectTrue("SELECT avg(round(float)) = 2.0", zmis);
+		
+		assertSelectThrows("SELECT not_found");
+		assertSelectThrows("SELECT min(1, 2, 3)");
+		assertSelectThrows("SELECT float(1, 2, 3)");
+		assertSelectThrows("SELECT not_found(1)");
+		assertSelectThrows("SELECT 1 <> false");
+		assertSelectThrows("SELECT 1 WHERE 1", zmi1);
+		assertSelectThrows("SELECT (SELECT 1, 2)", zmi1);
 	}
 	
 	public static void testSelect() throws Exception {
@@ -738,7 +748,7 @@ public class EvalTest extends TestCase {
 		}
 		catch (EvaluationException ex) {
 			// Uncomment to see error messages
-			System.out.println(ex.getMessage());
+			// System.out.println(ex.getMessage());
 		}
 	}
 	
