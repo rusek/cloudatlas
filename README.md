@@ -18,3 +18,7 @@ Buduje projekt, uruchamia testy i generuje archiwa .jar w katalogu target/.
     java -jar target/cloudatlas-1.0-SNAPSHOT-jar-with-dependencies.jar
     
 Uruchamia interpreter zapytań.
+
+    mvn cobertura:cobertura
+    
+Generuje raport z pokryciem kodu przez testy (dostępny w target/site/cobertura/).
