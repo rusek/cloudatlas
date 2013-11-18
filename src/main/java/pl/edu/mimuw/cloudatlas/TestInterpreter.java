@@ -158,7 +158,11 @@ public class TestInterpreter {
 		} catch (pl.edu.mimuw.cloudatlas.query.ParseException e) {
 			throw new TestException(e);
 		} catch (EvaluationException e) {
-			throw new TestException("Failed to execute query in zone " + zone.getGlobalName() + ": " + querySource, e);
+			System.out.println("Failed to execute query in zone " + zone.getGlobalName() + ": " + querySource);
+			System.out.println("    " + e.getMessage());
+			
+			// Uncomment to print stack trace (obviously...)
+			// e.printStackTrace();
 		}
 	}
 	
