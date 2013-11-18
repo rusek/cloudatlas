@@ -53,10 +53,10 @@ public class TestInterpreter {
 			new String[] {"students.mimuw.edu.pl"}, "2011/11/09 20:12:13.123", null, 3, false, new String[] {"agatka", "beatka", "celina"}, "-13 11:00:00.000");
 		builder.addZone(uwZone, 2, "khaki13", "/uw/khaki13", "2012/11/09 21:03:00.000", new String[] {"duch.mimuw.edu.pl", "wazniak.mimuw.edu.pl"}, 1,
 				new String[] {"wazniak.mimuw.edu.pl"}, null, 0.1, null, true, null, null);
-		Zone tmp = builder.addZone(pjwstkZone, 2, "whatever01", "pjwstk/whatever01", "2012/11/09 21:12:00.000", new String[] {"pjwstk.edu.pl"}, 1,
+		Zone tmp = builder.addZone(pjwstkZone, 2, "whatever01", "/pjwstk/whatever01", "2012/11/09 21:12:00.000", new String[] {"pjwstk.edu.pl"}, 1,
 				new String[] {"pjwstk.edu.pl"}, "2012/10/18 07:03:00.000", 0.1, 7);
 		builder.addList(tmp.getZMI(), "php_modules", new String[] {"rewrite"});
-		tmp = builder.addZone(pjwstkZone, 2, "whatever02", "pjwstk/whatever02", "2012/11/09 21:13:00.000", new String[] {"gdansk.pjwstk.edu.pl"}, 1,
+		tmp = builder.addZone(pjwstkZone, 2, "whatever02", "/pjwstk/whatever02", "2012/11/09 21:13:00.000", new String[] {"gdansk.pjwstk.edu.pl"}, 1,
 				new String[] {"gdansk.pjwstk.edu.pl"}, "2012/10/18 07:04:00.000", 0.4, 13);
 		builder.addList(tmp.getZMI(), "php_modules", new String[] {"odbc"});
 	}
@@ -235,7 +235,7 @@ public class TestInterpreter {
 			zmi.addAttribute("level", SimpleType.INTEGER, level != null ? new IntegerValue(level) : null);
 			zmi.addAttribute("name", SimpleType.STRING, name != null ? new StringValue(name) : null);
 			zmi.addAttribute("owner", SimpleType.STRING, owner != null ? new StringValue(owner) : null);
-			addTime(zmi, "time", time);
+			addTime(zmi, "timestamp", time);
 			addContacts(zmi, "contacts", contacts);
 			zmi.addAttribute("cardinality", SimpleType.INTEGER, cardinality != null ? new IntegerValue(cardinality) : null);
 			

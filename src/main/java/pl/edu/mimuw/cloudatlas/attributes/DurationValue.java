@@ -52,7 +52,7 @@ public class DurationValue extends SimpleValue implements Comparable<DurationVal
 		seconds -= minutes * 60;
 		
 		long hours = minutes / 60;
-		seconds -= hours * 60;
+		minutes -= hours * 60;
 		
 		long days = hours / 24;
 		hours -= days * 24;
