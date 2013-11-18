@@ -664,6 +664,7 @@ public class EvalTest extends TestCase {
 		// OneResult, ColumnResult, ListResult mixing
 		
 		assertSelectTrue("SELECT sum(int1 - int2) = 0", zmis);
+		assertSelectTrue("SELECT sum(to_double(int1) - to_double(int2)) = 0.0", zmis);
 		assertSelectThrows("SELECT sum(int1 - distinct(int2)) = 0", zmis);
 		assertSelectTrue("SELECT min(int1 - int2) = -2", zmis);
 		assertSelectTrue("SELECT max(int1 - int2) = 2", zmis);

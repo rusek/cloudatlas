@@ -1,7 +1,6 @@
 package pl.edu.mimuw.cloudatlas.query;
 
 import java.util.Date;
-import java.util.regex.Matcher;
 
 import pl.edu.mimuw.cloudatlas.attributes.BooleanValue;
 import pl.edu.mimuw.cloudatlas.attributes.CollectionType;
@@ -19,6 +18,7 @@ import pl.edu.mimuw.cloudatlas.attributes.DurationValue;
 import pl.edu.mimuw.cloudatlas.attributes.TimeValue;
 import pl.edu.mimuw.cloudatlas.attributes.Type;
 import pl.edu.mimuw.cloudatlas.attributes.Value;
+import pl.edu.mimuw.cloudatlas.attributes.ValueFormatException;
 
 public enum CallFunc {
 	to_string {
@@ -248,23 +248,12 @@ public enum CallFunc {
 						if (arg == null) {
 							return null;
 						}
-						Matcher match = DurationValue.PATTERN.matcher(arg.getString());
-						if (!match.matches()) {
+						try {
+							return DurationValue.parseDuration(arg.getString());
+						} catch (ValueFormatException e) {
 							throw new EvaluationException("Cannot convert string to duration: " + arg.getString());
 						}
 						
-						long sign = match.group(1).equals("+") ? 1 : -1;
-						long days = Integer.parseInt(match.group(2));
-						long hours = Integer.parseInt(match.group(3));
-						long mins = Integer.parseInt(match.group(4));
-						long secs = Integer.parseInt(match.group(5));
-						long mils = Integer.parseInt(match.group(6));
-						
-						if (hours > 23 || mins > 59 || secs > 59) {
-							throw new EvaluationException("Cannot convert string to duration: " + arg.getString());
-						}
-						
-						return new DurationValue(sign * (((((days * 24) + hours) * 60 + mins) * 60 + secs) * 1000 + mils));	
 					}
 					
 				};

@@ -96,7 +96,7 @@ public class Functions {
 			}
 
 			public Result visit(ColumnResult result) throws EvaluationException {
-				return ListResult.createFromFunc(funcCasted, result.getValues());
+				return ColumnResult.createFromFunc(funcCasted, result.getValues());
 			}
 		});
 	}

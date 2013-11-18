@@ -27,6 +27,7 @@ import pl.edu.mimuw.cloudatlas.attributes.StringValue;
 import pl.edu.mimuw.cloudatlas.attributes.TimeValue;
 import pl.edu.mimuw.cloudatlas.attributes.Type;
 import pl.edu.mimuw.cloudatlas.attributes.Value;
+import pl.edu.mimuw.cloudatlas.attributes.ValueFormatException;
 import pl.edu.mimuw.cloudatlas.query.Env;
 import pl.edu.mimuw.cloudatlas.query.EvaluationException;
 import pl.edu.mimuw.cloudatlas.query.Parsers;
@@ -152,7 +153,7 @@ public class TestInterpreter {
 		} catch (pl.edu.mimuw.cloudatlas.query.ParseException e) {
 			throw new TestException(e);
 		} catch (EvaluationException e) {
-			throw new TestException(e);
+			throw new TestException("Failed to execute query in zone " + zone.getGlobalName() + ": " + querySource, e);
 		}
 	}
 	
@@ -259,26 +260,16 @@ public class TestInterpreter {
 			
 		}
 		
-		public void addDuration(ZMI zmi, String name, String time) {
-			if(time == null) {
+		public void addDuration(ZMI zmi, String name, String dur) throws TestException {
+			if(dur == null) {
 				zmi.addAttribute(name, SimpleType.DURATION, null);
 			}
 			else {
-				int start = 1;
-				int mul = 1;
-				if(time.charAt(0) == '-')
-					mul = -1;
-				else if(time.charAt(0) != '+')
-					start = 0;
-				String[] tmp = time.substring(start).split(" ");
-				int days = Integer.parseInt(tmp[0]);
-				String[] timeS = tmp[1].split(":");
-				int hours = Integer.parseInt(timeS[0]);
-				int mins = Integer.parseInt(timeS[1]);
-				String[] sec = timeS[2].split("\\.");
-				int secs = Integer.parseInt(sec[0]);
-				int mils = Integer.parseInt(sec[1]);
-				zmi.addAttribute(name, new DurationValue(mul * (((((days * 24) + hours) * 60 + mins) * 60 + secs) * 1000 + mils)));
+				try {
+					zmi.addAttribute(name, DurationValue.parseDuration(dur));
+				} catch (ValueFormatException e) {
+					throw new TestException(e);
+				}
 			}
 		}
 		

@@ -2,6 +2,7 @@ package pl.edu.mimuw.cloudatlas.attributes;
 
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class DurationValue extends SimpleValue implements Comparable<DurationValue> {
@@ -82,4 +83,24 @@ public class DurationValue extends SimpleValue implements Comparable<DurationVal
 		return Long.compare(miliseconds, o.miliseconds);
 	}
 
+	
+	public static DurationValue parseDuration(String text) throws ValueFormatException {
+		Matcher match = DurationValue.PATTERN.matcher(text);
+		if (!match.matches()) {
+			throw new ValueFormatException("Invalid duration string: " + text);
+		}
+		
+		long sign = match.group(1).equals("+") ? 1 : -1;
+		long days = Integer.parseInt(match.group(2));
+		long hours = Integer.parseInt(match.group(3));
+		long mins = Integer.parseInt(match.group(4));
+		long secs = Integer.parseInt(match.group(5));
+		long mils = Integer.parseInt(match.group(6));
+		
+		if (hours > 23 || mins > 59 || secs > 59) {
+			throw new ValueFormatException("Invalid duration string: " + text);
+		}
+		
+		return new DurationValue(sign * (((((days * 24) + hours) * 60 + mins) * 60 + secs) * 1000 + mils));	
+	}
 }
