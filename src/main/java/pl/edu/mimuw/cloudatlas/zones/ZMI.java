@@ -1,7 +1,7 @@
 package pl.edu.mimuw.cloudatlas.zones;
 
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import pl.edu.mimuw.cloudatlas.attributes.Type;
@@ -9,7 +9,7 @@ import pl.edu.mimuw.cloudatlas.attributes.Value;
 
 public class ZMI {
 	
-	private final Map<String, Attribute> attributes = new HashMap<String, Attribute>();
+	private final Map<String, Attribute> attributes = new LinkedHashMap<String, Attribute>();
 	
 	public Collection<Attribute> getAttributes() {
 		return attributes.values();

@@ -212,11 +212,10 @@ public class SelectStmt extends Stmt {
 		
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public int compare(RowEntry arg0, RowEntry arg1) {
-			Iterator<Comparable> it0 = arg0.orderValues.iterator();
-			Iterator<Comparable> it1 = arg1.orderValues.iterator();
-			for (OrderExpr orderExpr : ordering) {
-				Comparable obj0 = it0.next();
-				Comparable obj1 = it1.next();
+			for (int i = ordering.size() - 1; i >= 0; i--) {
+				OrderExpr orderExpr = ordering.get(i);
+				Comparable obj0 = arg0.orderValues.get(i);
+				Comparable obj1 = arg1.orderValues.get(i);
 				if (obj0 == null) {
 					if (obj1 != null) {
 						return orderExpr.getNullOrd().areNullsFirst(orderExpr.getOrd()) ? -1 : 1;

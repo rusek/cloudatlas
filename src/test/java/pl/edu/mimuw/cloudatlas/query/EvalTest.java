@@ -74,13 +74,13 @@ public class EvalTest extends TestCase {
 		assertSelectReturns("SELECT first(10, id) ORDER BY str DESC NULLS LAST", zmis,
 				listWith(new IntegerValue(4), new IntegerValue(1), new IntegerValue(3), new IntegerValue(2)));
 		
-		assertSelectReturns("SELECT first(10, id) ORDER BY w1 ASC, id ASC", zmis,
+		assertSelectReturns("SELECT first(10, id) ORDER BY id ASC, w1 ASC", zmis,
 				listWith(new IntegerValue(1), new IntegerValue(4), new IntegerValue(2), new IntegerValue(3)));
-		assertSelectReturns("SELECT first(10, id) ORDER BY w1 ASC, id DESC", zmis,
+		assertSelectReturns("SELECT first(10, id) ORDER BY id DESC, w1 ASC", zmis,
 				listWith(new IntegerValue(4), new IntegerValue(1), new IntegerValue(3), new IntegerValue(2)));
-		assertSelectReturns("SELECT first(10, id) ORDER BY w1 DESC, id ASC", zmis,
+		assertSelectReturns("SELECT first(10, id) ORDER BY id ASC, w1 DESC", zmis,
 				listWith(new IntegerValue(2), new IntegerValue(3), new IntegerValue(1), new IntegerValue(4)));
-		assertSelectReturns("SELECT first(10, id) ORDER BY w1 DESC, id DESC", zmis,
+		assertSelectReturns("SELECT first(10, id) ORDER BY id DESC, w1 DESC", zmis,
 				listWith(new IntegerValue(3), new IntegerValue(2), new IntegerValue(4), new IntegerValue(1)));
 		
 	}
