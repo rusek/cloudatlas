@@ -10,6 +10,7 @@ public class OneResult extends Result {
 
 	public <V extends Value> OneResult(Type<? extends V> type, V value) {
 		assert type != null;
+		assert value == null || value.getType().equals(type);
 		
 		this.type = type;
 		this.value = value;

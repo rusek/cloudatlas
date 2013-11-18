@@ -155,29 +155,45 @@ public enum CallModifier {
 				}
 				
 				private Result evaluate(Type<? extends Value> type, List<Value> values) throws EvaluationException {
-					double sum = 0.0;
-					int count = 0;
-					
 					if (type.equals(SimpleType.INTEGER)) {
+						double sum = 0.0;
+						int count = 0;
+						
 						for (Value value : values) {
 							if (value != null) {
 								sum += ((IntegerValue) value).getInteger();
 								count++;
 							}
 						}
+
+						return new OneResult(SimpleType.DOUBLE, count == 0 ? null : new DoubleValue(sum / count));
 					} else if (type.equals(SimpleType.DOUBLE)) {
+						double sum = 0.0;
+						int count = 0;
+						
 						for (Value value : values) {
 							if (value != null) {
 								sum += ((DoubleValue) value).getDouble();
 								count++;
 							}
 						}
+
+						return new OneResult(SimpleType.DOUBLE, count == 0 ? null : new DoubleValue(sum / count));
+					} else if (type.equals(SimpleType.DURATION)) {
+						long sum = 0;
+						long count = 0;
+						
+						for (Value value : values) {
+							if (value != null) {
+								sum += ((DurationValue) value).getTotalMiliseconds();
+								count++;
+							}
+						}
+
+						return new OneResult(SimpleType.DURATION, count == 0 ? null : new DurationValue(sum / count));
 					} else {
-						// TODO duration?
 						throw new EvaluationException("Function avg cannot be applied to argument of type " + type);
 					}
-					
-					return new OneResult(type, count == 0 ? null : new DoubleValue(sum / count));
 				}
 				
 			});

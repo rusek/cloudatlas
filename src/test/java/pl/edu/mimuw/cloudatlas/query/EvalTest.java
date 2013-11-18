@@ -140,6 +140,8 @@ public class EvalTest extends TestCase {
 		assertSelectThrows("SELECT avg(intList)", zmis);
 		assertSelectReturns("SELECT avg(float)", zmis, new DoubleValue(5.5 / 2.0));
 		assertSelectReturns("SELECT avg(float) WHERE float > 666.0", zmis, null);
+		assertSelectReturns("SELECT avg(dur)", zmis, new DurationValue(300));
+		assertSelectReturns("SELECT avg(dur) WHERE false", zmis, null);
 		
 		assertSelectThrows("SELECT sum(0)", zmis);
 		assertSelectReturns("SELECT sum(int)", zmis, new IntegerValue(6));
@@ -478,8 +480,10 @@ public class EvalTest extends TestCase {
 		ZMI zmi = new ZMI();
 		zmi.addAttribute("id", new IntegerValue(1));
 		zmi.addAttribute("intList", listWith(new IntegerValue(1), new IntegerValue(2)));
+		zmi.addAttribute("intListAsSet", setWith(new IntegerValue(1), new IntegerValue(2)));
 		zmi.addAttribute("nullIntList", ListType.of(SimpleType.INTEGER));
 		zmi.addAttribute("intSet", setWith(new IntegerValue(6)));
+		zmi.addAttribute("intSetAsList", listWith(new IntegerValue(6)));
 		zmi.addAttribute("nullIntSet", SetType.of(SimpleType.INTEGER));
 		zmi.addAttribute("nullInt", SimpleType.INTEGER);
 		zmi.addAttribute("nullFloat", SimpleType.DOUBLE);
@@ -569,7 +573,25 @@ public class EvalTest extends TestCase {
 		
 		assertSelectThrows("SELECT is_null(to_time(false))");
 		
-		// FIXME to_set, to_list !!!!!!!!!!!!!!!!!!!!!!!!!!!
+		// to_set
+		
+		{
+			ZMI zmi2 = new ZMI();
+			zmi2.addAttribute("id", new IntegerValue(1));
+			zmi2.addAttribute("intList", listWith(new IntegerValue(1), new IntegerValue(2), new IntegerValue(1),
+					new IntegerValue(3)));
+			zmi2.addAttribute("intListAsSet", setWith(new IntegerValue(1), new IntegerValue(2), new IntegerValue(3)));
+			
+			assertSelectTrue("SELECT count(id) = 1 WHERE to_set(intList) = intListAsSet", zmi2);
+			assertSelectTrue("SELECT count(id) = 1 WHERE is_null(to_set(nullIntList))", zmi);
+			assertSelectThrows("SELECT count(id) = 1 WHERE is_null(to_set(12))", zmi);
+		}
+		
+		// to_list
+		
+		assertSelectTrue("SELECT count(id) = 1 WHERE to_list(intSet) = intSetAsList", zmi);
+		assertSelectTrue("SELECT count(id) = 1 WHERE is_null(to_list(nullIntSet))", zmi);
+		assertSelectThrows("SELECT count(id) = 1 WHERE is_null(to_list(12))", zmi);
 		
 		// now
 		
