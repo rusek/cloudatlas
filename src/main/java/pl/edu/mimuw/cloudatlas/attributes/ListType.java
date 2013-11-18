@@ -64,6 +64,6 @@ public class ListType<V extends SimpleValue> extends CollectionType<V, ListValue
 	
 	@Override
 	public String toString() {
-		return "ListType[" + itemType + "]";
+		return "list of " + itemType;
 	}
 }

@@ -31,7 +31,7 @@ public abstract class SimpleType<V extends SimpleValue> extends Type<V> {
 		
 		@Override
 		public String toString() {
-			return "BooleanType";
+			return "boolean";
 		}
 
 		@Override
@@ -50,7 +50,7 @@ public abstract class SimpleType<V extends SimpleValue> extends Type<V> {
 		
 		@Override
 		public String toString() {
-			return "IntegerType";
+			return "integer";
 		}
 
 		@Override
@@ -69,7 +69,7 @@ public abstract class SimpleType<V extends SimpleValue> extends Type<V> {
 		
 		@Override
 		public String toString() {
-			return "DoubleType";
+			return "double";
 		}
 
 		@Override
@@ -88,7 +88,7 @@ public abstract class SimpleType<V extends SimpleValue> extends Type<V> {
 		
 		@Override
 		public String toString() {
-			return "StringType";
+			return "string";
 		}
 
 		@Override
@@ -113,7 +113,7 @@ public abstract class SimpleType<V extends SimpleValue> extends Type<V> {
 		
 		@Override
 		public String toString() {
-			return "ContactType";
+			return "contact";
 		}
 		
 	};
@@ -127,7 +127,7 @@ public abstract class SimpleType<V extends SimpleValue> extends Type<V> {
 		
 		@Override
 		public String toString() {
-			return "TimeType";
+			return "time";
 		}
 
 		@Override
@@ -146,7 +146,7 @@ public abstract class SimpleType<V extends SimpleValue> extends Type<V> {
 		
 		@Override
 		public String toString() {
-			return "DurationType";
+			return "duration";
 		}
 
 		@Override

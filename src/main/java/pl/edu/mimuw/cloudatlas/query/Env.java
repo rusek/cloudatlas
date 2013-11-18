@@ -1,6 +1,7 @@
 package pl.edu.mimuw.cloudatlas.query;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
@@ -26,7 +27,7 @@ public abstract class Env {
 	
 	public abstract void storeResult(Object idObject, Result result);
 	
-	public static Env createFromZMIs(List<ZMI> infos) {
+	public static Env createFromZMIs(Collection<ZMI> infos) {
 		return new RootEnv(infos);
 	}
 	
@@ -122,12 +123,12 @@ public abstract class Env {
 		
 		private final IdentityHashMap<Object, Result> storedResults = new IdentityHashMap<Object, Result>();
 		
-		private RootEnv(List<ZMI> infos) {
+		private RootEnv(Collection<ZMI> infos) {
 			fillColumnIndicesAndTypes(infos);
 			fillRows(infos);
 		}
 		
-		private void fillColumnIndicesAndTypes(List<ZMI> infos) {
+		private void fillColumnIndicesAndTypes(Collection<ZMI> infos) {
 			for (ZMI info : infos) {
 				for (Attribute attribute : info.getAttributes()) {
 					Integer currentIndex = columnIndices.get(attribute.getName());
@@ -142,7 +143,7 @@ public abstract class Env {
 			}
 		}
 		
-		private void fillRows(List<ZMI> infos) {
+		private void fillRows(Collection<ZMI> infos) {
 			for (ZMI info : infos) {
 				List<Value> rowValues = new ArrayList<Value>(Collections.<Value>nCopies(columnTypes.size(), null));
 				for (Attribute attribute : info.getAttributes()) {

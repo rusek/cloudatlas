@@ -63,6 +63,6 @@ public class SetType<V extends SimpleValue> extends CollectionType<V, SetValue<V
 
 	@Override
 	public String toString() {
-		return "SetType[" + itemType + "]";
+		return "set of " + itemType;
 	}
 }
