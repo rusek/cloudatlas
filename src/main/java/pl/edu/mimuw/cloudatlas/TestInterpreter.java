@@ -6,6 +6,7 @@ import java.net.UnknownHostException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,17 +48,17 @@ public class TestInterpreter {
 		rootZone = builder.addZone(null, 0, null, "/uw/violet07", "2012/11/09 20:10:17.342 CET", null, 0);
 		Zone uwZone = builder.addZone(rootZone, 1, "uw", "/uw/violet07", "2012/11/09 20:8:13.123 CET", null, 0);
 		Zone pjwstkZone = builder.addZone(rootZone, 1, "pjwstk", "/pjwstk/whatever01", "2012/11/09 20:8:13.123 CET", null, 0);
-		builder.addZone(uwZone, 2, "violet07", "/uw/violet07", "2012/11/09 18:00:00.000", new String[] {"uw.edu.pl", "biol.uw.edu.pl", "mimuw.edu.pl"}, 1,
-			new String[] {"uw.edu.pl"}, "2011/11/09 20:8:13.123", 0.9, 3, null, new String[] {"tola", "tosia"}, "+13 12:00:00.000");
-		builder.addZone(uwZone, 2, "khaki31", "/uw/khaki31", "2012/11/09 20:03:00.000", new String[] {"students.mimuw.edu.pl"}, 1,
-			new String[] {"students.mimuw.edu.pl"}, "2011/11/09 20:12:13.123", null, 3, false, new String[] {"agatka", "beatka", "celina"}, "-13 11:00:00.000");
-		builder.addZone(uwZone, 2, "khaki13", "/uw/khaki13", "2012/11/09 21:03:00.000", new String[] {"duch.mimuw.edu.pl", "wazniak.mimuw.edu.pl"}, 1,
-				new String[] {"wazniak.mimuw.edu.pl"}, null, 0.1, null, true, null, null);
-		Zone tmp = builder.addZone(pjwstkZone, 2, "whatever01", "/pjwstk/whatever01", "2012/11/09 21:12:00.000", new String[] {"pjwstk.edu.pl"}, 1,
-				new String[] {"pjwstk.edu.pl"}, "2012/10/18 07:03:00.000", 0.1, 7);
+		builder.addZone(uwZone, 2, "violet07", "/uw/violet07", "2012/11/09 18:00:00.000", new String[] {"UW1A", "UW1B", "UW1C"}, 1,
+			new String[] {"UW1"}, "2011/11/09 20:8:13.123", 0.9, 3, null, new String[] {"tola", "tosia"}, "+13 12:00:00.000");
+		builder.addZone(uwZone, 2, "khaki31", "/uw/khaki31", "2012/11/09 20:03:00.000", new String[] {"UW2A"}, 1,
+			new String[] {"UW2A"}, "2011/11/09 20:12:13.123", null, 3, false, new String[] {"agatka", "beatka", "celina"}, "-13 11:00:00.000");
+		builder.addZone(uwZone, 2, "khaki13", "/uw/khaki13", "2012/11/09 21:03:00.000", new String[] {"UW3A", "UW3B"}, 1,
+				new String[] {"UW3B"}, null, 0.1, null, true, null, null);
+		Zone tmp = builder.addZone(pjwstkZone, 2, "whatever01", "/pjwstk/whatever01", "2012/11/09 21:12:00.000", new String[] {"PJ1"}, 1,
+				new String[] {"PJ1"}, "2012/10/18 07:03:00.000", 0.1, 7);
 		builder.addList(tmp.getZMI(), "php_modules", new String[] {"rewrite"});
-		tmp = builder.addZone(pjwstkZone, 2, "whatever02", "/pjwstk/whatever02", "2012/11/09 21:13:00.000", new String[] {"gdansk.pjwstk.edu.pl"}, 1,
-				new String[] {"gdansk.pjwstk.edu.pl"}, "2012/10/18 07:04:00.000", 0.4, 13);
+		tmp = builder.addZone(pjwstkZone, 2, "whatever02", "/pjwstk/whatever02", "2012/11/09 21:13:00.000", new String[] {"PJ2"}, 1,
+				new String[] {"PJ2"}, "2012/10/18 07:04:00.000", 0.4, 13);
 		builder.addList(tmp.getZMI(), "php_modules", new String[] {"odbc"});
 	}
 	
@@ -230,6 +231,22 @@ public class TestInterpreter {
 
 
 	private static class ZoneBuilder {
+		private Map<String, ContactValue> contactValues = new HashMap<String, ContactValue>();
+		private byte nextIPLastByte = 1;
+		
+		private ContactValue getContact(String name) throws TestException {
+			ContactValue result = contactValues.get(name);
+			if (result == null) {
+				try {
+					result = new ContactValue(InetAddress.getByAddress(name, new byte[]{10, 0, 0, nextIPLastByte++}));
+				} catch (UnknownHostException e) {
+					throw new TestException(e);
+				}
+				contactValues.put(name, result);
+			}
+			return result;
+		}
+		
 		public Zone addZone(Zone parent, Integer level, String name, String owner, String time, String[] contacts, Integer cardinality) throws TestException {
 			ZMI zmi = new ZMI();
 			zmi.addAttribute("level", SimpleType.INTEGER, level != null ? new IntegerValue(level) : null);
@@ -308,11 +325,7 @@ public class TestInterpreter {
 			SetValue<ContactValue> contactValues = SetValue.of(SimpleType.CONTACT);
 			if(list != null) {
 				for(String s : list) {
-					try {
-						contactValues.addItem(new ContactValue(InetAddress.getByName(s)));
-					} catch (UnknownHostException e) {
-						throw new TestException(e);
-					}
+					contactValues.addItem(getContact(s));
 				}
 			}
 			zmi.addAttribute(name, contactValues);
