@@ -8,6 +8,8 @@ import java.util.Iterator;
 import java.util.List;
 
 public class ListValue<V extends SimpleValue> extends CollectionValue<V> {
+
+	private static final long serialVersionUID = 1L;
 	
 	private final SimpleType<V> itemType;
 	private final List<V> items = new ArrayList<V>();
@@ -102,5 +104,15 @@ public class ListValue<V extends SimpleValue> extends CollectionValue<V> {
 
 	public static <V extends SimpleValue> ListValue<V> of(SimpleType<V> itemType) {
 		return new ListValue<V>(itemType);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public ListValue<V> deepCopy() {
+		ListValue<V> copy = new ListValue<V>(itemType);
+		for (V item : items) {
+			copy.addItem((V) item.deepCopy());
+		}
+		return copy;
 	}
 }

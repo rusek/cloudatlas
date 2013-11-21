@@ -6,6 +6,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class DurationValue extends SimpleValue implements Comparable<DurationValue> {
+
+	private static final long serialVersionUID = 1L;
 	
 	public final static Pattern PATTERN = Pattern.compile("^([+-])(0|[1-9]\\d*) (\\d{2}):(\\d{2}):(\\d{2})\\.(\\d{3})$"); 
 	

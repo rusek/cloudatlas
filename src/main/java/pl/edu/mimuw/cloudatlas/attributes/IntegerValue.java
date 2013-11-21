@@ -4,6 +4,8 @@ import java.io.DataOutput;
 import java.io.IOException;
 
 public class IntegerValue extends SimpleValue implements Comparable<IntegerValue> {
+
+	private static final long serialVersionUID = 1L;
 	
 	private long wrapped;
 	

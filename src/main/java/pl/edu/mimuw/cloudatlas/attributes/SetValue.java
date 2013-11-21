@@ -7,6 +7,8 @@ import java.util.Iterator;
 import java.util.Set;
 
 public class SetValue<V extends SimpleValue> extends CollectionValue<V> {
+
+	private static final long serialVersionUID = 1L;
 	
 	private final SimpleType<V> itemType;
 	private final Set<V> items = new HashSet<V>();
@@ -89,6 +91,15 @@ public class SetValue<V extends SimpleValue> extends CollectionValue<V> {
 		return builder.toString();
 	}
 
+	@SuppressWarnings("unchecked")
+	@Override
+	public SetValue<V> deepCopy() {
+		SetValue<V> copy = new SetValue<V>(itemType);
+		for (V item : items) {
+			copy.addItem((V) item.deepCopy());
+		}
+		return copy;
+	}
 
 	public static <V extends SimpleValue> SetValue<V> of(SimpleType<V> itemType) {
 		return new SetValue<V>(itemType);

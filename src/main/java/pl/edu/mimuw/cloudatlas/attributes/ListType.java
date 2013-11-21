@@ -6,6 +6,8 @@ import java.io.IOException;
 
 
 public class ListType<V extends SimpleValue> extends CollectionType<V, ListValue<V>> {
+
+	private static final long serialVersionUID = 1L;
 	
 	private ListType(SimpleType<V> itemType) {
 		super(itemType);

@@ -46,4 +46,9 @@ public class Attribute {
 	public String toString() {
 		return name + ": " + value.toString() + " <" + type.toString() + ">";
 	}
+	
+	@SuppressWarnings("unchecked")
+	public Attribute deepCopy() {
+		return new Attribute(name, (Type<Value>) type, value);
+	}
 }

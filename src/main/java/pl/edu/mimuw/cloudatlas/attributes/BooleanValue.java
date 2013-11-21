@@ -5,6 +5,8 @@ import java.io.IOException;
 
 public class BooleanValue extends SimpleValue implements Comparable<BooleanValue> {
 
+	private static final long serialVersionUID = 1L;
+	
 	private boolean wrapped;
 	
 	public BooleanValue(boolean wrapped) {

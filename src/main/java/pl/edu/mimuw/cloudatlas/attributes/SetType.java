@@ -6,6 +6,8 @@ import java.io.IOException;
 
 public class SetType<V extends SimpleValue> extends CollectionType<V, SetValue<V>> {
 
+	private static final long serialVersionUID = 1L;
+
 	private SetType(SimpleType<V> itemType) {
 		super(itemType);
 	}

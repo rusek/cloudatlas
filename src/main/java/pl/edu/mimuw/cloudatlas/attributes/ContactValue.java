@@ -6,6 +6,8 @@ import java.net.InetAddress;
 
 public class ContactValue extends SimpleValue {
 
+	private static final long serialVersionUID = 1L;
+
 	private InetAddress wrapped;
 	
 	public ContactValue(InetAddress wrapped) {

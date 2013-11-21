@@ -8,6 +8,8 @@ import java.util.Date;
 import java.util.TimeZone;
 
 public class TimeValue extends SimpleValue implements Comparable<TimeValue> {
+
+	private static final long serialVersionUID = 1L;
 	
 	private long timestamp;
 	
@@ -70,5 +72,9 @@ public class TimeValue extends SimpleValue implements Comparable<TimeValue> {
 		DateFormat format = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS");
 		format.setTimeZone(TimeZone.getTimeZone("CET"));
 		return format;
+	}
+	
+	public static TimeValue now() {
+		return new TimeValue(new Date().getTime());
 	}
 }

@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.net.InetAddress;
 
 public abstract class SimpleType<V extends SimpleValue> extends Type<V> {
+
+	private static final long serialVersionUID = 1L;
 	
 	@Override
 	public boolean equals(Object obj) {
@@ -23,6 +25,8 @@ public abstract class SimpleType<V extends SimpleValue> extends Type<V> {
 	}
 
 	public static final SimpleType<BooleanValue> BOOLEAN = new SimpleType<BooleanValue>() {
+
+		private static final long serialVersionUID = 1L;
 
 		@Override
 		public BooleanValue compactReadValue(DataInput input) throws IOException {
@@ -43,6 +47,8 @@ public abstract class SimpleType<V extends SimpleValue> extends Type<V> {
 	
 	public static final SimpleType<IntegerValue> INTEGER = new SimpleType<IntegerValue>() {
 
+		private static final long serialVersionUID = 1L;
+
 		@Override
 		public IntegerValue compactReadValue(DataInput input) throws IOException {
 			return new IntegerValue(input.readLong());
@@ -61,6 +67,8 @@ public abstract class SimpleType<V extends SimpleValue> extends Type<V> {
 	};
 	
 	public static final SimpleType<DoubleValue> DOUBLE = new SimpleType<DoubleValue>() {
+
+		private static final long serialVersionUID = 1L;
 
 		@Override
 		public DoubleValue compactReadValue(DataInput input) throws IOException {
@@ -81,6 +89,8 @@ public abstract class SimpleType<V extends SimpleValue> extends Type<V> {
 	
 	public static final SimpleType<StringValue> STRING = new SimpleType<StringValue>() {
 
+		private static final long serialVersionUID = 1L;
+
 		@Override
 		public StringValue compactReadValue(DataInput input) throws IOException {
 			return new StringValue(input.readUTF());
@@ -99,6 +109,8 @@ public abstract class SimpleType<V extends SimpleValue> extends Type<V> {
 	};
 	
 	public static final SimpleType<ContactValue> CONTACT = new SimpleType<ContactValue>() {
+
+		private static final long serialVersionUID = 1L;
 
 		@Override
 		public ContactValue compactReadValue(DataInput input) throws IOException {
@@ -120,6 +132,8 @@ public abstract class SimpleType<V extends SimpleValue> extends Type<V> {
 	
 	public static final SimpleType<TimeValue> TIME = new SimpleType<TimeValue>() {
 
+		private static final long serialVersionUID = 1L;
+
 		@Override
 		public TimeValue compactReadValue(DataInput input) throws IOException {
 			return new TimeValue(input.readLong());
@@ -138,6 +152,8 @@ public abstract class SimpleType<V extends SimpleValue> extends Type<V> {
 	};
 	
 	public static final SimpleType<DurationValue> DURATION = new SimpleType<DurationValue>() {
+
+		private static final long serialVersionUID = 1L;
 
 		@Override
 		public DurationValue compactReadValue(DataInput input) throws IOException {

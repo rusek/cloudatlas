@@ -19,6 +19,10 @@ public class ZMI {
 		return attributes.containsKey(name);
 	}
 	
+	public Attribute getAttribute(String name) {
+		return attributes.get(name);
+	}
+	
 	public void removeAttribute(String name) {
 		attributes.remove(name);
 	}
