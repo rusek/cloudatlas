@@ -36,15 +36,14 @@ public class StateIsland extends PluggableIsland implements StateProviderIsland 
 				Zone requestedZone = rootZone.findZone(zoneName);
 				if (requestedZone == null) {
 					receiverEndpoint.zoneNotFound(requestId);
+				} else {
+					Attribute attribute = requestedZone.getZMI().getAttribute(attributeName);
+					if (attribute == null) {
+						receiverEndpoint.attributeNotFound(requestId);
+					} else {	
+						receiverEndpoint.zoneAttributeFetched(requestId, attribute);
+					}
 				}
-				
-				Attribute attribute = requestedZone.getZMI().getAttribute(attributeName);
-				if (attribute == null) {
-					receiverEndpoint.attributeNotFound(requestId);
-				}
-
-				receiverEndpoint.zoneAttributeFetched(requestId, attribute);
-				
 			}
 
 			@Override
@@ -61,9 +60,9 @@ public class StateIsland extends PluggableIsland implements StateProviderIsland 
 				Zone requestedZone = rootZone.findZone(zoneName);
 				if (requestedZone == null) {
 					receiverEndpoint.zoneNotFound(requestId);
+				} else {
+					receiverEndpoint.zoneAttributeNamesFetched(requestId, requestedZone.getZMI().getAttributeNames());
 				}
-				
-				receiverEndpoint.zoneAttributeNamesFetched(requestId, requestedZone.getZMI().getAttributeNames());
 			}
 
 			@Override

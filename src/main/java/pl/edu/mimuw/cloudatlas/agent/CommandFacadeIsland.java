@@ -11,6 +11,7 @@ import java.util.concurrent.Semaphore;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import pl.edu.mimuw.cloudatlas.attributes.Type;
 import pl.edu.mimuw.cloudatlas.attributes.Value;
 import pl.edu.mimuw.cloudatlas.cli.CommandFacade;
 import pl.edu.mimuw.cloudatlas.islands.ChildEndpoint;
@@ -141,7 +142,7 @@ public class CommandFacadeIsland extends PluggableIsland implements ChildIsland,
 			if (zoneName == null) {
 				throw new RemoteException("Zone name is null");
 			}
-			if (ZoneNames.isGlobalName(zoneName)) {
+			if (!ZoneNames.isGlobalName(zoneName)) {
 				throw new RemoteException("Invalid zone name: " + zoneName);
 			}
 			if (attrName == null) {
@@ -193,6 +194,33 @@ public class CommandFacadeIsland extends PluggableIsland implements ChildIsland,
 			stateProviderEndpoint.fetchMyZoneName(handler);
 			
 			return handler.get();
+		}
+
+		@Override
+		public void setMyAttribute(String attributeName,
+				Type<? extends Value> attributeType, Value attributeValue) throws RemoteException {
+			log.info("Received command setMyAttribute(%s, %s, %s)", attributeName, attributeType, attributeValue);
+			
+			if (attributeName == null) {
+				throw new RemoteException("Attribute name is null");
+			}
+			if (attributeType == null) {
+				throw new RemoteException("Attribute type is null");
+			}
+			if (attributeValue != null && !attributeValue.getType().equals(attributeType)) {
+				throw new RemoteException("Attribute value has invalid type");
+			}
+			
+			RequestHandler<Void> handler = new RequestHandler<Void>() {
+				
+				@Override
+				public void myZoneAttributeUpdated(Void requestId) {
+					setResult(null);
+				}
+			};
+			stateProviderEndpoint.updateMyZoneAttribute(handler, attributeName, attributeType, attributeValue);
+			
+			handler.get();
 		}
 		
 	}
