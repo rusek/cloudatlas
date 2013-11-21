@@ -6,7 +6,7 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class MotherIsland extends FatIsland {
+public class MotherIsland extends ManualIsland {
 	
 	private static Logger log = LogManager.getLogger();
 	
@@ -35,34 +35,36 @@ public class MotherIsland extends FatIsland {
 	private void wakeUpChildren() {
 		assert state == State.VIRGIN;
 		
-		log.info("Waking up islands");
-		state = State.RUNNING;
+		log.info("Igniting system.");
+		
+		state = State.IGNITED;
 		numAwakenChildren = childEndpoints.size();
 		for (ChildEndpoint childEndpoint : childEndpoints) {
 			childEndpoint.wakeUp();
 		}
 	}
 	
-	private void tryInitiateStop() {
-		assert state.compareTo(State.RUNNING) >= 0;
+	private void tryInitiateExtinguishing() {
+		assert state.compareTo(State.IGNITED) >= 0;
 		
-		if (state.equals(State.RUNNING)) {
-			log.info("Initiating stop");
+		if (state.equals(State.IGNITED)) {
+			log.info("Entering extinguishing state.");
 			
-			state = State.STOPPING;
+			state = State.EXTINGUISHING;
 			for (ChildEndpoint childEndpoint : childEndpoints) {
 				childEndpoint.goToBed();
 			}
-			tryCompleteStop();
+			tryCompleteExtinguishing();
 		}
 	}
 	
-	private void tryCompleteStop() {
-		assert state.equals(State.STOPPING);
+	private void tryCompleteExtinguishing() {
+		assert state.equals(State.EXTINGUISHING);
 		
 		if (numAwakenChildren == 0) {
-			log.info("Stopped");
-			Thread.currentThread().interrupt(); // TODO destroy self
+			log.info("System extinguished.");
+			
+			Thread.currentThread().interrupt();
 		}
 	}
 	
@@ -73,17 +75,17 @@ public class MotherIsland extends FatIsland {
 
 			@Override
 			public void stop() {
-				tryInitiateStop();
+				tryInitiateExtinguishing();
 			}
 
 			@Override
 			public void wentToBed() {
 				numAwakenChildren--;
-				tryCompleteStop();
+				tryCompleteExtinguishing();
 			}};
 	}
 	
 	private static enum State {
-		VIRGIN, RUNNING, STOPPING, STOPPED;
+		VIRGIN, IGNITED, EXTINGUISHING, EXTINGUISHED;
 	}
 }

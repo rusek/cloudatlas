@@ -16,6 +16,12 @@ public class Client {
 					Value v = stub.getAttributeValue(args[2], args[3]);
 					System.out.println("Value of " + args[3] + " at " + args[2] + " is " + v.toString());
 					break;
+					
+				case "getMyGlobalName":
+					String name = stub.getMyGlobalName();
+					System.out.println("My global name is " + name);
+					break;
+					
 				case "shutdown":
 					stub.shutdown();
 					break;

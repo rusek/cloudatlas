@@ -10,6 +10,8 @@ public interface CommandFacade extends Remote {
 	
 	public Value getAttributeValue(String zoneName, String attrName) throws RemoteException;
 	
+	public String getMyGlobalName() throws RemoteException;
+	
 	public void shutdown() throws RemoteException;
 }
 

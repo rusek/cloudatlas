@@ -1,5 +1,11 @@
 package pl.edu.mimuw.cloudatlas.agent;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import pl.edu.mimuw.cloudatlas.attributes.Type;
+import pl.edu.mimuw.cloudatlas.attributes.Value;
 import pl.edu.mimuw.cloudatlas.islands.Tube;
 import pl.edu.mimuw.cloudatlas.zones.Attribute;
 
@@ -16,27 +22,90 @@ public class StateTube<RId> extends Tube<StateReceiverEndpoint<RId>, StateProvid
 	}
 
 	@Override
-	public void getZoneAttribute(final RId requestId, final String globalName,
+	public void fetchZoneAttribute(final RId requestId, final String globalName,
 			final String attributeName) {
+		assert globalName != null;
+		assert attributeName != null;
+		
 		getRightCarousel().enqueue(new Runnable() {
 
 			@Override
 			public void run() {
-				getRightEndpoint().getZoneAttribute(requestId, globalName, attributeName);
+				getRightEndpoint().fetchZoneAttribute(requestId, globalName, attributeName);
+			}
+			
+		});
+	}
+	
+	@Override
+	public void updateMyZoneAttribute(final RId requestId, final String attributeName,
+			final Type<? extends Value> attributeType, Value attributeValue) {
+		assert attributeName != null;
+		assert attributeType != null;
+		
+		final Value valueCopy = attributeValue == null ? null : attributeValue.deepCopy();
+		
+		getRightCarousel().enqueue(new Runnable() {
+
+			@Override
+			public void run() {
+				getRightEndpoint().updateMyZoneAttribute(requestId, attributeName, attributeType, valueCopy);
+			}
+			
+		});
+		
+	}
+
+	@Override
+	public void fetchZoneAttributeNames(final RId requestId, final String zoneName) {
+		assert zoneName != null;
+		
+		getRightCarousel().enqueue(new Runnable() {
+
+			@Override
+			public void run() {
+				getRightEndpoint().fetchZoneAttributeNames(requestId, zoneName);
 			}
 			
 		});
 	}
 
 	@Override
-	public void zoneAttributeReceived(final RId requestId, Attribute attribute) {
-		final Attribute copiedAttribute = attribute == null ? null : attribute.deepCopy();
+	public void fetchZoneNames(final RId requestId) {
+		getRightCarousel().enqueue(new Runnable() {
+
+			@Override
+			public void run() {
+				getRightEndpoint().fetchMyZoneName(requestId);
+			}
+			
+		});
+		
+	}
+
+	@Override
+	public void fetchMyZoneName(final RId requestId) {
+		getRightCarousel().enqueue(new Runnable() {
+
+			@Override
+			public void run() {
+				getRightEndpoint().fetchMyZoneName(requestId);
+			}
+			
+		});
+	}
+
+	@Override
+	public void zoneAttributeFetched(final RId requestId, Attribute attribute) {
+		assert attribute != null;
+		
+		final Attribute copiedAttribute = attribute.deepCopy();
 		
 		getLeftCarousel().enqueue(new Runnable() {
 
 			@Override
 			public void run() {
-				getLeftEndpoint().zoneAttributeReceived(requestId, copiedAttribute);
+				getLeftEndpoint().zoneAttributeFetched(requestId, copiedAttribute);
 			}
 			
 		});
@@ -54,5 +123,78 @@ public class StateTube<RId> extends Tube<StateReceiverEndpoint<RId>, StateProvid
 			
 		});
 		
+	}
+
+	@Override
+	public void myZoneAttributeUpdated(final RId requestId) {
+		getLeftCarousel().enqueue(new Runnable() {
+
+			@Override
+			public void run() {
+				getLeftEndpoint().myZoneAttributeUpdated(requestId);
+			}
+			
+		});
+	}
+
+	@Override
+	public void zoneNamesFetched(final RId requestId, Collection<String> zoneNames) {
+		assert zoneNames != null;
+		
+		final List<String> zoneNamesCopy = new ArrayList<String>();
+		zoneNamesCopy.addAll(zoneNames);
+		
+		getLeftCarousel().enqueue(new Runnable() {
+
+			@Override
+			public void run() {
+				getLeftEndpoint().zoneNamesFetched(requestId, zoneNamesCopy);
+			}
+			
+		});
+	}
+
+	@Override
+	public void zoneAttributeNamesFetched(final RId requestId,
+			Collection<String> attributeNames) {
+		assert attributeNames != null;
+		
+		final List<String> attributeNamesCopy = new ArrayList<String>();
+		attributeNamesCopy.addAll(attributeNames);
+		
+		getLeftCarousel().enqueue(new Runnable() {
+
+			@Override
+			public void run() {
+				getLeftEndpoint().zoneAttributeNamesFetched(requestId, attributeNamesCopy);
+			}
+			
+		});
+	}
+
+	@Override
+	public void myZoneNameFetched(final RId requestId, final String zoneName) {
+		assert zoneName != null;
+		
+		getLeftCarousel().enqueue(new Runnable() {
+
+			@Override
+			public void run() {
+				getLeftEndpoint().myZoneNameFetched(requestId, zoneName);
+			}
+			
+		});
+	}
+
+	@Override
+	public void attributeNotFound(final RId requestId) {
+		getLeftCarousel().enqueue(new Runnable() {
+
+			@Override
+			public void run() {
+				getLeftEndpoint().attributeNotFound(requestId);
+			}
+			
+		});
 	}
 }

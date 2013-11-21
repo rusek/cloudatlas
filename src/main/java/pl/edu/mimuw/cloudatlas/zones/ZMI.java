@@ -11,6 +11,10 @@ public class ZMI {
 	
 	private final Map<String, Attribute> attributes = new LinkedHashMap<String, Attribute>();
 	
+	public Collection<String> getAttributeNames() {
+		return attributes.keySet();
+	}
+	
 	public Collection<Attribute> getAttributes() {
 		return attributes.values();
 	}
@@ -27,7 +31,7 @@ public class ZMI {
 		attributes.remove(name);
 	}
 	
-	public <V extends Value> void addAttribute(String name, Type<V> type, V value) {
+	public void addAttribute(String name, Type<? extends Value> type, Value value) {
 		assert !attributes.containsKey(name);
 		
 		setAttribute(name, type, value);
@@ -38,9 +42,7 @@ public class ZMI {
 	}
 	
 	public void addAttribute(String name, Value value) {
-		assert !attributes.containsKey(name); 
-		
-		setAttribute(name, value);
+		addAttribute(name, value.getType(), value);
 	}
 	
 	public void setAttribute(String name, Value value) {
@@ -51,7 +53,7 @@ public class ZMI {
 		setAttribute(name, type, null);
 	}
 	
-	public <V extends Value> void setAttribute(String name, Type<V> type, V value) {
+	public void setAttribute(String name, Type<? extends Value> type, Value value) {
 		attributes.put(name, new Attribute(name, type, value));
 	}
 	

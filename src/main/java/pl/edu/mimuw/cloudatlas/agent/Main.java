@@ -6,9 +6,6 @@ import org.apache.logging.log4j.Logger;
 import pl.edu.mimuw.cloudatlas.islands.MotherIsland;
 import pl.edu.mimuw.cloudatlas.islands.MotherTube;
 import pl.edu.mimuw.cloudatlas.islands.PluggableIslandExecutor;
-import pl.edu.mimuw.cloudatlas.islands.TimerIsland;
-import pl.edu.mimuw.cloudatlas.islands.TimerIslandImpl;
-import pl.edu.mimuw.cloudatlas.islands.TimerTube;
 
 
 public class Main {
@@ -28,13 +25,10 @@ public class Main {
 		MotherTube.entangle(commandFacadeIsland, motherIsland);
 		StateTube.entangle(commandFacadeIsland, stateIsland);
 		
-		try {
-			motherIsland.runForever();
-		} catch (InterruptedException e) {
-			log.info("interrupted");
-		}
+		motherIsland.spinCarouselUntilInterrupted();
 		
 		islandExecutor.destroy();
-		log.info("closed!");
+
+		log.info("Exiting main()");
 	}
 }

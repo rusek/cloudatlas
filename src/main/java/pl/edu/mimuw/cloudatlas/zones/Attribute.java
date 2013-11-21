@@ -9,7 +9,7 @@ public class Attribute {
 	private final Type<? extends Value> type;
 	private Value value;
 	
-	public <V extends Value> Attribute(String name, Type<V> type, V value) {
+	public Attribute(String name, Type<? extends Value> type, Value value) {
 		assert name != null;
 		assert type != null;
 		
@@ -47,8 +47,7 @@ public class Attribute {
 		return name + ": " + value.toString() + " <" + type.toString() + ">";
 	}
 	
-	@SuppressWarnings("unchecked")
 	public Attribute deepCopy() {
-		return new Attribute(name, (Type<Value>) type, value);
+		return new Attribute(name, type, value);
 	}
 }
