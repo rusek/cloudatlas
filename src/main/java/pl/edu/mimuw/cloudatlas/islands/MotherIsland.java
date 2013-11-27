@@ -6,6 +6,8 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+// Mommy manages all the islands - she initiates system ignition and coordinates extinguishing. 
+// You should never mess with mommy.
 public class MotherIsland extends ManualIsland {
 	
 	private static Logger log = LogManager.getLogger();

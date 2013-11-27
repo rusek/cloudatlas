@@ -9,20 +9,22 @@ import pl.edu.mimuw.cloudatlas.attributes.Value;
 import pl.edu.mimuw.cloudatlas.islands.PluggableIsland;
 import pl.edu.mimuw.cloudatlas.zones.Attribute;
 import pl.edu.mimuw.cloudatlas.zones.Zone;
+import pl.edu.mimuw.cloudatlas.zones.ZoneNames;
 
 public class StateIsland extends PluggableIsland implements StateProviderIsland {
 	
 	private Zone rootZone;
 	private Zone myZone;
 	
-	public StateIsland() {
-		String myName = "/uw/violet07";
+	public StateIsland(String zoneName) {
+		rootZone = Zone.createRootWithOwner(zoneName);
 		
-		rootZone = Zone.createRootWithOwner(myName);
+		Zone zone = rootZone;
+		for (String localName : ZoneNames.splitGlobalName(zoneName)) {
+			zone = zone.addChildWithOwner(localName, zoneName);
+		}
 		
-		Zone uwZone = rootZone.addChildWithOwner("uw", myName);
-		
-		myZone = uwZone.addChildWithOwner("violet07", myName);
+		myZone = zone;
 		myZone.getZMI().setAttribute("cardinality", new IntegerValue(1));
 	}
 

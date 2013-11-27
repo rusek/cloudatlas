@@ -23,8 +23,14 @@ public class Client {
 	private CommandFacade commandFacade;
 	private boolean shouldQuit = false;
 	private boolean shellMode = false;
+	private String registryHost;
 	
 	public Client(String registryHost) throws RemoteException, NotBoundException {
+		this.registryHost = registryHost;
+		connect();
+	}
+	
+	private void connect() throws RemoteException, NotBoundException {
 		Registry registry = LocateRegistry.getRegistry(registryHost);
 		commandFacade = (CommandFacade) registry.lookup(CommandFacade.BIND_NAME);
 	}
@@ -47,6 +53,8 @@ public class Client {
 	public void printShellHelp() {
 		out.println("Available commands:");
 		printCommonCommands();
+		out.println("  - reconnect");
+		out.println("  - Reestablishes connection to the agent");
 		out.println("  - quit");
 		out.println("    Exits shell.");
 	}
@@ -59,7 +67,7 @@ public class Client {
 	}
 	
 	private Completer createCompleter() {
-		return new StringsCompleter("getAttributeValue", "getMyGlobalName", "extinguish");
+		return new StringsCompleter("getAttributeValue", "getMyGlobalName", "extinguish", "reconnect");
 	}
 	
 	public void processCommonCommand(String name, List<String> args) throws RemoteException {
@@ -105,8 +113,12 @@ public class Client {
 		}
 	}
 	
-	public void processShellCommand(String name, List<String> args) throws RemoteException {
+	public void processShellCommand(String name, List<String> args) throws Exception {
 		switch (name) {
+		case "reconnect":
+			connect();
+			break;
+			
 		case "quit":
 			if (args.size() != 0) {
 				throw new IllegalArgumentException("quit command takes no arguments");

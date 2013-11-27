@@ -18,6 +18,10 @@ public class ZoneNames {
 		return LOCAL_NAME_PATTERN.matcher(localName) != null;
 	}
 	
+	public static String[] splitGlobalName(String globalName) {
+		return globalName.substring(1).split("/");
+	}
+	
 	public static String getLocalName(String globalName) {
 		int pos = globalName.lastIndexOf('/');
 		if (pos == globalName.length() - 1) {
