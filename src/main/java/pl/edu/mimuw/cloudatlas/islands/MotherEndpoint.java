@@ -2,7 +2,7 @@ package pl.edu.mimuw.cloudatlas.islands;
 
 public interface MotherEndpoint {
 
-	public void stop();
+	public void initiateExtinguishing();
 
-	public void wentToBed();
+	public void childExtinguished();
 }

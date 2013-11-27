@@ -40,7 +40,7 @@ public class CommandFacadeIsland extends PluggableIsland implements ChildIsland,
 		return new ChildEndpoint() {
 
 			@Override
-			public void wakeUp() {
+			public void ignite() {
 				try {
 					log.info("Registering command facade in RMI.");
 					
@@ -60,7 +60,7 @@ public class CommandFacadeIsland extends PluggableIsland implements ChildIsland,
 			}
 
 			@Override
-			public void goToBed() {
+			public void extinguish() {
 				try {
 					log.info("Unregistering command facade.");
 					
@@ -74,7 +74,7 @@ public class CommandFacadeIsland extends PluggableIsland implements ChildIsland,
 					throw new RuntimeException(e);
 				}
 				
-				motherEndpoint.wentToBed();
+				motherEndpoint.childExtinguished();
 			}
 			
 		};
@@ -173,10 +173,10 @@ public class CommandFacadeIsland extends PluggableIsland implements ChildIsland,
 		}
 
 		@Override
-		public void shutdown() {
-			log.info("Received command shutdown()");
+		public void extinguish() {
+			log.info("Received command extinguish()");
 			
-			motherEndpoint.stop();
+			motherEndpoint.initiateExtinguishing();
 		}
 
 		@Override

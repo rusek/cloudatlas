@@ -15,6 +15,6 @@ public interface CommandFacade extends Remote {
 	
 	public String getMyGlobalName() throws RemoteException;
 	
-	public void shutdown() throws RemoteException;
+	public void extinguish() throws RemoteException;
 }
 

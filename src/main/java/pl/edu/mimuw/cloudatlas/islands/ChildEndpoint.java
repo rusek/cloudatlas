@@ -2,7 +2,7 @@ package pl.edu.mimuw.cloudatlas.islands;
 
 public interface ChildEndpoint {
 
-	public void wakeUp();
+	public void ignite();
 	
-	public void goToBed();
+	public void extinguish();
 }

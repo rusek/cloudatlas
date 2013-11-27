@@ -2,6 +2,7 @@ package pl.edu.mimuw.cloudatlas.islands;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
+// TODO probably should be deleted, doesn't work with DatagramSocket.receive in idle()
 public abstract class IdleIsland implements Island {
 	
 	private final LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<Runnable>();
@@ -39,6 +40,10 @@ public abstract class IdleIsland implements Island {
 		}
 		
 	};
+	
+	public IdleIsland() {
+		thread.start();
+	}
 	
 	protected void idle() throws InterruptedException {
 		queue.take().run();

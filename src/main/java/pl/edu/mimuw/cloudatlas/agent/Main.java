@@ -46,12 +46,17 @@ public class Main {
 		CommandFacadeIsland commandFacadeIsland = new CommandFacadeIsland();
 		islandExecutor.addIsland(commandFacadeIsland);
 		
+		DatagramSocketIsland socketIsland = new DatagramSocketIsland(properties);
+		islandExecutor.addIsland(socketIsland);
+		
 		MotherTube.entangle(commandFacadeIsland, motherIsland);
+		MotherTube.entangle(socketIsland, motherIsland);
 		StateTube.entangle(commandFacadeIsland, stateIsland);
 		
 		motherIsland.spinCarouselUntilInterrupted();
 		
 		islandExecutor.destroy();
+		socketIsland.destroy();
 
 		log.info("Exiting main()");
 	}

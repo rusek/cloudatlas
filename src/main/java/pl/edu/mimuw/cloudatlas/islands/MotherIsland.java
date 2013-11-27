@@ -14,14 +14,14 @@ public class MotherIsland extends ManualIsland {
 	
 	private State state = State.VIRGIN;
 	private List<ChildEndpoint> childEndpoints = new ArrayList<ChildEndpoint>();
-	private int numAwakenChildren = 0;
+	private int numIgnitedChildren = 0;
 	
 	public MotherIsland() {
 		getCarousel().enqueue(new Runnable() {
 
 			@Override
 			public void run() {
-				wakeUpChildren();
+				ignite();
 			}
 			
 		});
@@ -34,15 +34,15 @@ public class MotherIsland extends ManualIsland {
 		System.exit(1);
 	}
 	
-	private void wakeUpChildren() {
+	private void ignite() {
 		assert state == State.VIRGIN;
 		
 		log.info("Igniting system.");
 		
 		state = State.IGNITED;
-		numAwakenChildren = childEndpoints.size();
+		numIgnitedChildren = childEndpoints.size();
 		for (ChildEndpoint childEndpoint : childEndpoints) {
-			childEndpoint.wakeUp();
+			childEndpoint.ignite();
 		}
 	}
 	
@@ -54,7 +54,7 @@ public class MotherIsland extends ManualIsland {
 			
 			state = State.EXTINGUISHING;
 			for (ChildEndpoint childEndpoint : childEndpoints) {
-				childEndpoint.goToBed();
+				childEndpoint.extinguish();
 			}
 			tryCompleteExtinguishing();
 		}
@@ -63,7 +63,7 @@ public class MotherIsland extends ManualIsland {
 	private void tryCompleteExtinguishing() {
 		assert state.equals(State.EXTINGUISHING);
 		
-		if (numAwakenChildren == 0) {
+		if (numIgnitedChildren == 0) {
 			log.info("System extinguished.");
 			
 			Thread.currentThread().interrupt();
@@ -76,13 +76,13 @@ public class MotherIsland extends ManualIsland {
 		return new MotherEndpoint() {
 
 			@Override
-			public void stop() {
+			public void initiateExtinguishing() {
 				tryInitiateExtinguishing();
 			}
 
 			@Override
-			public void wentToBed() {
-				numAwakenChildren--;
+			public void childExtinguished() {
+				numIgnitedChildren--;
 				tryCompleteExtinguishing();
 			}};
 	}

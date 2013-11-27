@@ -92,7 +92,7 @@ public class Client {
 			if (args.size() != 0) {
 				throw new IllegalArgumentException("extinguish command takes no arguments");
 			}
-			commandFacade.shutdown();
+			commandFacade.extinguish();
 			break;
 		
 		case "ping":

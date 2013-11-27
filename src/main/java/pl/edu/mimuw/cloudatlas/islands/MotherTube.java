@@ -10,48 +10,48 @@ public class MotherTube extends Tube<ChildEndpoint, MotherEndpoint> implements C
 	}
 
 	@Override
-	public void wakeUp() {
+	public void ignite() {
 		getLeftCarousel().enqueue(new Runnable() {
 
 			@Override
 			public void run() {
-				getLeftEndpoint().wakeUp();
+				getLeftEndpoint().ignite();
 			}
 			
 		});
 	}
 
 	@Override
-	public void goToBed() {
+	public void extinguish() {
 		getLeftCarousel().enqueue(new Runnable() {
 
 			@Override
 			public void run() {
-				getLeftEndpoint().goToBed();
+				getLeftEndpoint().extinguish();
 			}
 			
 		});
 	}
 
 	@Override
-	public void stop() {
+	public void initiateExtinguishing() {
 		getRightCarousel().enqueue(new Runnable() {
 
 			@Override
 			public void run() {
-				getRightEndpoint().stop();
+				getRightEndpoint().initiateExtinguishing();
 			}
 			
 		});
 	}
 
 	@Override
-	public void wentToBed() {
+	public void childExtinguished() {
 		getRightCarousel().enqueue(new Runnable() {
 
 			@Override
 			public void run() {
-				getRightEndpoint().wentToBed();
+				getRightEndpoint().childExtinguished();
 			}
 			
 		});
