@@ -8,7 +8,7 @@ public interface StateReceiverEndpoint<RId> {
 	
 	public void zoneAttributeFetched(RId requestId, Attribute attribute);
 	
-	public void myZoneAttributeUpdated(RId requestId);
+	public void myZoneAttributesUpdated(RId requestId);
 	
 	public void zoneNamesFetched(RId requestId, Collection<String> zoneNames);
 	

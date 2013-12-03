@@ -85,6 +85,17 @@ public class Client {
 		}
 	}
 	
+	private void sendStats() throws RemoteException, IOException {
+		List<Attribute> stats = statsCollector.collectStats();
+		commandFacade.setMyAttributes(stats);
+		
+		if (shellMode) {
+			for (Attribute stat : stats) {
+				out.println(stat);
+			}
+		}
+	}
+	
 	public void flush() {
 		out.flush();
 	}
@@ -96,6 +107,8 @@ public class Client {
 		out.println("    Returns agent zone name.");
 		out.println("  - showStats");
 		out.println("    Collects statistics and prints values.");
+		out.println("  - sendStats");
+		out.println("    Collects statistics and sends them to the agent.");
 		out.println("  - extinguish");
 		out.println("    Remotely shuts down agent.");
 		out.println("  - help");
@@ -106,7 +119,7 @@ public class Client {
 		out.println("Available commands:");
 		printCommonCommands();
 		out.println("  - reconnect [host[:port]][/zoneName]");
-		out.println("  - Reestablishes connection to the agent");
+		out.println("    Reestablishes connection to the agent");
 		out.println("  - quit");
 		out.println("    Exits shell.");
 	}
@@ -119,7 +132,8 @@ public class Client {
 	}
 	
 	private Completer createCompleter() {
-		return new StringsCompleter("getAttributeValue", "getMyGlobalName", "extinguish", "reconnect", "showStats");
+		return new StringsCompleter("getAttributeValue", "getMyGlobalName", "extinguish", "reconnect", "showStats",
+				"sendStats");
 	}
 	
 	public void processCommonCommand(String name, List<String> args) throws Exception {
@@ -159,6 +173,13 @@ public class Client {
 			for (Attribute stat : stats) {
 				out.println(stat);
 			}
+			break;
+		
+		case "sendStats":
+			if (args.size() != 0) {
+				throw new IllegalArgumentException("showStats command takes no arguments");
+			}
+			sendStats();
 			break;
 		
 		case "":
@@ -205,6 +226,10 @@ public class Client {
 	
 	public void processConsoleCommand(String name, List<String> args) throws Exception {
 		switch (name) {
+		case "--help":
+			printConsoleHelp();
+			break;
+		
 		case "shell":
 			if (args.size() != 0) {
 				throw new IllegalArgumentException("shell command takes no arguments");

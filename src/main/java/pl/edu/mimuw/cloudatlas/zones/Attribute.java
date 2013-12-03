@@ -1,10 +1,14 @@
 package pl.edu.mimuw.cloudatlas.zones;
 
+import java.io.Serializable;
+
 import pl.edu.mimuw.cloudatlas.attributes.Type;
 import pl.edu.mimuw.cloudatlas.attributes.Value;
 
-public class Attribute {
+public class Attribute implements Serializable {
 
+	private static final long serialVersionUID = 1L;
+	
 	private final String name;
 	private final Type<? extends Value> type;
 	private Value value;

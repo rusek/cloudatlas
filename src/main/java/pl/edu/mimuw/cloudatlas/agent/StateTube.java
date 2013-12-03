@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import pl.edu.mimuw.cloudatlas.attributes.Type;
-import pl.edu.mimuw.cloudatlas.attributes.Value;
 import pl.edu.mimuw.cloudatlas.islands.Tube;
 import pl.edu.mimuw.cloudatlas.zones.Attribute;
 
@@ -38,18 +36,19 @@ public class StateTube<RId> extends Tube<StateReceiverEndpoint<RId>, StateProvid
 	}
 	
 	@Override
-	public void updateMyZoneAttribute(final RId requestId, final String attributeName,
-			final Type<? extends Value> attributeType, Value attributeValue) {
-		assert attributeName != null;
-		assert attributeType != null;
+	public void updateMyZoneAttributes(final RId requestId, List<Attribute> attributes) {
+		assert attributes != null;
 		
-		final Value valueCopy = attributeValue == null ? null : attributeValue.deepCopy();
+		final List<Attribute> attributesCopy = new ArrayList<Attribute>();
+		for (Attribute attribute : attributes) {
+			attributesCopy.add(attribute.deepCopy());
+		}
 		
 		getRightCarousel().enqueue(new Runnable() {
 
 			@Override
 			public void run() {
-				getRightEndpoint().updateMyZoneAttribute(requestId, attributeName, attributeType, valueCopy);
+				getRightEndpoint().updateMyZoneAttributes(requestId, attributesCopy);
 			}
 			
 		});
@@ -126,12 +125,12 @@ public class StateTube<RId> extends Tube<StateReceiverEndpoint<RId>, StateProvid
 	}
 
 	@Override
-	public void myZoneAttributeUpdated(final RId requestId) {
+	public void myZoneAttributesUpdated(final RId requestId) {
 		getLeftCarousel().enqueue(new Runnable() {
 
 			@Override
 			public void run() {
-				getLeftEndpoint().myZoneAttributeUpdated(requestId);
+				getLeftEndpoint().myZoneAttributesUpdated(requestId);
 			}
 			
 		});

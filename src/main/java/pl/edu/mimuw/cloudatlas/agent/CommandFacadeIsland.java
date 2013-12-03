@@ -6,12 +6,12 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.Semaphore;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import pl.edu.mimuw.cloudatlas.attributes.Type;
 import pl.edu.mimuw.cloudatlas.attributes.Value;
 import pl.edu.mimuw.cloudatlas.cli.CommandFacade;
 import pl.edu.mimuw.cloudatlas.islands.ChildEndpoint;
@@ -107,9 +107,9 @@ public class CommandFacadeIsland extends PluggableIsland implements ChildIsland,
 			}
 
 			@Override
-			public void myZoneAttributeUpdated(
+			public void myZoneAttributesUpdated(
 					StateReceiverEndpoint<Void> requestId) {
-				requestId.myZoneAttributeUpdated(null);
+				requestId.myZoneAttributesUpdated(null);
 			}
 
 			@Override
@@ -205,28 +205,26 @@ public class CommandFacadeIsland extends PluggableIsland implements ChildIsland,
 		}
 
 		@Override
-		public void setMyAttribute(String attributeName,
-				Type<? extends Value> attributeType, Value attributeValue) throws RemoteException {
-			log.info("Received command setMyAttribute(%s, %s, %s)", attributeName, attributeType, attributeValue);
+		public void setMyAttributes(List<Attribute> attributes) throws RemoteException {
+			log.info("Received command setMyAttributes(%s)", attributes);
 			
-			if (attributeName == null) {
-				throw new RemoteException("Attribute name is null");
+			if (attributes == null) {
+				throw new RemoteException("Attribute list is null");
 			}
-			if (attributeType == null) {
-				throw new RemoteException("Attribute type is null");
-			}
-			if (attributeValue != null && !attributeValue.getType().equals(attributeType)) {
-				throw new RemoteException("Attribute value has invalid type");
+			for (Attribute attribute : attributes) {
+				if (attribute == null) {
+					throw new RemoteException("One of attributes is null");
+				}
 			}
 			
 			RequestHandler<Void> handler = new RequestHandler<Void>() {
 				
 				@Override
-				public void myZoneAttributeUpdated(Void requestId) {
+				public void myZoneAttributesUpdated(Void requestId) {
 					setResult(null);
 				}
 			};
-			stateProviderEndpoint.updateMyZoneAttribute(handler, attributeName, attributeType, attributeValue);
+			stateProviderEndpoint.updateMyZoneAttributes(handler, attributes);
 			
 			handler.get();
 		}
@@ -259,7 +257,7 @@ public class CommandFacadeIsland extends PluggableIsland implements ChildIsland,
 		}
 
 		@Override
-		public void myZoneAttributeUpdated(Void requestId) {
+		public void myZoneAttributesUpdated(Void requestId) {
 			throw new RuntimeException("Unexpected callback invoked");
 			
 		}

@@ -1,14 +1,14 @@
 package pl.edu.mimuw.cloudatlas.agent;
 
-import pl.edu.mimuw.cloudatlas.attributes.Type;
-import pl.edu.mimuw.cloudatlas.attributes.Value;
+import java.util.List;
+
+import pl.edu.mimuw.cloudatlas.zones.Attribute;
 
 public interface StateProviderEndpoint<RId> {
 	
 	public void fetchZoneAttribute(RId requestId, String zoneName, String attributeName);
 	
-	public void updateMyZoneAttribute(RId requestId, String attributeName,
-			Type<? extends Value> attributeType, Value attributeValue);
+	public void updateMyZoneAttributes(RId requestId, List<Attribute> attributes);
 
 	public void fetchZoneAttributeNames(RId requestId, String zoneName);
 	

@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import pl.edu.mimuw.cloudatlas.attributes.IntegerValue;
-import pl.edu.mimuw.cloudatlas.attributes.Type;
-import pl.edu.mimuw.cloudatlas.attributes.Value;
 import pl.edu.mimuw.cloudatlas.islands.PluggableIsland;
 import pl.edu.mimuw.cloudatlas.zones.Attribute;
 import pl.edu.mimuw.cloudatlas.zones.Zone;
@@ -49,12 +47,13 @@ public class StateIsland extends PluggableIsland implements StateProviderIsland 
 			}
 
 			@Override
-			public void updateMyZoneAttribute(RId requestId, 
-					String attributeName, Type<? extends Value> attributeType,
-					Value attributeValue) {
-				myZone.getZMI().setAttribute(attributeName, attributeType, attributeValue);
+			public void updateMyZoneAttributes(RId requestId, List<Attribute> attributes) {
+				// TODO update timestamp?
+				for (Attribute attribute : attributes) {
+					myZone.getZMI().setAttribute(attribute.getName(), attribute.getType(), attribute.getValue());
+				}
 				
-				receiverEndpoint.myZoneAttributeUpdated(requestId);
+				receiverEndpoint.myZoneAttributesUpdated(requestId);
 			}
 
 			@Override
