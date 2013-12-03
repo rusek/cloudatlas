@@ -1,6 +1,7 @@
 package pl.edu.mimuw.cloudatlas.cli;
 
 import pl.edu.mimuw.cloudatlas.attributes.Value;
+import pl.edu.mimuw.cloudatlas.zones.Attribute;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -10,6 +11,8 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -18,21 +21,68 @@ import jline.console.completer.Completer;
 import jline.console.completer.StringsCompleter;
 
 public class Client {
+	
+	private static final Pattern LOCATOR_PATTERN = Pattern.compile("(?:([^:/]+)(?::(\\d+))?)?(/.+)?");
 
 	private PrintWriter out = new PrintWriter(System.out);
 	private CommandFacade commandFacade;
 	private boolean shouldQuit = false;
 	private boolean shellMode = false;
-	private String registryHost;
 	
-	public Client(String registryHost) throws RemoteException, NotBoundException {
-		this.registryHost = registryHost;
+	private String registryHost = "localhost";
+	private Integer registryPort = null;
+	private String agentZoneName = null;
+	
+	private StatsCollector statsCollector = new StatsCollector();
+	
+	public Client(String locator) throws RemoteException, NotBoundException {
+		parseLocator(locator);
 		connect();
 	}
 	
+	private void parseLocator(String locator) {
+		String registryHost = this.registryHost;
+		Integer registryPort = this.registryPort;
+		String agentName = this.agentZoneName;
+		
+		Matcher matcher = LOCATOR_PATTERN.matcher(locator);
+		if (!matcher.matches()) {
+			throw new IllegalArgumentException("Invalid locator: " + locator);
+		}
+		
+		if (matcher.group(1) != null) {
+			registryHost = matcher.group(1);
+			agentName = null;
+			registryPort = null;
+		}
+
+		if (matcher.group(2) != null) {
+			registryPort = Integer.parseInt(matcher.group(2));
+		}
+		
+		if (matcher.group(3) != null) {
+			agentName = matcher.group(3);
+		}
+		
+		this.registryHost = registryHost;
+		this.registryPort = registryPort;
+		this.agentZoneName = agentName;
+	}
+	
 	private void connect() throws RemoteException, NotBoundException {
-		Registry registry = LocateRegistry.getRegistry(registryHost);
-		commandFacade = (CommandFacade) registry.lookup(CommandFacade.BIND_NAME);
+		Registry registry;
+		
+		if (registryPort == null) {
+			registry = LocateRegistry.getRegistry(registryHost);
+		} else {
+			registry = LocateRegistry.getRegistry(registryHost, registryPort);
+		}
+		
+		if (agentZoneName == null) {
+			commandFacade = (CommandFacade) registry.lookup(CommandFacade.BIND_NAME);
+		} else {
+			commandFacade = (CommandFacade) registry.lookup(CommandFacade.BIND_NAME + ":" + agentZoneName);
+		}
 	}
 	
 	public void flush() {
@@ -44,6 +94,8 @@ public class Client {
 		out.println("    Returns attribute value of a given zone.");
 		out.println("  - getMyGlobalName");
 		out.println("    Returns agent zone name.");
+		out.println("  - showStats");
+		out.println("    Collects statistics and prints values.");
 		out.println("  - extinguish");
 		out.println("    Remotely shuts down agent.");
 		out.println("  - help");
@@ -53,7 +105,7 @@ public class Client {
 	public void printShellHelp() {
 		out.println("Available commands:");
 		printCommonCommands();
-		out.println("  - reconnect");
+		out.println("  - reconnect [host[:port]][/zoneName]");
 		out.println("  - Reestablishes connection to the agent");
 		out.println("  - quit");
 		out.println("    Exits shell.");
@@ -67,10 +119,10 @@ public class Client {
 	}
 	
 	private Completer createCompleter() {
-		return new StringsCompleter("getAttributeValue", "getMyGlobalName", "extinguish", "reconnect");
+		return new StringsCompleter("getAttributeValue", "getMyGlobalName", "extinguish", "reconnect", "showStats");
 	}
 	
-	public void processCommonCommand(String name, List<String> args) throws RemoteException {
+	public void processCommonCommand(String name, List<String> args) throws Exception {
 		switch (name) {
 		case "getAttributeValue":
 			if (args.size() != 2) {
@@ -98,6 +150,16 @@ public class Client {
 		case "ping":
 			out.println("pong");
 			break;
+			
+		case "showStats":
+			if (args.size() != 0) {
+				throw new IllegalArgumentException("showStats command takes no arguments");
+			}
+			List<Attribute> stats = statsCollector.collectStats();
+			for (Attribute stat : stats) {
+				out.println(stat);
+			}
+			break;
 		
 		case "":
 		case "help":
@@ -116,6 +178,12 @@ public class Client {
 	public void processShellCommand(String name, List<String> args) throws Exception {
 		switch (name) {
 		case "reconnect":
+			if (args.size() > 1) {
+				throw new IllegalArgumentException("reconnect takes at most 1 argument");
+			}
+			if (args.size() > 0) {
+				parseLocator(args.get(0));
+			}
 			connect();
 			break;
 			
@@ -135,7 +203,7 @@ public class Client {
 		}
 	}
 	
-	public void processConsoleCommand(String name, List<String> args) throws RemoteException, IOException {
+	public void processConsoleCommand(String name, List<String> args) throws Exception {
 		switch (name) {
 		case "shell":
 			if (args.size() != 0) {
@@ -191,15 +259,3 @@ public class Client {
 	}
 
 }
-
-// http://stackoverflow.com/questions/1051295/how-to-find-how-much-disk-space-is-left-using-java
-// http://stackoverflow.com/questions/2062440/java-cpu-usage-monitoring
-// http://stackoverflow.com/questions/12807797/java-get-available-memory
-// http://stackoverflow.com/questions/5512378/how-to-get-ram-size-and-size-of-hard-disk-using-java
-// TODO Swap
-// http://stackoverflow.com/questions/54686/how-to-get-a-list-of-current-open-windows-process-with-java
-// http://stackoverflow.com/questions/4759570/finding-number-of-cores-in-java
-// kernel: uname -v
-// users: who -q
-// DNS: /etc/resolv.conf
-

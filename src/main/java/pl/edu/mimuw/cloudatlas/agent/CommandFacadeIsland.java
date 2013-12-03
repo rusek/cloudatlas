@@ -26,12 +26,18 @@ public class CommandFacadeIsland extends PluggableIsland implements ChildIsland,
 	
 	private static Logger log = LogManager.getFormatterLogger(CommandFacadeIsland.class);
 	
+	private final String zoneName;
+	
 	private MotherEndpoint motherEndpoint;
 	private StateProviderEndpoint<StateReceiverEndpoint<Void>> stateProviderEndpoint;
 
 	private CommandFacadeImpl facadeImpl;
 	private CommandFacade facadeStub;
 	private Registry registry;
+
+	public CommandFacadeIsland(String zoneName) {
+		this.zoneName = zoneName;
+	}
 	
 	@Override
 	public ChildEndpoint mountMother(final MotherEndpoint motherEndpoint) {
@@ -42,7 +48,7 @@ public class CommandFacadeIsland extends PluggableIsland implements ChildIsland,
 			@Override
 			public void ignite() {
 				try {
-					log.info("Registering command facade in RMI.");
+					log.info("Registering command facade in RMI: %s", CommandFacade.BIND_NAME + ":" + zoneName);
 					
 					if (System.getSecurityManager() == null) {
 						System.setSecurityManager(new SecurityManager());
@@ -52,6 +58,7 @@ public class CommandFacadeIsland extends PluggableIsland implements ChildIsland,
 					facadeStub = (CommandFacade) UnicastRemoteObject.exportObject(facadeImpl, 0);
 					registry = LocateRegistry.getRegistry();
 					registry.rebind(CommandFacade.BIND_NAME, facadeStub);
+					registry.rebind(CommandFacade.BIND_NAME + ":" + zoneName, facadeStub);
 					
 					log.info("RMI ready.");
 				} catch (RemoteException e) {
@@ -65,6 +72,7 @@ public class CommandFacadeIsland extends PluggableIsland implements ChildIsland,
 					log.info("Unregistering command facade.");
 					
 					registry.unbind(CommandFacade.BIND_NAME);
+					registry.unbind(CommandFacade.BIND_NAME + ":" + zoneName);
 					UnicastRemoteObject.unexportObject(facadeImpl, false);
 					
 					log.info("Command facade unregistered.");

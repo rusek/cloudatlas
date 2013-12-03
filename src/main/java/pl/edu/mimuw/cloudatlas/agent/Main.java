@@ -1,5 +1,7 @@
 package pl.edu.mimuw.cloudatlas.agent;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
 
@@ -22,6 +24,21 @@ public class Main {
 		return properties;
 	}
 	
+	private Properties loadProperties(String fileName) throws IOException {
+		FileInputStream inputStream = new FileInputStream(fileName);
+		try {
+			Properties properties = new Properties();
+			properties.load(inputStream);
+			return properties;
+		} finally {
+			try {
+				inputStream.close();
+			} catch (IOException ex) {
+				
+			}
+		}
+	}
+	
 	private String getZoneName(Properties properties) {
 		String zoneName = properties.getProperty("zoneName");
 		if (zoneName == null) {
@@ -34,7 +51,7 @@ public class Main {
 	}
 	
 	public void execute(String[] args) throws IOException {
-		Properties properties = loadProperties();
+		Properties properties = args.length > 0 ? loadProperties(args[0]) : loadProperties();
 		String zoneName = getZoneName(properties);
 		
 		MotherIsland motherIsland = new MotherIsland();
@@ -43,7 +60,7 @@ public class Main {
 		StateIsland stateIsland = new StateIsland(zoneName);
 		islandExecutor.addIsland(stateIsland);
 		
-		CommandFacadeIsland commandFacadeIsland = new CommandFacadeIsland();
+		CommandFacadeIsland commandFacadeIsland = new CommandFacadeIsland(zoneName);
 		islandExecutor.addIsland(commandFacadeIsland);
 		
 		DatagramSocketIsland socketIsland = new DatagramSocketIsland(properties);

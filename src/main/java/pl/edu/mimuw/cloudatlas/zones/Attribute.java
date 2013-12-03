@@ -44,7 +44,7 @@ public class Attribute {
 	}
 	
 	public String toString() {
-		return name + ": " + value.toString() + " <" + type.toString() + ">";
+		return name + " : " + type + " = " + value;
 	}
 	
 	public Attribute deepCopy() {
