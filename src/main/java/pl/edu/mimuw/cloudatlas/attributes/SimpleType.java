@@ -3,7 +3,6 @@ package pl.edu.mimuw.cloudatlas.attributes;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.net.InetAddress;
 
 public abstract class SimpleType<V extends SimpleValue> extends Type<V> {
 
@@ -114,13 +113,9 @@ public abstract class SimpleType<V extends SimpleValue> extends Type<V> {
 
 		@Override
 		public ContactValue compactReadValue(DataInput input) throws IOException {
-			int length = input.readInt();
-			if (length < 0) {
-				throw new IOException("Negative length");
-			}
-			byte[] bytes = new byte[length];
-			input.readFully(bytes);
-			return new ContactValue(InetAddress.getByAddress(bytes));
+			String host = input.readUTF();
+			int port = input.readUnsignedShort();
+			return new ContactValue(host, port);
 		}
 		
 		@Override

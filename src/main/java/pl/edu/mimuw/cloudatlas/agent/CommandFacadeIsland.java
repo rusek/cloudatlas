@@ -12,6 +12,7 @@ import java.util.concurrent.Semaphore;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import pl.edu.mimuw.cloudatlas.attributes.ContactValue;
 import pl.edu.mimuw.cloudatlas.attributes.Value;
 import pl.edu.mimuw.cloudatlas.cli.CommandFacade;
 import pl.edu.mimuw.cloudatlas.islands.ChildEndpoint;
@@ -71,14 +72,16 @@ public class CommandFacadeIsland extends PluggableIsland implements ChildIsland,
 				try {
 					log.info("Unregistering command facade.");
 					
-					registry.unbind(CommandFacade.BIND_NAME);
-					registry.unbind(CommandFacade.BIND_NAME + ":" + zoneName);
+					try {
+						registry.unbind(CommandFacade.BIND_NAME);
+					} catch (NotBoundException e) { }
+					try {
+						registry.unbind(CommandFacade.BIND_NAME + ":" + zoneName);
+					} catch (NotBoundException e) { }
 					UnicastRemoteObject.unexportObject(facadeImpl, false);
 					
 					log.info("Command facade unregistered.");
 				} catch (RemoteException e) {
-					throw new RuntimeException(e);
-				} catch (NotBoundException e) {
 					throw new RuntimeException(e);
 				}
 				
@@ -227,6 +230,13 @@ public class CommandFacadeIsland extends PluggableIsland implements ChildIsland,
 			stateProviderEndpoint.updateMyZoneAttributes(handler, attributes);
 			
 			handler.get();
+		}
+
+		@Override
+		public void setFallbackContacts(List<ContactValue> contacts)
+				throws RemoteException {
+			log.info("Received command setFallbackContacts(%s)", contacts);
+			// FIXME really set fallback contacts
 		}
 		
 	}

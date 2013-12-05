@@ -1,8 +1,6 @@
 package pl.edu.mimuw.cloudatlas;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -232,16 +230,11 @@ public class TestInterpreter {
 
 	private static class ZoneBuilder {
 		private Map<String, ContactValue> contactValues = new HashMap<String, ContactValue>();
-		private byte nextIPLastByte = 1;
 		
 		private ContactValue getContact(String name) throws TestException {
 			ContactValue result = contactValues.get(name);
 			if (result == null) {
-				try {
-					result = new ContactValue(InetAddress.getByAddress(name, new byte[]{10, 0, 0, nextIPLastByte++}));
-				} catch (UnknownHostException e) {
-					throw new TestException(e);
-				}
+				result = new ContactValue(name, 1234);
 				contactValues.put(name, result);
 			}
 			return result;

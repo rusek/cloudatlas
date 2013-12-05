@@ -11,6 +11,8 @@ import org.apache.logging.log4j.Logger;
 import pl.edu.mimuw.cloudatlas.islands.MotherIsland;
 import pl.edu.mimuw.cloudatlas.islands.MotherTube;
 import pl.edu.mimuw.cloudatlas.islands.PluggableIslandExecutor;
+import pl.edu.mimuw.cloudatlas.islands.TimerIslandImpl;
+import pl.edu.mimuw.cloudatlas.islands.TimerTube;
 import pl.edu.mimuw.cloudatlas.zones.ZoneNames;
 
 
@@ -66,14 +68,18 @@ public class Main {
 		DatagramSocketIsland socketIsland = new DatagramSocketIsland(properties);
 		islandExecutor.addIsland(socketIsland);
 		
+		TimerIslandImpl timerIsland = new TimerIslandImpl();
+		
 		MotherTube.entangle(commandFacadeIsland, motherIsland);
 		MotherTube.entangle(socketIsland, motherIsland);
 		StateTube.entangle(commandFacadeIsland, stateIsland);
+		TimerTube.entangle(socketIsland, timerIsland);
 		
 		motherIsland.spinCarouselUntilInterrupted();
 		
 		islandExecutor.destroy();
 		socketIsland.destroy();
+		timerIsland.destroy();
 
 		log.info("Exiting main()");
 	}

@@ -1,6 +1,8 @@
 package pl.edu.mimuw.cloudatlas.cli;
 
+import pl.edu.mimuw.cloudatlas.attributes.ContactValue;
 import pl.edu.mimuw.cloudatlas.attributes.Value;
+import pl.edu.mimuw.cloudatlas.attributes.ValueFormatException;
 import pl.edu.mimuw.cloudatlas.zones.Attribute;
 
 import java.io.IOException;
@@ -9,6 +11,7 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -105,6 +108,8 @@ public class Client {
 		out.println("    Returns attribute value of a given zone.");
 		out.println("  - getMyGlobalName");
 		out.println("    Returns agent zone name.");
+		out.println("  - setFallbackContacts <host:port> [<host:port>] ...");
+		out.println("    Sets fallback contacts.");
 		out.println("  - showStats");
 		out.println("    Collects statistics and prints values.");
 		out.println("  - sendStats");
@@ -133,7 +138,7 @@ public class Client {
 	
 	private Completer createCompleter() {
 		return new StringsCompleter("getAttributeValue", "getMyGlobalName", "extinguish", "reconnect", "showStats",
-				"sendStats");
+				"sendStats", "setFallbackContacts");
 	}
 	
 	public void processCommonCommand(String name, List<String> args) throws Exception {
@@ -173,6 +178,21 @@ public class Client {
 			for (Attribute stat : stats) {
 				out.println(stat);
 			}
+			break;
+			
+		case "setFallbackContacts":
+			if (args.size() == 0) {
+				throw new IllegalArgumentException("setFallbackContacts takes at least one argument");
+			}
+			List<ContactValue> contacts = new ArrayList<ContactValue>();
+			for (String arg : args) {
+				try {
+					contacts.add(ContactValue.parseContact(arg));
+				} catch (ValueFormatException ex) {
+					throw new IllegalArgumentException("Invalid contact: " + arg);
+				}
+			}
+			commandFacade.setFallbackContacts(contacts);
 			break;
 		
 		case "sendStats":
