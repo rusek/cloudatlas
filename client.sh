@@ -9,5 +9,5 @@ export CLASSPATH=$JAR
 java -Djava.rmi.server.codebase=file:"$JAR" \
         -Djava.security.policy="$DIR/client.policy" \
         pl.edu.mimuw.cloudatlas.cli.Client \
-        localhost $@
+        "$@"
 
