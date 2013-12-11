@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import pl.edu.mimuw.cloudatlas.attributes.ContactValue;
 import pl.edu.mimuw.cloudatlas.islands.Tube;
 import pl.edu.mimuw.cloudatlas.zones.Attribute;
 
@@ -89,6 +90,33 @@ public class StateTube<RId> extends Tube<StateReceiverEndpoint<RId>, StateProvid
 			@Override
 			public void run() {
 				getRightEndpoint().fetchMyZoneName(requestId);
+			}
+			
+		});
+	}
+
+	@Override
+	public void updateFallbackContacts(Collection<ContactValue> fallbackContacts) {
+		final Collection<ContactValue> fallbackContactsCopy = new ArrayList<ContactValue>();
+		fallbackContactsCopy.addAll(fallbackContacts);
+		
+		getRightCarousel().enqueue(new Runnable() {
+
+			@Override
+			public void run() {
+				getRightEndpoint().updateFallbackContacts(fallbackContactsCopy);
+			}
+			
+		});
+	}
+
+	@Override
+	public void getContactForGossiping(final RId requestId) {
+		getRightCarousel().enqueue(new Runnable() {
+
+			@Override
+			public void run() {
+				getRightEndpoint().getContactForGossiping(requestId);
 			}
 			
 		});
@@ -192,6 +220,18 @@ public class StateTube<RId> extends Tube<StateReceiverEndpoint<RId>, StateProvid
 			@Override
 			public void run() {
 				getLeftEndpoint().attributeNotFound(requestId);
+			}
+			
+		});
+	}
+
+	@Override
+	public void contactForGossipingReceived(final RId requestId, final ContactValue contact) {
+		getLeftCarousel().enqueue(new Runnable() {
+
+			@Override
+			public void run() {
+				getLeftEndpoint().contactForGossipingReceived(requestId, contact);
 			}
 			
 		});

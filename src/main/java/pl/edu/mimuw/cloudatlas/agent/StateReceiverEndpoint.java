@@ -2,6 +2,7 @@ package pl.edu.mimuw.cloudatlas.agent;
 
 import java.util.Collection;
 
+import pl.edu.mimuw.cloudatlas.attributes.ContactValue;
 import pl.edu.mimuw.cloudatlas.zones.Attribute;
 
 public interface StateReceiverEndpoint<RId> {
@@ -19,4 +20,6 @@ public interface StateReceiverEndpoint<RId> {
 	public void zoneNotFound(RId requestId);
 
 	public void attributeNotFound(RId requestId);
+	
+	public void contactForGossipingReceived(RId requestId, ContactValue contact);
 }

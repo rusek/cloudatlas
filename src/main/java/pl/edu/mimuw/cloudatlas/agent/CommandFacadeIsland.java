@@ -96,7 +96,7 @@ public class CommandFacadeIsland extends PluggableIsland implements ChildIsland,
 			StateProviderEndpoint<StateReceiverEndpoint<Void>> providerEndpoint) {
 		this.stateProviderEndpoint = providerEndpoint;
 		
-		return new StateReceiverEndpoint<StateReceiverEndpoint<Void>>() {
+		return new StateReceiverAdapter<StateReceiverEndpoint<Void>>() {
 
 			@Override
 			public void zoneAttributeFetched(
@@ -236,12 +236,12 @@ public class CommandFacadeIsland extends PluggableIsland implements ChildIsland,
 		public void setFallbackContacts(List<ContactValue> contacts)
 				throws RemoteException {
 			log.info("Received command setFallbackContacts(%s)", contacts);
-			// FIXME really set fallback contacts
+			stateProviderEndpoint.updateFallbackContacts(contacts);
 		}
 		
 	}
 	
-	private static class RequestHandler<R> implements StateReceiverEndpoint<Void> {
+	private static class RequestHandler<R> extends StateReceiverAdapter<Void> {
 		private final Semaphore semaphore = new Semaphore(0);
 		private R result;
 		private RemoteException exception;
@@ -254,44 +254,6 @@ public class CommandFacadeIsland extends PluggableIsland implements ChildIsland,
 		protected void setException(RemoteException exception) {
 			this.exception = exception;
 			this.semaphore.release();
-		}
-		
-		@Override
-		public void zoneAttributeFetched(Void requestId, Attribute attribute) {
-			throw new RuntimeException("Unexpected callback invoked");
-		}
-
-		@Override
-		public void zoneNotFound(Void requestId) {
-			throw new RuntimeException("Unexpected callback invoked");
-		}
-
-		@Override
-		public void myZoneAttributesUpdated(Void requestId) {
-			throw new RuntimeException("Unexpected callback invoked");
-			
-		}
-
-		@Override
-		public void zoneNamesFetched(Void requestId,
-				Collection<String> zoneNames) {
-			throw new RuntimeException("Unexpected callback invoked");
-		}
-
-		@Override
-		public void zoneAttributeNamesFetched(Void requestId,
-				Collection<String> attributeNames) {
-			throw new RuntimeException("Unexpected callback invoked");
-		}
-
-		@Override
-		public void myZoneNameFetched(Void requestId, String zoneName) {
-			throw new RuntimeException("Unexpected callback invoked");
-		}
-
-		@Override
-		public void attributeNotFound(Void requestId) {
-			throw new RuntimeException("Unexpected callback invoked");
 		}
 		
 		public R get() throws RemoteException {

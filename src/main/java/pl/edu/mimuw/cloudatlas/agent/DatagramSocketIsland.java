@@ -15,6 +15,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import pl.edu.mimuw.cloudatlas.agent.DatagramStreamRepository.Stream;
+import pl.edu.mimuw.cloudatlas.attributes.ContactValue;
 import pl.edu.mimuw.cloudatlas.islands.ChildEndpoint;
 import pl.edu.mimuw.cloudatlas.islands.ChildIsland;
 import pl.edu.mimuw.cloudatlas.islands.IslandException;
@@ -29,12 +30,14 @@ public class DatagramSocketIsland extends PluggableIsland implements
 		ChildEndpoint,
 		DatagramStreamRepository.DatagramSender,
 		TimerFeedbackIsland<Runnable>,
-		TimerFeedbackEndpoint<Runnable> {
+		TimerFeedbackEndpoint<Runnable>,
+		StateReceiverIsland<DatagramSocketIsland.StreamHandler> {
 	
 	private static Logger log = LogManager.getFormatterLogger(DatagramSocketIsland.class);
 
 	private MotherEndpoint motherEndpoint;
 	private TimerEndpoint<Runnable> timerEndpoint;
+	private StateProviderEndpoint<StreamHandler> stateEndpoint;
 	
 	private boolean extinguishing = false;
 	private String host;
@@ -79,6 +82,27 @@ public class DatagramSocketIsland extends PluggableIsland implements
 	}
 
 	@Override
+	public StateReceiverEndpoint<StreamHandler> mountStateProvider(
+			StateProviderEndpoint<StreamHandler> providerEndpoint) {
+		this.stateEndpoint = providerEndpoint;
+		
+		return new StateReceiverAdapter<StreamHandler>() {
+
+			@Override
+			public void contactForGossipingReceived(StreamHandler requestId,
+					ContactValue contact) {
+				if (contact == null) {
+					log.info("No contact for gossiping");
+					return;
+				}
+				InetSocketAddress address = new InetSocketAddress(contact.getHost(), contact.getPort());
+				new StreamHandler(streamRepository.createStream(address)).sendRoundMessage(0);
+			}
+			
+		};
+	}
+
+	@Override
 	public void ignite() {
 		log.debug("Creating DatagramSocket, host: %s, port: %d.", host, port);
 		try {
@@ -93,15 +117,16 @@ public class DatagramSocketIsland extends PluggableIsland implements
 
 			@Override
 			public void run() {
-				new StreamHandler(streamRepository.createStream(new InetSocketAddress("localhost", 6660))).sendRoundMessage(0);
+				stateEndpoint.getContactForGossiping(null);
+				//new StreamHandler(streamRepository.createStream(new InetSocketAddress("localhost", 6660))).sendRoundMessage(0);
 				
-				//timerEndpoint.schedule(this, 1000);
+				timerEndpoint.schedule(this, 5000);
 			}
 			
 		};
 		
 		if (port == 6666) 
-			timerEndpoint.schedule(gossipTask, 1000);
+			timerEndpoint.schedule(gossipTask, 5000);
 	}
 
 	@Override
@@ -155,7 +180,7 @@ public class DatagramSocketIsland extends PluggableIsland implements
 		}
 	}
 	
-	private class StreamHandler implements DatagramStreamRepository.StreamHandler {
+	public class StreamHandler implements DatagramStreamRepository.StreamHandler {
 		
 		private final Stream stream;
 		

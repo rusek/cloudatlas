@@ -1,8 +1,13 @@
 package pl.edu.mimuw.cloudatlas.agent;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
+import java.util.Set;
 
+import pl.edu.mimuw.cloudatlas.attributes.ContactValue;
 import pl.edu.mimuw.cloudatlas.attributes.IntegerValue;
 import pl.edu.mimuw.cloudatlas.islands.PluggableIsland;
 import pl.edu.mimuw.cloudatlas.zones.Attribute;
@@ -11,8 +16,10 @@ import pl.edu.mimuw.cloudatlas.zones.ZoneNames;
 
 public class StateIsland extends PluggableIsland implements StateProviderIsland {
 	
+	private Random random = new Random();
 	private Zone rootZone;
 	private Zone myZone;
+	private List<ContactValue> fallbackContacts = new ArrayList<ContactValue>();
 	
 	public StateIsland(String zoneName) {
 		rootZone = Zone.createRootWithOwner(zoneName);
@@ -84,6 +91,23 @@ public class StateIsland extends PluggableIsland implements StateProviderIsland 
 			@Override
 			public void fetchMyZoneName(RId requestId) {
 				receiverEndpoint.myZoneNameFetched(requestId, myZone.getGlobalName());
+			}
+
+			@Override
+			public void updateFallbackContacts(
+					Collection<ContactValue> fallbackContacts) {
+				StateIsland.this.fallbackContacts.clear();
+				StateIsland.this.fallbackContacts.addAll(fallbackContacts);
+			}
+
+			@Override
+			public void getContactForGossiping(RId requestId) {
+				ContactValue contact = null;
+				if (!fallbackContacts.isEmpty()) {
+					contact = fallbackContacts.get(random.nextInt(fallbackContacts.size()));
+				}
+				receiverEndpoint.contactForGossipingReceived(requestId, contact);
+				
 			}
 			
 		};

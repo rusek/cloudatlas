@@ -233,4 +233,10 @@ public class SelectStmt extends Stmt {
 		}
 		
 	}
+
+	@Override
+	public List<SelectionResult> executeSelection(Env env)
+			throws EvaluationException {
+		return evaluate(env); // TODO rename methods?
+	}
 }

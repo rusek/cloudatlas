@@ -11,11 +11,11 @@ public class ZoneNames {
 	}
 	
 	public static boolean isGlobalName(String globalName) {
-		return GLOBAL_NAME_PATTERN.matcher(globalName) != null;
+		return GLOBAL_NAME_PATTERN.matcher(globalName).matches();
 	}
 	
 	public static boolean isLocalName(String localName) {
-		return LOCAL_NAME_PATTERN.matcher(localName) != null;
+		return LOCAL_NAME_PATTERN.matcher(localName).matches();
 	}
 	
 	public static String[] splitGlobalName(String globalName) {
