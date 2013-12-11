@@ -1,7 +1,6 @@
 package pl.edu.mimuw.cloudatlas.agent;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
 
@@ -35,9 +34,7 @@ public class Main {
 		} finally {
 			try {
 				inputStream.close();
-			} catch (IOException ex) {
-				
-			}
+			} catch (IOException ex) {}
 		}
 	}
 	

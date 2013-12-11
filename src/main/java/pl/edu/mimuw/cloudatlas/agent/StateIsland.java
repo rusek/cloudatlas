@@ -2,13 +2,12 @@ package pl.edu.mimuw.cloudatlas.agent;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 
 import pl.edu.mimuw.cloudatlas.attributes.ContactValue;
 import pl.edu.mimuw.cloudatlas.attributes.IntegerValue;
+import pl.edu.mimuw.cloudatlas.attributes.TimeValue;
 import pl.edu.mimuw.cloudatlas.islands.PluggableIsland;
 import pl.edu.mimuw.cloudatlas.zones.Attribute;
 import pl.edu.mimuw.cloudatlas.zones.Zone;
@@ -55,10 +54,10 @@ public class StateIsland extends PluggableIsland implements StateProviderIsland 
 
 			@Override
 			public void updateMyZoneAttributes(RId requestId, List<Attribute> attributes) {
-				// TODO update timestamp?
 				for (Attribute attribute : attributes) {
 					myZone.getZMI().setAttribute(attribute.getName(), attribute.getType(), attribute.getValue());
 				}
+				myZone.getZMI().setAttribute("timestamp", TimeValue.now());
 				
 				receiverEndpoint.myZoneAttributesUpdated(requestId);
 			}

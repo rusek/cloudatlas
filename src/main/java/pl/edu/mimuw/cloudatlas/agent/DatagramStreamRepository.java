@@ -2,8 +2,10 @@ package pl.edu.mimuw.cloudatlas.agent;
 
 import java.net.DatagramPacket;
 import java.net.SocketAddress;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -29,6 +31,8 @@ import org.apache.logging.log4j.Logger;
  */
 public class DatagramStreamRepository {
 	
+	private static long MAX_STREAM_IDLE_DURATION = 60 * 1000; // 60 seconds
+	
 	private static Logger log = LogManager.getFormatterLogger(DatagramStreamRepository.class);
 	
 	private static final int HEADER_SIZE = 20;
@@ -53,7 +57,16 @@ public class DatagramStreamRepository {
 	}
 	
 	public void tick() {
-		// FIXME remove old streams
+		long lastActivityThreshold = new Date().getTime() - MAX_STREAM_IDLE_DURATION;
+		List<Stream> streams = new ArrayList<Stream>();
+		streams.addAll(this.streams.values());
+		
+		for (Stream stream : streams) {
+			if (stream.lastActivity < lastActivityThreshold) {
+				log.debug("Dropping idle stream %s", stream.key);
+				stream.close();
+			}
+		}
 	}
 	
 	public void receivePacket(DatagramPacket packet, long timestamp) {
@@ -80,6 +93,9 @@ public class DatagramStreamRepository {
 			stream = new Stream(key);
 			streams.put(key, stream);
 			acceptor.acceptStream(stream);
+			if (!streams.containsKey(key)) { // closed during accept?
+				return;
+			}
 		}
 		stream.addFrame(seqNum, frame, timestamp, senderTimestamp, senderShift);
 	}
@@ -121,6 +137,11 @@ public class DatagramStreamRepository {
 				return false;
 			return true;
 		}
+		
+		@Override
+		public String toString() {
+			return "StreamKey(" + address + ", " + streamId + ")";
+		}
 	}
 	
 	public class Stream {
@@ -132,6 +153,8 @@ public class DatagramStreamRepository {
 		private StreamHandler handler = null;
 		private int observedTimeShift = Integer.MIN_VALUE;
 		private Long timeDiff = null;
+		private boolean closed = false;
+		private long lastActivity = new Date().getTime();
 		
 		private Stream(StreamKey key) {
 			this.key = key;
@@ -139,7 +162,7 @@ public class DatagramStreamRepository {
 		
 		public long getSenderTimeDiff() {
 			if (timeDiff == null) {
-				return 0;
+				return 0; // TODO log 
 			} else {
 				return timeDiff;
 			}
@@ -150,8 +173,12 @@ public class DatagramStreamRepository {
 		}
 		
 		public void sendMessage(byte[] data) {
-			int offset = 0;
+			if (closed) {
+				return;
+			}
+			lastActivity = new Date().getTime();
 			
+			int offset = 0;
 			while (offset != data.length) {
 				int sentThisTime = Math.min(DatagramSender.MAX_PACKET_SIZE - HEADER_SIZE, data.length - offset);
 				byte[] datagramData = new byte[sentThisTime + HEADER_SIZE];
@@ -167,6 +194,14 @@ public class DatagramStreamRepository {
 				packet.setSocketAddress(key.address);
 				sender.sendPacket(packet);
 			}
+		}
+		
+		public void close() {
+			if (closed) {
+				return;
+			}
+			closed = true;
+			streams.remove(key);
 		}
 		
 		private void addFrame(int seqNum, StreamFrame frame, long timestamp, long senderTimestamp, int senderShift) {
@@ -196,6 +231,7 @@ public class DatagramStreamRepository {
 		
 		private void emitMessage() {
 			log.debug("Emitting message from stream, startSeqNum: %d, endSeqNum: %d", startSeqNum, endSeqNum);
+			lastActivity = new Date().getTime();
 			int length = 0;
 			for (int i = startSeqNum; i < endSeqNum; i++) {
 				length += frames.get(i).getLength();

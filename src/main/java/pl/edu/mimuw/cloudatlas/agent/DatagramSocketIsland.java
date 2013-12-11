@@ -33,6 +33,8 @@ public class DatagramSocketIsland extends PluggableIsland implements
 		TimerFeedbackEndpoint<Runnable>,
 		StateReceiverIsland<DatagramSocketIsland.StreamHandler> {
 	
+	public static long DEFAULT_GOSSIP_INTERVAL = 5000;
+	
 	private static Logger log = LogManager.getFormatterLogger(DatagramSocketIsland.class);
 
 	private MotherEndpoint motherEndpoint;
@@ -42,6 +44,7 @@ public class DatagramSocketIsland extends PluggableIsland implements
 	private boolean extinguishing = false;
 	private String host;
 	private int port;
+	private long gossipInterval = DEFAULT_GOSSIP_INTERVAL;
 	
 	private DatagramSocket socket;
 	private ReceiverThread receiverThread;
@@ -55,6 +58,11 @@ public class DatagramSocketIsland extends PluggableIsland implements
 			throw new IllegalArgumentException("Missing port property");
 		}
 		this.port = Integer.parseInt(portString);
+		
+		String gossipIntervalString = properties.getProperty("gossipInterval");
+		if (gossipIntervalString != null) {
+			gossipInterval = Long.parseLong(gossipIntervalString);
+		}
 		
 		this.streamRepository = new DatagramStreamRepository(new DatagramStreamRepository.StreamAcceptor() {
 			
@@ -76,6 +84,7 @@ public class DatagramSocketIsland extends PluggableIsland implements
 	@Override
 	public TimerFeedbackEndpoint<Runnable> mountTimer(
 			TimerEndpoint<Runnable> timerEndpoint) {
+		assert this.timerEndpoint == null;
 		this.timerEndpoint = timerEndpoint;
 		
 		return this;
@@ -84,6 +93,7 @@ public class DatagramSocketIsland extends PluggableIsland implements
 	@Override
 	public StateReceiverEndpoint<StreamHandler> mountStateProvider(
 			StateProviderEndpoint<StreamHandler> providerEndpoint) {
+		assert this.stateEndpoint == null;
 		this.stateEndpoint = providerEndpoint;
 		
 		return new StateReceiverAdapter<StreamHandler>() {
@@ -91,6 +101,10 @@ public class DatagramSocketIsland extends PluggableIsland implements
 			@Override
 			public void contactForGossipingReceived(StreamHandler requestId,
 					ContactValue contact) {
+				if (extinguishing) {
+					return;
+				}
+				
 				if (contact == null) {
 					log.info("No contact for gossiping");
 					return;
@@ -117,16 +131,18 @@ public class DatagramSocketIsland extends PluggableIsland implements
 
 			@Override
 			public void run() {
+				if (extinguishing) {
+					return;
+				}
+				streamRepository.tick();
 				stateEndpoint.getContactForGossiping(null);
-				//new StreamHandler(streamRepository.createStream(new InetSocketAddress("localhost", 6660))).sendRoundMessage(0);
 				
-				timerEndpoint.schedule(this, 5000);
+				timerEndpoint.schedule(this, gossipInterval);
 			}
 			
 		};
-		
-		if (port == 6666) 
-			timerEndpoint.schedule(gossipTask, 5000);
+		 
+		timerEndpoint.schedule(gossipTask, gossipInterval);
 	}
 
 	@Override

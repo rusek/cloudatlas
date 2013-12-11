@@ -22,3 +22,18 @@ Uruchamia interpreter zapytań.
     mvn cobertura:cobertura
     
 Generuje raport z pokryciem kodu przez testy (dostępny w target/site/cobertura/).
+
+Uruchamianie aplikacji
+--------------------
+
+* `./registry.sh` - uruchamia rejestr RMI;
+* `./agent.sh <config>` - uruchamia agenta z podanym plikiem konfiguracyjnym;
+* `./client.sh <komenda> <arg1> <arg2> ...` - wykonuje podaną komendę klienta, `./client.sh --help` dla listy dostępnych komend  
+
+Opcje konfiguracyjne agenta
+--------------------
+
+* `zoneName` - globalna nazwa strefy agenta, np. `/uw/khaki13`; wartość wymagana;
+* `host` - nazwa hosta, na której agent nasłuchuje na przychodzące połączenia; domyślnie `localhost`;
+* `port` - numer portu, na którym agent nasłuchuje na przychodzące połączenia; wartość wymagana;
+* `gossipInterval` - odstęp pomiędzy kolejnymi plotkowaniami (w ms); domyślnie 5000;
