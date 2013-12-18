@@ -76,12 +76,14 @@ public class Client {
 		Command command = (shellMode ? shellCommands : consoleCommands).get(name);
 		if (command == null) {
 			out.println("Unrecognized command: " + name);
+		} else {
+			try {
+				command.execute(args);
+			} catch (Exception ex) {
+				command.printException(ex);
+			}
 		}
-		try {
-			command.execute(args);
-		} catch (Exception ex) {
-			command.printException(ex);
-		}
+		
 		out.flush();
 	}
 	
@@ -458,14 +460,20 @@ public class Client {
 			reader.setPrompt(">: ");
 			out = new PrintWriter(reader.getOutput());
 
-			String line;
+			String line = null;
 			while (!shouldQuit && (line = reader.readLine()) != null) {
-				String[] parts = StringUtils.trim(line).split("\\s+");
 				try {
-					executeCommand(parts[0], Arrays.asList(parts).subList(1, parts.length));
+					List<String> parts = Utils.splitArgs(line);
+					if (!parts.isEmpty()) {
+						executeCommand(parts.get(0), parts.subList(1, parts.size()));
+					}
 				} catch (Exception ex) {
 					printException(ex);
 				}
+				out.flush();
+			}
+			if (line == null) {
+				out.println();
 				out.flush();
 			}
 		}

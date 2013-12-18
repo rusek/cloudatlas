@@ -37,3 +37,4 @@ Opcje konfiguracyjne agenta
 * `host` - nazwa hosta, na której agent nasłuchuje na przychodzące połączenia; domyślnie `localhost`;
 * `port` - numer portu, na którym agent nasłuchuje na przychodzące połączenia; wartość wymagana;
 * `gossipInterval` - odstęp pomiędzy kolejnymi plotkowaniami (w ms); domyślnie 5000;
+* `fallbackContacts` - lista zapasowych kontaktów, w formacie `hostname:port, hostname:port, ...`; domyślnie pusta;

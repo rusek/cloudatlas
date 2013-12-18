@@ -56,7 +56,7 @@ public class Main {
 		MotherIsland motherIsland = new MotherIsland();
 		PluggableIslandExecutor islandExecutor = new PluggableIslandExecutor(motherIsland);
 		
-		StateIsland stateIsland = new StateIsland(zoneName);
+		StateIsland stateIsland = new StateIsland(zoneName, properties);
 		islandExecutor.addIsland(stateIsland);
 		
 		CommandFacadeIsland commandFacadeIsland = new CommandFacadeIsland(zoneName);

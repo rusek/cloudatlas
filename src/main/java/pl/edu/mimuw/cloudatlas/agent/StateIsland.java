@@ -3,11 +3,15 @@ package pl.edu.mimuw.cloudatlas.agent;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Properties;
 import java.util.Random;
+
+import org.apache.commons.lang.StringUtils;
 
 import pl.edu.mimuw.cloudatlas.attributes.ContactValue;
 import pl.edu.mimuw.cloudatlas.attributes.IntegerValue;
 import pl.edu.mimuw.cloudatlas.attributes.TimeValue;
+import pl.edu.mimuw.cloudatlas.attributes.ValueFormatException;
 import pl.edu.mimuw.cloudatlas.islands.PluggableIsland;
 import pl.edu.mimuw.cloudatlas.zones.Attribute;
 import pl.edu.mimuw.cloudatlas.zones.Zone;
@@ -20,7 +24,7 @@ public class StateIsland extends PluggableIsland implements StateProviderIsland 
 	private Zone myZone;
 	private List<ContactValue> fallbackContacts = new ArrayList<ContactValue>();
 	
-	public StateIsland(String zoneName) {
+	public StateIsland(String zoneName, Properties properties) {
 		rootZone = Zone.createRootWithOwner(zoneName);
 		
 		Zone zone = rootZone;
@@ -30,6 +34,21 @@ public class StateIsland extends PluggableIsland implements StateProviderIsland 
 		
 		myZone = zone;
 		myZone.getZMI().setAttribute("cardinality", new IntegerValue(1));
+		
+		initFallbackContacts(properties.getProperty("fallbackContacts"));
+	}
+	
+	private void initFallbackContacts(String contacts) {
+		if (contacts == null) {
+			return;
+		}
+		for (String contact : StringUtils.trim(contacts).split(",\\s*")) {
+			try {
+				fallbackContacts.add(ContactValue.parseContact(contact));
+			} catch (ValueFormatException e) {
+				throw new IllegalArgumentException(e);
+			}
+		}
 	}
 
 	@Override
