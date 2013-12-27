@@ -21,8 +21,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang.StringUtils;
-
 import jline.console.ConsoleReader;
 import jline.console.completer.Completer;
 import jline.console.completer.StringsCompleter;
@@ -56,6 +54,10 @@ public class Client {
 		addCommonCommand(new SetFallbackContactsCommand());
 		addCommonCommand(new ShowStatsCommand());
 		addCommonCommand(new SendStatsCommand());
+		addCommonCommand(new InstallQueryCommand());
+		addCommonCommand(new InstallQueryAtCommand());
+		addCommonCommand(new UninstallQueryCommand());
+		addCommonCommand(new UninstallQueryAtCommand());
 		addCommonCommand(new ExtinguishCommand());
 		addShellCommand(new ReconnectCommand());
 		addShellCommand(new QuitCommand());
@@ -375,6 +377,137 @@ public class Client {
 			println("    Remotely shuts down agent.");
 		}
 		
+	}
+	
+	private class InstallQueryCommand extends FacadeCommand {
+		
+		private String attributeName;
+		private String query;
+
+		@Override
+		public void prepare(List<String> args) throws Exception {
+			if (args.size() != 2) {
+				throw new IllegalArgumentException("installQuery command takes exactly 2 arguments");
+			}
+			attributeName = args.get(0);
+			query = args.get(1);
+		}
+
+		@Override
+		public void executeOnFacade(CommandFacade facade) throws Exception {
+			facade.installQuery(attributeName, query);
+			
+		}
+
+		@Override
+		public String getName() {
+			return "installQuery";
+		}
+
+		@Override
+		public void printHelp() {
+			println("  - installQuery <&attributeName> <query>");
+			println("    Installs a given query in all agent zones.");
+			
+		}
+	}
+
+	private class InstallQueryAtCommand extends FacadeCommand {
+
+		private String zoneName;
+		private String attributeName;
+		private String query;
+
+		@Override
+		public void prepare(List<String> args) throws Exception {
+			if (args.size() != 3) {
+				throw new IllegalArgumentException("installQuery command takes exactly 3 arguments");
+			}
+			zoneName = args.get(0);
+			attributeName = args.get(1);
+			query = args.get(2);
+		}
+
+		@Override
+		public void executeOnFacade(CommandFacade facade) throws Exception {
+			facade.installQueryAt(zoneName, attributeName, query);
+			
+		}
+
+		@Override
+		public String getName() {
+			return "installQueryAt";
+		}
+
+		@Override
+		public void printHelp() {
+			println("  - installQueryAt <zoneName> <&attributeName> <query>");
+			println("    Installs a given query in a given zone.");
+			
+		}
+	}
+	
+	private class UninstallQueryCommand extends FacadeCommand {
+		
+		private String attributeName;
+
+		@Override
+		public void prepare(List<String> args) throws Exception {
+			if (args.size() != 1) {
+				throw new IllegalArgumentException("uninstallQuery command takes exactly 1 argument");
+			}
+			attributeName = args.get(0);
+		}
+
+		@Override
+		public void executeOnFacade(CommandFacade facade) throws Exception {
+			facade.uninstallQuery(attributeName);
+			
+		}
+
+		@Override
+		public String getName() {
+			return "uninstallQuery";
+		}
+
+		@Override
+		public void printHelp() {
+			println("  - uninstallQuery <&attributeName>");
+			println("    Uninstalls a given query from all agent zones.");
+			
+		}
+	}
+
+	private class UninstallQueryAtCommand extends FacadeCommand {
+
+		private String zoneName;
+		private String attributeName;
+
+		@Override
+		public void prepare(List<String> args) throws Exception {
+			if (args.size() != 2) {
+				throw new IllegalArgumentException("uninstallQueryAt command takes exactly 2 arguments");
+			}
+			zoneName = args.get(0);
+			attributeName = args.get(1);
+		}
+
+		@Override
+		public void executeOnFacade(CommandFacade facade) throws Exception {
+			facade.uninstallQueryAt(zoneName, attributeName);
+		}
+
+		@Override
+		public String getName() {
+			return "uninstallQueryAt";
+		}
+
+		@Override
+		public void printHelp() {
+			println("  - uninstallQueryAt <zoneName> <&attributeName>");
+			println("    Uninstalls a given query from a given zone.");
+			
+		}
 	}
 	
 	private class QuitCommand extends Command {

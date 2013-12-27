@@ -19,7 +19,10 @@ import pl.edu.mimuw.cloudatlas.islands.ChildEndpoint;
 import pl.edu.mimuw.cloudatlas.islands.ChildIsland;
 import pl.edu.mimuw.cloudatlas.islands.MotherEndpoint;
 import pl.edu.mimuw.cloudatlas.islands.PluggableIsland;
+import pl.edu.mimuw.cloudatlas.query.ParseException;
+import pl.edu.mimuw.cloudatlas.query.Parsers;
 import pl.edu.mimuw.cloudatlas.zones.Attribute;
+import pl.edu.mimuw.cloudatlas.zones.AttributeNames;
 import pl.edu.mimuw.cloudatlas.zones.ZoneNames;
 
 public class CommandFacadeIsland extends PluggableIsland implements ChildIsland,
@@ -71,7 +74,7 @@ public class CommandFacadeIsland extends PluggableIsland implements ChildIsland,
 			public void extinguish() {
 				try {
 					log.info("Unregistering command facade.");
-					
+					// FIXME deadlock if waiting for feedback from state island
 					try {
 						registry.unbind(CommandFacade.BIND_NAME);
 					} catch (NotBoundException e) { }
@@ -96,7 +99,7 @@ public class CommandFacadeIsland extends PluggableIsland implements ChildIsland,
 			StateProviderEndpoint<StateReceiverEndpoint<Void>> providerEndpoint) {
 		this.stateProviderEndpoint = providerEndpoint;
 		
-		return new StateReceiverAdapter<StateReceiverEndpoint<Void>>() {
+		return new StateReceiverEndpoint<StateReceiverEndpoint<Void>>() {
 
 			@Override
 			public void zoneAttributeFetched(
@@ -137,6 +140,17 @@ public class CommandFacadeIsland extends PluggableIsland implements ChildIsland,
 			@Override
 			public void attributeNotFound(StateReceiverEndpoint<Void> requestId) {
 				requestId.attributeNotFound(null);
+			}
+
+			@Override
+			public void queryInstalled(StateReceiverEndpoint<Void> requestId) {
+				requestId.queryInstalled(null);
+				
+			}
+
+			@Override
+			public void queryUninstalled(StateReceiverEndpoint<Void> requestId) {
+				requestId.queryUninstalled(null);
 			}
 			
 		};
@@ -238,32 +252,119 @@ public class CommandFacadeIsland extends PluggableIsland implements ChildIsland,
 			log.info("Received command setFallbackContacts(%s)", contacts);
 			stateProviderEndpoint.updateFallbackContacts(contacts);
 		}
+		
+		private void validateQuery(String query) throws RemoteException {
+			if (query == null) {
+				throw new RemoteException("Query is null");
+			}
+			try {
+				Parsers.parseQuery(query);
+			} catch (ParseException e) {
+				throw new RemoteException(e.getMessage());
+			}
+		}
 
 		@Override
 		public void installQuery(String attributeName, String query)
 				throws RemoteException {
-			// TODO Auto-generated method stub
+			log.info("Received command installQuery(%s, %s)", attributeName, query);
+			if (attributeName == null || !AttributeNames.isSpecialName(attributeName)) {
+				throw new RemoteException("Invalid attribute name: " + attributeName);
+			}
+			validateQuery(query);
 			
+			RequestHandler<Void> handler = new RequestHandler<Void>() {
+
+				@Override
+				public void queryInstalled(Void requestId) {
+					setResult(null);
+				}
+				
+			};
+			
+			stateProviderEndpoint.installQuery(handler, attributeName, null, query);
+			
+			handler.get();
 		}
 
 		@Override
-		public void installQueryAt(String attributeName, String zoneName,
+		public void installQueryAt(String zoneName, String attributeName,
 				String query) throws RemoteException {
-			// TODO Auto-generated method stub
+			log.info("Received command installQueryAt(%s, %s, %s)", attributeName, zoneName, query);
+			if (attributeName == null || !AttributeNames.isSpecialName(attributeName)) {
+				throw new RemoteException("Invalid attribute name: " + attributeName);
+			}
+			if (zoneName == null || !ZoneNames.isGlobalName(zoneName)) {
+				throw new RemoteException("Invalid zone name: " + zoneName);
+			}
+			validateQuery(query);
 			
+			RequestHandler<Void> handler = new RequestHandler<Void>() {
+
+				@Override
+				public void queryInstalled(Void requestId) {
+					setResult(null);
+				}
+				
+				@Override
+				public void zoneNotFound(Void requestId) {
+					setException(new RemoteException("Zone not found"));
+				}
+				
+			};
+			
+			stateProviderEndpoint.installQuery(handler, attributeName, zoneName, query);
+			
+			handler.get();
 		}
 
 		@Override
 		public void uninstallQuery(String attributeName) throws RemoteException {
-			// TODO Auto-generated method stub
+			if (attributeName == null || !AttributeNames.isSpecialName(attributeName)) {
+				throw new RemoteException("Invalid attribute name: " + attributeName);
+			}
 			
+			RequestHandler<Void> handler = new RequestHandler<Void>() {
+
+				@Override
+				public void queryUninstalled(Void requestId) {
+					setResult(null);
+				}
+				
+			};
+			
+			stateProviderEndpoint.uninstallQuery(handler, attributeName, null);
+			
+			handler.get();
 		}
 
 		@Override
-		public void unintallQueryAt(String attributeName, String zoneName)
+		public void uninstallQueryAt(String zoneName, String attributeName)
 				throws RemoteException {
-			// TODO Auto-generated method stub
+			if (attributeName == null || !AttributeNames.isSpecialName(attributeName)) {
+				throw new RemoteException("Invalid attribute name: " + attributeName);
+			}
+			if (zoneName == null || !ZoneNames.isGlobalName(zoneName)) {
+				throw new RemoteException("Invalid zone name: " + zoneName);
+			}
 			
+			RequestHandler<Void> handler = new RequestHandler<Void>() {
+
+				@Override
+				public void queryUninstalled(Void requestId) {
+					setResult(null);
+				}
+				
+				@Override
+				public void zoneNotFound(Void requestId) {
+					setException(new RemoteException("Zone not found"));
+				}
+				
+			};
+			
+			stateProviderEndpoint.uninstallQuery(handler, attributeName, zoneName);
+			
+			handler.get();
 		}
 		
 	}

@@ -69,8 +69,10 @@ public class Main {
 		
 		MotherTube.entangle(commandFacadeIsland, motherIsland);
 		MotherTube.entangle(socketIsland, motherIsland);
+		MotherTube.entangle(stateIsland, motherIsland);
 		StateTube.entangle(commandFacadeIsland, stateIsland);
 		TimerTube.entangle(socketIsland, timerIsland);
+		TimerTube.entangle(stateIsland, timerIsland);
 		GossipTube.entangle(socketIsland, stateIsland);
 		
 		motherIsland.spinCarouselUntilInterrupted();

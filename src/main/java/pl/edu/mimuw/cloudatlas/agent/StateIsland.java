@@ -17,21 +17,41 @@ import pl.edu.mimuw.cloudatlas.attributes.IntegerValue;
 import pl.edu.mimuw.cloudatlas.attributes.StringValue;
 import pl.edu.mimuw.cloudatlas.attributes.TimeValue;
 import pl.edu.mimuw.cloudatlas.attributes.ValueFormatException;
+import pl.edu.mimuw.cloudatlas.islands.ChildEndpoint;
+import pl.edu.mimuw.cloudatlas.islands.ChildIsland;
+import pl.edu.mimuw.cloudatlas.islands.MotherEndpoint;
 import pl.edu.mimuw.cloudatlas.islands.PluggableIsland;
+import pl.edu.mimuw.cloudatlas.islands.TimerEndpoint;
+import pl.edu.mimuw.cloudatlas.islands.TimerFeedbackEndpoint;
+import pl.edu.mimuw.cloudatlas.islands.TimerFeedbackIsland;
 import pl.edu.mimuw.cloudatlas.zones.Attribute;
 import pl.edu.mimuw.cloudatlas.zones.AttributeNames;
 import pl.edu.mimuw.cloudatlas.zones.ZMI;
 import pl.edu.mimuw.cloudatlas.zones.Zone;
 import pl.edu.mimuw.cloudatlas.zones.ZoneNames;
 
-public class StateIsland extends PluggableIsland implements StateProviderIsland, GossipListenerIsland {
+public class StateIsland extends PluggableIsland implements
+		ChildIsland,
+		StateProviderIsland,
+		GossipListenerIsland,
+		TimerFeedbackIsland<Runnable> {
 	
-	private static Logger log = LogManager.getFormatterLogger(DatagramSocketIsland.class);
+	public static long DEFAULT_ZONE_REFRESH_INTERVAL = 5000;
+	public static long DEFAULT_MAX_ZONE_AGE = 60000;
+	
+	private static Logger log = LogManager.getFormatterLogger(StateIsland.class);
 	
 	private Random random = new Random();
 	private Zone rootZone;
 	private Zone myZone;
 	private List<ContactValue> fallbackContacts = new ArrayList<ContactValue>();
+	private long zoneRefreshInterval;
+	private long maxZoneAge;
+	
+	private ZoneSiblingsPurger zoneSiblingsPurger;
+	private ZoneAncestorsRefresher zoneAncestorsRefresher;
+	
+	private TimerEndpoint<Runnable> timerEndpoint;
 	
 	public StateIsland(String zoneName, Properties properties) {
 		rootZone = Zone.createRootWithOwner(zoneName);
@@ -43,6 +63,23 @@ public class StateIsland extends PluggableIsland implements StateProviderIsland,
 		
 		myZone = zone;
 		myZone.getZMI().setAttribute("cardinality", new IntegerValue(1));
+		
+		String zoneRefreshIntervalString = properties.getProperty("zoneRefreshInterval");
+		if (zoneRefreshIntervalString == null) {
+			zoneRefreshInterval = DEFAULT_ZONE_REFRESH_INTERVAL;
+		} else {
+			zoneRefreshInterval = Long.parseLong(zoneRefreshIntervalString);
+		}
+		
+		String maxZoneAgeString = properties.getProperty("maxZoneAge");
+		if (maxZoneAgeString == null) {
+			maxZoneAge = DEFAULT_MAX_ZONE_AGE;
+		} else {
+			maxZoneAge = Long.parseLong(maxZoneAgeString);
+		}
+		
+		zoneSiblingsPurger = new ZoneSiblingsPurger(zoneName, maxZoneAge);
+		zoneAncestorsRefresher = new ZoneAncestorsRefresher(zoneName);
 		
 		initFallbackContacts(properties.getProperty("fallbackContacts"));
 	}
@@ -59,7 +96,53 @@ public class StateIsland extends PluggableIsland implements StateProviderIsland,
 			}
 		}
 	}
+	
+	private void refreshZones() {
+		log.debug("Refreshing zones");
+		zoneSiblingsPurger.purgeSiblings(rootZone);
+		zoneAncestorsRefresher.refreshAncestors(rootZone);
+		myZone.getZMI().setAttribute("timestamp", TimeValue.now());
+	}
 
+	@Override
+	public ChildEndpoint mountMother(final MotherEndpoint motherEndpoint) {
+		return new ChildEndpoint() {
+
+			@Override
+			public void ignite() {
+				timerEndpoint.schedule(new Runnable() {
+
+					@Override
+					public void run() {
+						refreshZones();
+						timerEndpoint.schedule(this, zoneRefreshInterval);
+					}
+					
+				}, zoneRefreshInterval);
+			}
+
+			@Override
+			public void extinguish() {
+				motherEndpoint.childExtinguished();
+			}
+			
+		};
+	}
+
+	@Override
+	public TimerFeedbackEndpoint<Runnable> mountTimer(TimerEndpoint<Runnable> timerEndpoint) {
+		this.timerEndpoint = timerEndpoint;
+		
+		return new TimerFeedbackEndpoint<Runnable>() {
+
+			@Override
+			public void fire(Runnable object) {
+				object.run();
+			}
+			
+		};
+	}
+	
 	@Override
 	public <RId> StateProviderEndpoint<RId> mountStateReceiver(final StateReceiverEndpoint<RId> receiverEndpoint) {
 		return new StateProviderEndpoint<RId>() {

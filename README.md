@@ -37,4 +37,6 @@ Opcje konfiguracyjne agenta
 * `host` - nazwa hosta, na której agent nasłuchuje na przychodzące połączenia; domyślnie `localhost`;
 * `port` - numer portu, na którym agent nasłuchuje na przychodzące połączenia; wartość wymagana;
 * `gossipInterval` - odstęp pomiędzy kolejnymi plotkowaniami (w ms); domyślnie 5000;
+* `zoneRefreshInterval` - odstęp pomiędzy odświeżeniami ZMI (w ms); domyślnie 5000;
+* `maxZoneAge` - wiek ZMI, po przekroczeniu którego strefa jest usuwana z pamięci agenta (w ms); domyślnie 60000;
 * `fallbackContacts` - lista zapasowych kontaktów, w formacie `hostname:port, hostname:port, ...`; domyślnie pusta;

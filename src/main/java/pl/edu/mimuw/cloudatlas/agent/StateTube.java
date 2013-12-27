@@ -249,14 +249,27 @@ public class StateTube<RId> extends Tube<StateReceiverEndpoint<RId>, StateProvid
 	}
 
 	@Override
-	public void queryInstalled(RId requestId) {
-		// TODO Auto-generated method stub
-		
+	public void queryInstalled(final RId requestId) {
+		getLeftCarousel().enqueue(new Runnable() {
+
+			@Override
+			public void run() {
+				getLeftEndpoint().queryInstalled(requestId);
+			}
+			
+		});
 	}
 
 	@Override
-	public void queryUninstalled(RId requestId) {
-		// TODO Auto-generated method stub
+	public void queryUninstalled(final RId requestId) {
+		getLeftCarousel().enqueue(new Runnable() {
+
+			@Override
+			public void run() {
+				getLeftEndpoint().queryUninstalled(requestId);
+			}
+			
+		});
 		
 	}
 }

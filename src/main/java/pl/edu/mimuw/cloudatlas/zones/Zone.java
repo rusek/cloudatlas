@@ -91,6 +91,14 @@ public class Zone {
 		return children.values();
 	}
 	
+	public Collection<String> getChildNames() {
+		return children.keySet();
+	}
+	
+	public void removeChild(String name) {
+		children.remove(name);
+	}
+	
 	public Collection<ZMI> getChildZMIs() {
 		List<ZMI> result = new ArrayList<ZMI>();
 		for (Zone child : children.values()) {
