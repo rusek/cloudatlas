@@ -1,5 +1,8 @@
 package pl.edu.mimuw.cloudatlas.zones;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -60,5 +63,35 @@ public class ZMI {
 	public Value getAttributeValue(String name) {
 		Attribute attribute = attributes.get(name);
 		return attribute == null ? null : attribute.getValue();
+	}
+	
+	public ZMI deepCopy() {
+		ZMI copy = new ZMI();
+		for (Attribute attr : attributes.values()) {
+			copy.attributes.put(attr.getName(), attr.deepCopy());
+		}
+		return copy;
+	}
+	
+	public void compactWrite(DataOutput output) throws IOException {
+		output.writeInt(attributes.size());
+		for (Attribute attribute : attributes.values()) {
+			attribute.compactWrite(output);
+		}
+	}
+	
+	public static ZMI compactRead(DataInput input) throws IOException {
+		int size = input.readInt();
+		if (size < 0) {
+			throw new IOException("Negative length");
+		}
+		
+		ZMI zmi = new ZMI();
+		for (int i = 0; i < size; i++) {
+			Attribute attribute = Attribute.compactRead(input);
+			zmi.attributes.put(attribute.getName(), attribute);
+		}
+		
+		return zmi;
 	}
 }

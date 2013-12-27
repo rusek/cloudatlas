@@ -7,6 +7,8 @@ import java.util.List;
 import pl.edu.mimuw.cloudatlas.attributes.ContactValue;
 import pl.edu.mimuw.cloudatlas.islands.Tube;
 import pl.edu.mimuw.cloudatlas.zones.Attribute;
+import pl.edu.mimuw.cloudatlas.zones.AttributeNames;
+import pl.edu.mimuw.cloudatlas.zones.ZoneNames;
 
 public class StateTube<RId> extends Tube<StateReceiverEndpoint<RId>, StateProviderEndpoint<RId>> implements
 		StateReceiverEndpoint<RId>, StateProviderEndpoint<RId> {
@@ -109,14 +111,35 @@ public class StateTube<RId> extends Tube<StateReceiverEndpoint<RId>, StateProvid
 			
 		});
 	}
-
+	
 	@Override
-	public void getContactForGossiping(final RId requestId) {
+	public void installQuery(final RId requestId, final String attributeName,
+			final String zoneName, final String query) {
+		assert AttributeNames.isSpecialName(attributeName);
+		assert zoneName == null || ZoneNames.isGlobalName(zoneName);
+		assert query != null;
+		
 		getRightCarousel().enqueue(new Runnable() {
 
 			@Override
 			public void run() {
-				getRightEndpoint().getContactForGossiping(requestId);
+				getRightEndpoint().installQuery(requestId, attributeName, zoneName, query);
+			}
+			
+		});
+	}
+
+	@Override
+	public void uninstallQuery(final RId requestId, final String attributeName,
+			final String zoneName) {
+		assert AttributeNames.isSpecialName(attributeName);
+		assert zoneName == null || ZoneNames.isGlobalName(zoneName);
+		
+		getRightCarousel().enqueue(new Runnable() {
+
+			@Override
+			public void run() {
+				getRightEndpoint().uninstallQuery(requestId, attributeName, zoneName);
 			}
 			
 		});
@@ -226,14 +249,14 @@ public class StateTube<RId> extends Tube<StateReceiverEndpoint<RId>, StateProvid
 	}
 
 	@Override
-	public void contactForGossipingReceived(final RId requestId, final ContactValue contact) {
-		getLeftCarousel().enqueue(new Runnable() {
+	public void queryInstalled(RId requestId) {
+		// TODO Auto-generated method stub
+		
+	}
 
-			@Override
-			public void run() {
-				getLeftEndpoint().contactForGossipingReceived(requestId, contact);
-			}
-			
-		});
+	@Override
+	public void queryUninstalled(RId requestId) {
+		// TODO Auto-generated method stub
+		
 	}
 }

@@ -2,7 +2,6 @@ package pl.edu.mimuw.cloudatlas.agent;
 
 import java.util.Collection;
 
-import pl.edu.mimuw.cloudatlas.attributes.ContactValue;
 import pl.edu.mimuw.cloudatlas.zones.Attribute;
 
 public class StateReceiverAdapter<RId> implements StateReceiverEndpoint<RId> {
@@ -46,7 +45,12 @@ public class StateReceiverAdapter<RId> implements StateReceiverEndpoint<RId> {
 	}
 
 	@Override
-	public void contactForGossipingReceived(RId requestId, ContactValue contact) {
+	public void queryInstalled(RId requestId) {
+		throw new RuntimeException("Unexpected callback invoked");
+	}
+
+	@Override
+	public void queryUninstalled(RId requestId) {
 		throw new RuntimeException("Unexpected callback invoked");
 	}
 }

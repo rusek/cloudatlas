@@ -168,6 +168,10 @@ public class DatagramStreamRepository {
 			}
 		}
 		
+		public boolean isClosed() {
+			return closed;
+		}
+		
 		public void setHandler(StreamHandler handler) {
 			this.handler = handler;
 		}

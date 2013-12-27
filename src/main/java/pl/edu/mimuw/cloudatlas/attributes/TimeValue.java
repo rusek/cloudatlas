@@ -21,6 +21,10 @@ public class TimeValue extends SimpleValue implements Comparable<TimeValue> {
 		return this.timestamp;
 	}
 	
+	public TimeValue addDuration(long dur) {
+		return new TimeValue(timestamp + dur);
+	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;

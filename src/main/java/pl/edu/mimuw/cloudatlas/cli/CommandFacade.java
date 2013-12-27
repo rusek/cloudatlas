@@ -20,5 +20,13 @@ public interface CommandFacade extends Remote {
 	public void setFallbackContacts(List<ContactValue> contacts) throws RemoteException;
 	
 	public void extinguish() throws RemoteException;
+	
+	public void installQuery(String attributeName, String query) throws RemoteException;
+	
+	public void installQueryAt(String attributeName, String zoneName, String query) throws RemoteException;
+	
+	public void uninstallQuery(String attributeName) throws RemoteException;
+	
+	public void unintallQueryAt(String attributeName, String zoneName) throws RemoteException;
 }
 

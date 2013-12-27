@@ -20,5 +20,7 @@ public interface StateProviderEndpoint<RId> {
 	
 	public void updateFallbackContacts(Collection<ContactValue> fallbackContacts);
 	
-	public void getContactForGossiping(RId requestId);
+	public void installQuery(RId requestId, String attributeName, String zoneName, String query);
+	
+	public void uninstallQuery(RId requestId, String attributeName, String zoneName);
 }

@@ -1,8 +1,12 @@
 package pl.edu.mimuw.cloudatlas.zones;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 import java.io.Serializable;
 
 import pl.edu.mimuw.cloudatlas.attributes.Type;
+import pl.edu.mimuw.cloudatlas.attributes.Types;
 import pl.edu.mimuw.cloudatlas.attributes.Value;
 
 public class Attribute implements Serializable {
@@ -53,5 +57,32 @@ public class Attribute implements Serializable {
 	
 	public Attribute deepCopy() {
 		return new Attribute(name, type, value);
+	}
+	
+	public void compactWrite(DataOutput output) throws IOException {
+		output.writeUTF(name);
+		Types.compactWriteType(type, output);
+		output.writeBoolean(value != null);
+		if (value != null) {
+			value.compactWrite(output);
+		}
+	}
+	
+	public static Attribute compactRead(DataInput input) throws IOException {
+		String name = input.readUTF();
+		if (!AttributeNames.isAttributeName(name)) {
+			throw new IOException("Not an attribute name: " + name);
+		}
+		
+		Type<? extends Value> type = Types.compactReadType(input);
+		
+		boolean present = input.readBoolean();
+		if (present) {
+			Value value = type.compactReadValue(input);
+			
+			return new Attribute(name, type, value);
+		} else {
+			return new Attribute(name, type, null);
+		}
 	}
 }

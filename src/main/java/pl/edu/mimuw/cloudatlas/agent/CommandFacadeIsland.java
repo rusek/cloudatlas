@@ -238,6 +238,33 @@ public class CommandFacadeIsland extends PluggableIsland implements ChildIsland,
 			log.info("Received command setFallbackContacts(%s)", contacts);
 			stateProviderEndpoint.updateFallbackContacts(contacts);
 		}
+
+		@Override
+		public void installQuery(String attributeName, String query)
+				throws RemoteException {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void installQueryAt(String attributeName, String zoneName,
+				String query) throws RemoteException {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void uninstallQuery(String attributeName) throws RemoteException {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void unintallQueryAt(String attributeName, String zoneName)
+				throws RemoteException {
+			// TODO Auto-generated method stub
+			
+		}
 		
 	}
 	

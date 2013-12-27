@@ -31,6 +31,10 @@ public class Zone {
 		return zmi;
 	}
 	
+	public void setZMI(ZMI zmi) {
+		this.zmi = zmi;
+	}
+	
 	public boolean isRoot() {
 		return globalName.equals("/");
 	}

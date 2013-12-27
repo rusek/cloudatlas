@@ -12,6 +12,8 @@ public class Types {
 	}
 	
 	public static void compactWriteType(Type<? extends Value> type, DataOutput output) throws IOException {
+		assert DISCRIMINATORS.containsKey(type.getClass()) : "Unregistered type: " + type;
+		
 		output.writeByte(DISCRIMINATORS.get(type.getClass()));
 		type.compactWrite(output);
 	}
@@ -58,13 +60,14 @@ public class Types {
 		});
 	}
 	
-	{
+	static {
 		registerSimpleType((byte) 1, SimpleType.BOOLEAN);
 		registerSimpleType((byte) 2, SimpleType.INTEGER);
 		registerSimpleType((byte) 3, SimpleType.DOUBLE);
 		registerSimpleType((byte) 4, SimpleType.STRING);
 		registerSimpleType((byte) 5, SimpleType.TIME);
 		registerSimpleType((byte) 6, SimpleType.DURATION);
+		registerSimpleType((byte) 7, SimpleType.CONTACT);
 		registerType((byte) 101, ListType.class, new TypeReader() {
 			public Type<? extends Value> compactReadType(DataInput input) throws IOException {
 				SimpleType<? extends SimpleValue> itemType = Types.compactReadSimpleType(input);

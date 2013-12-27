@@ -62,7 +62,7 @@ public class Main {
 		CommandFacadeIsland commandFacadeIsland = new CommandFacadeIsland(zoneName);
 		islandExecutor.addIsland(commandFacadeIsland);
 		
-		DatagramSocketIsland socketIsland = new DatagramSocketIsland(properties);
+		DatagramSocketIsland socketIsland = new DatagramSocketIsland(zoneName, properties);
 		islandExecutor.addIsland(socketIsland);
 		
 		TimerIslandImpl timerIsland = new TimerIslandImpl();
@@ -71,7 +71,7 @@ public class Main {
 		MotherTube.entangle(socketIsland, motherIsland);
 		StateTube.entangle(commandFacadeIsland, stateIsland);
 		TimerTube.entangle(socketIsland, timerIsland);
-		StateTube.entangle(socketIsland, stateIsland);
+		GossipTube.entangle(socketIsland, stateIsland);
 		
 		motherIsland.spinCarouselUntilInterrupted();
 		
