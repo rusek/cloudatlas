@@ -50,15 +50,19 @@ public class StateIsland extends PluggableIsland implements
 	
 	private ZoneSiblingsPurger zoneSiblingsPurger;
 	private ZoneAncestorsRefresher zoneAncestorsRefresher;
+	private ContactSelector contactSelector;
 	
 	private TimerEndpoint<Runnable> timerEndpoint;
 	
 	public StateIsland(String zoneName, Properties properties) {
-		rootZone = Zone.createRootWithOwner(zoneName);
+		ContactValue myContact = new ContactValue(
+				PropertyReader.getHost(properties),
+				PropertyReader.getPort(properties));
+		rootZone = Zone.createRootWithOwner(zoneName, myContact);
 		
 		Zone zone = rootZone;
 		for (String localName : ZoneNames.splitGlobalName(zoneName)) {
-			zone = zone.addChildWithOwner(localName, zoneName);
+			zone = zone.addChildWithOwner(localName, zoneName, myContact);
 		}
 		
 		myZone = zone;
@@ -80,6 +84,7 @@ public class StateIsland extends PluggableIsland implements
 		
 		zoneSiblingsPurger = new ZoneSiblingsPurger(zoneName, maxZoneAge);
 		zoneAncestorsRefresher = new ZoneAncestorsRefresher(zoneName);
+		contactSelector = new ContactSelector(zoneName, properties);
 		
 		initFallbackContacts(properties.getProperty("fallbackContacts"));
 	}
@@ -259,8 +264,8 @@ public class StateIsland extends PluggableIsland implements
 
 			@Override
 			public void getContactForGossiping(RId requestId) {
-				ContactValue contact = null;
-				if (!fallbackContacts.isEmpty()) {
+				ContactValue contact = contactSelector.nextContact(rootZone);
+				if (contact == null && !fallbackContacts.isEmpty()) {
 					contact = fallbackContacts.get(random.nextInt(fallbackContacts.size()));
 				}
 				transmitterEndpoint.contactForGossipingReceived(requestId, contact);
@@ -326,7 +331,7 @@ public class StateIsland extends PluggableIsland implements
 					return true;
 				} else {
 					TimeValue zoneTimestamp = getTimestamp(zone.getZMI());
-					return zoneTimestamp.getTimestamp() >= timestamp.getTimestamp();
+					return zoneTimestamp.getTimestamp() > timestamp.getTimestamp();
 				}
 			}
 			

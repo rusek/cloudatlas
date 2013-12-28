@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import pl.edu.mimuw.cloudatlas.attributes.ContactValue;
 import pl.edu.mimuw.cloudatlas.attributes.IntegerValue;
 import pl.edu.mimuw.cloudatlas.attributes.SetValue;
 import pl.edu.mimuw.cloudatlas.attributes.SimpleType;
@@ -117,28 +118,31 @@ public class Zone {
 		return child;
 	}
 	
-	public Zone addChildWithOwner(String localName, String owner) {
+	public Zone addChildWithOwner(String localName, String owner, ContactValue ownerContact) {
 		assert ZoneNames.isGlobalName(owner);
+		assert ownerContact != null;
 		
-		return addChild(localName, new ZMI()).setupZoneZMI(owner);
+		return addChild(localName, new ZMI()).setupZoneZMI(owner, ownerContact);
 	}
 	
 	public static Zone createRoot(ZMI zmi) {
 		return new Zone(null, "/", zmi);
 	}
 	
-	public static Zone createRootWithOwner(String owner) {
+	public static Zone createRootWithOwner(String owner, ContactValue ownerContact) {
 		assert ZoneNames.isGlobalName(owner);
 		
-		return createRoot(new ZMI()).setupZoneZMI(owner);
+		return createRoot(new ZMI()).setupZoneZMI(owner, ownerContact);
 	}
 	
-	private Zone setupZoneZMI(String owner) {
+	private Zone setupZoneZMI(String owner, ContactValue ownerContact) {
 		zmi.addAttribute("level", new IntegerValue(getLevel()));
 		zmi.addAttribute("name", SimpleType.STRING, isRoot() ? null : new StringValue(getLocalName()));
 		zmi.addAttribute("owner", new StringValue(owner));
 		zmi.addAttribute("timestamp", TimeValue.now());
-		zmi.addAttribute("contacts", SetValue.of(SimpleType.CONTACT));
+		SetValue<ContactValue> contacts = SetValue.of(SimpleType.CONTACT);
+		contacts.addItem(ownerContact);
+		zmi.addAttribute("contacts", contacts);
 		zmi.addAttribute("cardinality", new IntegerValue(0));
 		
 		return this;

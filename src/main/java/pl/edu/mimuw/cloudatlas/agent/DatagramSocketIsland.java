@@ -15,6 +15,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -62,13 +63,8 @@ public class DatagramSocketIsland extends PluggableIsland implements
 	
 	public DatagramSocketIsland(String zoneName, Properties properties) {
 		this.zoneName = zoneName;
-		this.host = properties.getProperty("host", "localhost");
-		
-		String portString = properties.getProperty("port");
-		if (portString == null) {
-			throw new IllegalArgumentException("Missing port property");
-		}
-		this.port = Integer.parseInt(portString);
+		this.host = PropertyReader.getHost(properties);
+		this.port = PropertyReader.getPort(properties);
 		
 		String gossipIntervalString = properties.getProperty("gossipInterval");
 		if (gossipIntervalString != null) {
@@ -219,6 +215,8 @@ public class DatagramSocketIsland extends PluggableIsland implements
 		private final Stream stream;
 		private StreamState state = StreamState.NEW;
 		private String peerName;
+		private Set<String> sentZMIs;
+		private Set<String> receivedZMIs;
 		
 		public StreamHandler(Stream stream) {
 			this.stream = stream;
@@ -322,6 +320,7 @@ public class DatagramSocketIsland extends PluggableIsland implements
 			Map<String, ZMI> zmis = readZMIs(input);
 			
 			log.debug("Received message with former ZMIs: %s", zmis.keySet());
+			receivedZMIs = zmis.keySet();
 			state = StreamState.WAITING_FOR_LISTENER;
 			gossipListenerEndpoint.exchangeZMIs(this, peerName, zmis);
 		}
@@ -330,8 +329,11 @@ public class DatagramSocketIsland extends PluggableIsland implements
 			Map<String, ZMI> zmis = readZMIs(input);
 			
 			log.debug("Received message with latter ZMIs: %s", zmis.keySet());
+			receivedZMIs = zmis.keySet();
 			state = StreamState.COMPLETED;
 			gossipListenerEndpoint.acceptZMIs(zmis);
+			
+			log.info("Gossiping to %s completed, sent: %s, received: %s", peerName, sentZMIs, receivedZMIs);
 		}
 		
 		private TimeValue getTimestamp(ZMI zmi) {
@@ -406,6 +408,7 @@ public class DatagramSocketIsland extends PluggableIsland implements
 			}
 			
 			log.debug("Timestamps exchanged for former ZMIs: %s", zmis.keySet());
+			sentZMIs = zmis.keySet();
 			state = StreamState.EXPECTING_LATTER_ZMIS;
 			stream.sendMessage(outputStream.toByteArray());
 		}
@@ -437,8 +440,11 @@ public class DatagramSocketIsland extends PluggableIsland implements
 			}
 			
 			log.debug("Former ZMIs exchanged for latter ZMIs %s", zmis.keySet());
+			sentZMIs = zmis.keySet();
 			state = StreamState.COMPLETED;
 			stream.sendMessage(outputStream.toByteArray());
+			
+			log.info("Gossiping from %s completed, sent: %s, received: %s", peerName, sentZMIs, receivedZMIs);
 		}
 		
 	}
