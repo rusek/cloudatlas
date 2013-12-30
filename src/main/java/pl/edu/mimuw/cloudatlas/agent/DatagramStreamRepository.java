@@ -162,7 +162,8 @@ public class DatagramStreamRepository {
 		
 		public long getSenderTimeDiff() {
 			if (timeDiff == null) {
-				return 0; // TODO log 
+				log.warn("No time difference available yet");
+				return 0;
 			} else {
 				return timeDiff;
 			}

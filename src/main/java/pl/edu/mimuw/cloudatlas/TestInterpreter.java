@@ -141,7 +141,7 @@ public class TestInterpreter {
 			
 			for (Stmt stmt : stmts) {
 				if (stmt instanceof SelectStmt) {
-					for (SelectionResult selectionResult : ((SelectStmt) stmt).evaluate(env)) {
+					for (SelectionResult selectionResult : ((SelectStmt) stmt).executeSelection(env)) {
 						if (selectionResult.getName() == null) {
 							throw new TestException("Unnamed sel_item in query: " + querySource);
 						}

@@ -3,10 +3,10 @@ package pl.edu.mimuw.cloudatlas.islands;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class PluggableIslandExecutor { // TODO more fancy name, 
+public class PluggableIslandExecutor {
 	
 	private MotherIsland mother;
-	private ExecutorService service = Executors.newFixedThreadPool(1);
+	private ExecutorService service = Executors.newSingleThreadExecutor();
 	
 	public PluggableIslandExecutor(MotherIsland mother) {
 		this.mother = mother;

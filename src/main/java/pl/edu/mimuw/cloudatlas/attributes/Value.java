@@ -4,7 +4,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.io.Serializable;
 
-public abstract class Value implements Serializable { // TODO make use of compactWrite()
+public abstract class Value implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 

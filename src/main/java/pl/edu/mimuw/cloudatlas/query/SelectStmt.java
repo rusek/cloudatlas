@@ -3,7 +3,6 @@ package pl.edu.mimuw.cloudatlas.query;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 
 import pl.edu.mimuw.cloudatlas.attributes.BooleanValue;
@@ -113,7 +112,8 @@ public class SelectStmt extends Stmt {
 		return rows;
 	}
 	
-	public List<SelectionResult> evaluate(Env env) throws EvaluationException {
+	@Override
+	public List<SelectionResult> executeSelection(Env env) throws EvaluationException {
 		List<Env.Row> rows = evaluateWhereAndOrderBy(env);
 		Env rowsEnv = env.subEnv(rows);
 		
@@ -124,13 +124,13 @@ public class SelectStmt extends Stmt {
 		return retVal;
 	}
 	
-	public Result evaluateAsExpr(Env env) throws EvaluationException {
+	public Result evaluate(Env env) throws EvaluationException {
 		Result result = env.getStoredResult(this);
 		if (result != null) {
 			return result;
 		}
 		
-		List<SelectionResult> stmtResult = evaluate(env);
+		List<SelectionResult> stmtResult = executeSelection(env);
 		if (stmtResult.size() != 1) {
 			throw new EvaluationException("Nested SELECT should return only one value");
 		}
@@ -232,11 +232,5 @@ public class SelectStmt extends Stmt {
 			return 0;
 		}
 		
-	}
-
-	@Override
-	public List<SelectionResult> executeSelection(Env env)
-			throws EvaluationException {
-		return evaluate(env); // TODO rename methods?
 	}
 }

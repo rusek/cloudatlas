@@ -75,7 +75,6 @@ public class CommandFacadeIsland extends PluggableIsland implements ChildIsland,
 			public void extinguish() {
 				try {
 					log.info("Unregistering command facade.");
-					// FIXME deadlock if waiting for feedback from state island
 					try {
 						registry.unbind(CommandFacade.BIND_NAME);
 					} catch (NotBoundException e) { }

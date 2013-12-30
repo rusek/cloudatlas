@@ -1,5 +1,7 @@
 package pl.edu.mimuw.cloudatlas.agent;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.Properties;
 
 public class PropertyReader {
@@ -18,4 +20,20 @@ public class PropertyReader {
 		return Integer.parseInt(portString);
 	}
 
+	public static Properties loadProperties(String path) throws IOException {
+		Properties properties = new Properties();
+		if (path == null) {
+			properties.load(Main.class.getClassLoader().getResourceAsStream("agent.properties"));
+		} else {
+			FileInputStream inputStream = new FileInputStream(path);
+			try {
+				properties.load(inputStream);
+			} finally {
+				try {
+					inputStream.close();
+				} catch (IOException ex) {}
+			}
+		}
+		return properties;
+	}
 }

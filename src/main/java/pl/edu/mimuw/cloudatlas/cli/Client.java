@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,6 +59,7 @@ public class Client {
 		addCommonCommand(new SetFallbackContactsCommand());
 		addCommonCommand(new ShowStatsCommand());
 		addCommonCommand(new SendStatsCommand());
+		addCommonCommand(new SendStatsLoopCommand());
 		addCommonCommand(new InstallQueryCommand());
 		addCommonCommand(new InstallQueryAtCommand());
 		addCommonCommand(new UninstallQueryCommand());
@@ -150,6 +152,10 @@ public class Client {
 			out.println(o);
 		}
 		
+		public void flush() {
+			out.flush();
+		}
+		
 		public void printException(Exception ex) {
 			if (ex instanceof IllegalArgumentException || ex instanceof IllegalStateException) {
 				println(ex.getMessage());
@@ -176,6 +182,11 @@ public class Client {
 		@Override
 		public void execute(List<String> args) throws Exception {
 			prepare(args);
+			executeOnFacades();
+			complete();
+		}
+		
+		protected void executeOnFacades() throws Exception {
 			if (connections.isEmpty()) {
 				throw new IllegalStateException("Not connected");
 			} else if (connections.size() == 1) {
@@ -192,7 +203,6 @@ public class Client {
 				}
 				indent = "";
 			}
-			complete();
 		}
 	}
 	
@@ -230,6 +240,52 @@ public class Client {
 					println(stat);
 				}
 			}
+		}
+	}
+
+	private class SendStatsLoopCommand extends FacadeCommand {
+		private List<Attribute> stats;
+		private long interval;
+
+		@Override
+		public String getName() {
+			return "sendStatsLoop";
+		}
+
+		@Override
+		public void printHelp() {
+			//       ************************************************************************
+			println("  - sendStatsLoop <interval>");
+			println("    Collects statistics and sends them to the agent every <interval>");
+			println("    miliseconds.");
+		}
+
+		@Override
+		public void prepare(List<String> args) throws Exception {
+			if (args.size() != 1) {
+				throw new IllegalArgumentException("sendStatsLoop command takes exactly 1 argument");
+			}
+			interval = Long.parseLong(args.get(0));
+		}
+
+		@Override
+		protected void executeOnFacades() throws Exception {
+			for (;;) {
+				stats = new StatsCollector().collectStats();
+				super.executeOnFacades();
+				println("Stats sent at " + new Date());
+				flush();
+				try {
+					Thread.sleep(interval);
+				} catch (InterruptedException e) {
+					return;
+				}
+			}
+		}
+
+		@Override
+		public void executeOnFacade(CommandFacade facade) throws Exception {
+			facade.setMyAttributes(stats);
 		}
 	}
 	

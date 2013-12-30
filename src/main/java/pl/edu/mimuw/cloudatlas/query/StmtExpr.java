@@ -11,7 +11,7 @@ public class StmtExpr extends Expr {
 	@Override
 	public Result evaluate(Env env) throws EvaluationException {
 		if (this.stmt instanceof SelectStmt) {
-			return ((SelectStmt) this.stmt).evaluateAsExpr(env);
+			return ((SelectStmt) this.stmt).evaluate(env);
 		} else {
 			throw new EvaluationException("Cannot compute value of " + this.stmt.getClass() + " in expression");
 		}

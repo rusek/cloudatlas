@@ -1,6 +1,5 @@
 package pl.edu.mimuw.cloudatlas.agent;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
 
@@ -19,25 +18,6 @@ public class Main {
 	
 	private static final Logger log = LogManager.getLogger();
 	
-	private Properties loadProperties() throws IOException {
-		Properties properties = new Properties();
-		properties.load(Main.class.getClassLoader().getResourceAsStream("agent.properties"));
-		return properties;
-	}
-	
-	private Properties loadProperties(String fileName) throws IOException {
-		FileInputStream inputStream = new FileInputStream(fileName);
-		try {
-			Properties properties = new Properties();
-			properties.load(inputStream);
-			return properties;
-		} finally {
-			try {
-				inputStream.close();
-			} catch (IOException ex) {}
-		}
-	}
-	
 	private String getZoneName(Properties properties) {
 		String zoneName = properties.getProperty("zoneName");
 		if (zoneName == null) {
@@ -50,7 +30,8 @@ public class Main {
 	}
 	
 	public void execute(String[] args) throws IOException {
-		Properties properties = args.length > 0 ? loadProperties(args[0]) : loadProperties();
+		Properties properties = args.length > 0 ? PropertyReader.loadProperties(args[0]) :
+			PropertyReader.loadProperties(null);
 		String zoneName = getZoneName(properties);
 		
 		MotherIsland motherIsland = new MotherIsland();

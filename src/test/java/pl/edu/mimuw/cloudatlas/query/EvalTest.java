@@ -791,6 +791,6 @@ public class EvalTest extends TestCase {
 	private static List<SelectionResult> evaluateSelect(String source, List<ZMI> zmis) throws EvaluationException, ParseException {
 		SelectStmt select = (SelectStmt) Parsers.parseQuery(source).get(0);
 		Env env = Env.createFromZMIs(zmis);
-		return select.evaluate(env);
+		return select.executeSelection(env);
 	}
 }
