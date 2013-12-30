@@ -11,7 +11,7 @@ public class AttributeNames {
 	
 	private static final Set<String> BUILTIN_NAMES = new HashSet<String>();
 	
-	{
+	static {
 		Collections.addAll(BUILTIN_NAMES, "level", "name", "owner", "timestamp", "contacts", "cardinality");
 	}
 

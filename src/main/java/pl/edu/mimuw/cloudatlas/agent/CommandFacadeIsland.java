@@ -5,6 +5,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Semaphore;
@@ -151,6 +152,13 @@ public class CommandFacadeIsland extends PluggableIsland implements ChildIsland,
 			@Override
 			public void queryUninstalled(StateReceiverEndpoint<Void> requestId) {
 				requestId.queryUninstalled(null);
+			}
+
+			@Override
+			public void zoneAttributesFetched(
+					StateReceiverEndpoint<Void> requestId,
+					Collection<Attribute> attributes) {
+				requestId.zoneAttributesFetched(null, attributes);
 			}
 			
 		};
@@ -320,6 +328,7 @@ public class CommandFacadeIsland extends PluggableIsland implements ChildIsland,
 
 		@Override
 		public void uninstallQuery(String attributeName) throws RemoteException {
+			log.info("Received command uninstallQuery(%s)", attributeName);
 			if (attributeName == null || !AttributeNames.isSpecialName(attributeName)) {
 				throw new RemoteException("Invalid attribute name: " + attributeName);
 			}
@@ -341,6 +350,7 @@ public class CommandFacadeIsland extends PluggableIsland implements ChildIsland,
 		@Override
 		public void uninstallQueryAt(String zoneName, String attributeName)
 				throws RemoteException {
+			log.info("Received command uninstallQueryAt(%s, %s)", zoneName, attributeName);
 			if (attributeName == null || !AttributeNames.isSpecialName(attributeName)) {
 				throw new RemoteException("Invalid attribute name: " + attributeName);
 			}
@@ -365,6 +375,56 @@ public class CommandFacadeIsland extends PluggableIsland implements ChildIsland,
 			stateProviderEndpoint.uninstallQuery(handler, attributeName, zoneName);
 			
 			handler.get();
+		}
+
+		@Override
+		public List<String> getZoneNames() throws RemoteException {
+			log.info("Received command getZoneNames()");
+			
+			RequestHandler<List<String>> handler = new RequestHandler<List<String>>() {
+
+				@Override
+				public void zoneNamesFetched(Void requestId,
+						Collection<String> zoneNames) {
+					List<String> zoneNameList = new ArrayList<String>();
+					zoneNameList.addAll(zoneNames);
+					setResult(zoneNameList);
+				}
+
+			};
+			
+			stateProviderEndpoint.fetchZoneNames(handler);
+			
+			return handler.get();
+		}
+
+		@Override
+		public List<Attribute> getAttributes(String zoneName)
+				throws RemoteException {
+			log.info("Received command getAttributes(%s)", zoneName);
+			if (zoneName == null || !ZoneNames.isGlobalName(zoneName)) {
+				throw new RemoteException("Invalid zone name: " + zoneName);
+			}
+			
+			RequestHandler<List<Attribute>> handler = new RequestHandler<List<Attribute>>() {
+
+				@Override
+				public void zoneNotFound(Void requestId) {
+					setException(new RemoteException("Zone not found"));
+				}
+
+				@Override
+				public void zoneAttributesFetched(Void requestId,
+						Collection<Attribute> attributes) {
+					List<Attribute> attributeList = new ArrayList<Attribute>();
+					attributeList.addAll(attributes);
+					setResult(attributeList);
+				}
+			};
+			
+			stateProviderEndpoint.fetchZoneAttributes(handler, zoneName);
+			
+			return handler.get();
 		}
 		
 	}

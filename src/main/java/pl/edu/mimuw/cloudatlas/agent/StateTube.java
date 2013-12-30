@@ -78,7 +78,7 @@ public class StateTube<RId> extends Tube<StateReceiverEndpoint<RId>, StateProvid
 
 			@Override
 			public void run() {
-				getRightEndpoint().fetchMyZoneName(requestId);
+				getRightEndpoint().fetchZoneNames(requestId);
 			}
 			
 		});
@@ -143,6 +143,21 @@ public class StateTube<RId> extends Tube<StateReceiverEndpoint<RId>, StateProvid
 			}
 			
 		});
+	}
+
+	@Override
+	public void fetchZoneAttributes(final RId requestId, final String zoneName) {
+		assert ZoneNames.isGlobalName(zoneName);
+		
+		getRightCarousel().enqueue(new Runnable() {
+
+			@Override
+			public void run() {
+				getRightEndpoint().fetchZoneAttributes(requestId, zoneName);
+			}
+			
+		});
+		
 	}
 
 	@Override
@@ -271,5 +286,23 @@ public class StateTube<RId> extends Tube<StateReceiverEndpoint<RId>, StateProvid
 			
 		});
 		
+	}
+
+	@Override
+	public void zoneAttributesFetched(final RId requestId,
+			Collection<Attribute> attributes) {
+		final List<Attribute> attributesCopy = new ArrayList<Attribute>();
+		for (Attribute attribute : attributes) {
+			attributesCopy.add(attribute.deepCopy());
+		}
+		
+		getLeftCarousel().enqueue(new Runnable() {
+
+			@Override
+			public void run() {
+				getLeftEndpoint().zoneAttributesFetched(requestId, attributesCopy);
+			}
+			
+		});
 	}
 }

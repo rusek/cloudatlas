@@ -53,4 +53,10 @@ public class StateReceiverAdapter<RId> implements StateReceiverEndpoint<RId> {
 	public void queryUninstalled(RId requestId) {
 		throw new RuntimeException("Unexpected callback invoked");
 	}
+
+	@Override
+	public void zoneAttributesFetched(RId requestId,
+			Collection<Attribute> attributes) {
+		throw new RuntimeException("Unexpected callback invoked");
+	}
 }

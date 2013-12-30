@@ -14,6 +14,8 @@ public interface StateReceiverEndpoint<RId> {
 	
 	public void zoneAttributeNamesFetched(RId requestId, Collection<String> attributeNames);
 	
+	public void zoneAttributesFetched(RId requestId, Collection<Attribute> attributes);
+	
 	public void myZoneNameFetched(RId requestId, String zoneName);
 	
 	public void zoneNotFound(RId requestId);

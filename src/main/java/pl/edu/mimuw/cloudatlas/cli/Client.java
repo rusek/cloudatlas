@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,7 +51,10 @@ public class Client {
 	
 	public Client() {
 		addCommonCommand(new GetAttributeValueCommand());
+		addCommonCommand(new SetMyAttributeValueCommand());
+		addCommonCommand(new GetAttributesCommand());
 		addCommonCommand(new GetMyGlobalNameCommand());
+		addCommonCommand(new ListZoneNamesCommand());
 		addCommonCommand(new SetFallbackContactsCommand());
 		addCommonCommand(new ShowStatsCommand());
 		addCommonCommand(new SendStatsCommand());
@@ -323,12 +327,91 @@ public class Client {
 		
 	}
 	
+	private class SetMyAttributeValueCommand extends FacadeCommand {
+
+		private Attribute attribute; 
+		
+		@Override
+		public void prepare(List<String> args) throws Exception {
+			if (args.size() < 2) {
+				throw new IllegalArgumentException("setMyAttributeValue takes at least 2 arguments");
+			}
+			
+			attribute = new Attribute(args.get(0), ValueParser.parseValue(args.subList(1, args.size())));
+		}
+
+		@Override
+		public void executeOnFacade(CommandFacade facade) throws Exception {
+			List<Attribute> attributes = new ArrayList<Attribute>();
+			attributes.add(attribute);
+			facade.setMyAttributes(attributes);
+		}
+
+		@Override
+		public String getName() {
+			return "setMyAttributeValue";
+		}
+
+		@Override
+		public void printHelp() {
+			//       ************************************************************************
+			println("  - setMyAttributeValue <attributeName> <simpleType> <value>");
+			println("    setMyAttributeValue <attributeName> list:<simpleType> <item1> ...");
+			println("    setMyAttributeValue <attributeName> set:<simpleType> <item1> ...");
+			println("    Sets value of a given attribute that belongs to agent's own zone.");
+			println("    Possible simpleType values: boolean, integer, double, string, time,");
+			println("    duration, contact.");
+			
+		}
+		
+	}
+	
+	private class GetAttributesCommand extends FacadeCommand {
+		private String zoneName;
+		
+		@Override
+		public void prepare(List<String> args) throws Exception {
+			if (args.size() != 1) {
+				throw new IllegalArgumentException("getAttributes command takes exactly 1 argument");
+			}
+			zoneName = args.get(0);
+		}
+
+		@Override
+		public void executeOnFacade(CommandFacade facade) throws Exception {
+			List<Attribute> attributes = facade.getAttributes(zoneName);
+			Collections.sort(attributes, new Comparator<Attribute>() {
+
+				@Override
+				public int compare(Attribute arg0, Attribute arg1) {
+					return arg0.getName().compareTo(arg1.getName());
+				}
+				
+			});
+			for (Attribute attribute : attributes) {
+				println(attribute);
+			}
+		}
+
+		@Override
+		public String getName() {
+			return "getAttributes";
+		}
+
+		@Override
+		public void printHelp() {
+			println("  - getAttributes");
+			println("    Returns all attributes of a given zone");
+		}
+		
+	}
+	
 	private class GetMyGlobalNameCommand extends FacadeCommand {
 
 		@Override
 		public void prepare(List<String> args) throws Exception {
 			if (args.size() != 0) {
-				throw new IllegalArgumentException("getAttributeValue command takes no arguments");
+				throw new IllegalArgumentException("getMyGlobalName command takes no arguments");
 			}
 		}
 
@@ -347,6 +430,35 @@ public class Client {
 		public void printHelp() {
 			println("  - getMyGlobalName");
 			println("    Returns agent zone name.");
+		}
+		
+	}
+	
+	private class ListZoneNamesCommand extends FacadeCommand {
+
+		@Override
+		public void prepare(List<String> args) throws Exception {
+			if (args.size() != 0) {
+				throw new IllegalArgumentException("listZoneNames command takes no arguments");
+			}
+		}
+
+		@Override
+		public void executeOnFacade(CommandFacade facade) throws Exception {
+			for (String zoneName : facade.getZoneNames()) {
+				println(zoneName);
+			}
+		}
+
+		@Override
+		public String getName() {
+			return "listZoneNames";
+		}
+
+		@Override
+		public void printHelp() {
+			println("  - listZoneNames");
+			println("  - Lists global names of all zones known by the agent");
 		}
 		
 	}

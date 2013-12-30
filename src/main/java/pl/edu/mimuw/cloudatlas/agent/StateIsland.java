@@ -254,6 +254,16 @@ public class StateIsland extends PluggableIsland implements
 					}
 				}
 			}
+
+			@Override
+			public void fetchZoneAttributes(RId requestId, String zoneName) {
+				Zone zone = rootZone.findZone(zoneName);
+				if (zone == null) {
+					receiverEndpoint.zoneNotFound(requestId);
+				} else {
+					receiverEndpoint.zoneAttributesFetched(requestId, zone.getZMI().getAttributes());
+				}
+			}
 		};
 	}
 

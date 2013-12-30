@@ -10,6 +10,8 @@ public interface StateProviderEndpoint<RId> {
 	
 	public void fetchZoneAttribute(RId requestId, String zoneName, String attributeName);
 	
+	public void fetchZoneAttributes(RId requestId, String zoneName);
+	
 	public void updateMyZoneAttributes(RId requestId, List<Attribute> attributes);
 
 	public void fetchZoneAttributeNames(RId requestId, String zoneName);

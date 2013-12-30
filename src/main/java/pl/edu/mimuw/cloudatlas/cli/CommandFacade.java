@@ -13,7 +13,11 @@ public interface CommandFacade extends Remote {
 	
 	public Value getAttributeValue(String zoneName, String attrName) throws RemoteException;
 	
+	public List<Attribute> getAttributes(String zoneName) throws RemoteException;
+	
 	public void setMyAttributes(List<Attribute> attributes) throws RemoteException;
+	
+	public List<String> getZoneNames() throws RemoteException;
 	
 	public String getMyGlobalName() throws RemoteException;
 	
