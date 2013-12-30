@@ -35,7 +35,7 @@ LineTerminator     = \r|\n|\r\n|\n\r
 WhiteSpace         = {LineTerminator} | [ \t\f]
 Identifier         = [a-zA-Z][a-zA-Z0-9_]*
 DecIntegerLiteral  = 0 | [1-9][0-9]*
-DecFloatLiteral    = (0 | [1-9][0-9]*)\.[0-9]*([eE][+-]?[0-9]+)?
+DecFloatLiteral    = (0 | [1-9][0-9]*)(\.[0-9]*)?([eE][+-]?[0-9]+)?
 
 /* additional high-level states */
 %state STRING
@@ -153,9 +153,9 @@ DecFloatLiteral    = (0 | [1-9][0-9]*)\.[0-9]*([eE][+-]?[0-9]+)?
     \\\\                             
         { this.string.append('\\'); }
     <<EOF>>                        
-        { throw new Error("Unterminated string at the end of input"); }
+        { throw new java.io.IOException("Unterminated string at the end of input"); }
 }
 
 /* error fallback */
 .|\n                               
-    { throw new Error("Illegal character <" + this.yytext() + ">"); }
+    { throw new java.io.IOException("Illegal character <" + this.yytext() + ">"); }

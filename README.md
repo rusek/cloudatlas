@@ -23,12 +23,21 @@ Uruchamia interpreter zapytań.
     
 Generuje raport z pokryciem kodu przez testy (dostępny w target/site/cobertura/).
 
-Uruchamianie aplikacji
---------------------
+    ./registry.sh
+    
+Uruchamia rejestr RMI.
 
-* `./registry.sh` - uruchamia rejestr RMI;
-* `./agent.sh <config>` - uruchamia agenta z podanym plikiem konfiguracyjnym;
-* `./client.sh <komenda> <arg1> <arg2> ...` - wykonuje podaną komendę klienta, `./client.sh --help` dla listy dostępnych komend  
+
+    ./agent.sh <config>
+    
+Uruchamia agenta z podanym plikiem konfiguracyjnym, np. `./agent.sh agent.uw.khaki13.properties`.
+
+
+    ./client.sh <komenda> <arg1> <arg2> ...
+
+Wykonuje podaną komendę klienta. `./client.sh --help` wypisuje listę dostępnych komend i sposób specyfikowania
+lokalizacji, pod którą znajduje się agent. Klient jest w stanie komunikować się z wieloma agentami na raz
+i pozwala na pracę w trybie interaktywnym (komenda `shell`).  
 
 Opcje konfiguracyjne agenta
 --------------------
@@ -39,6 +48,12 @@ Opcje konfiguracyjne agenta
 * `gossipInterval` - odstęp pomiędzy kolejnymi plotkowaniami (w ms); domyślnie 5000;
 * `zoneRefreshInterval` - odstęp pomiędzy odświeżeniami ZMI (w ms); domyślnie 5000;
 * `maxZoneAge` - wiek ZMI, po przekroczeniu którego strefa jest usuwana z pamięci agenta (w ms); domyślnie 60000;
+* `gossipLevelSelectionStrategy` - specyfikuje strategię wyboru poziomu do plotkowania; możliwe wartości:
+    * `random` (domyślnie) - poziom jest wybierany losowo;
+    * `weightedRandom` - poziom jest wybierany losowo z prawdopodobieństwem malejącym wykładniczo względem poziomu;
+    * `roundRobin` - poziomy są wybierane cyklicznie;
+    * `weightedRoundRobin` - poziomy są wybierane cyklicznie, z prawdopodobieństwem malejącym wykładniczo względem poziomu;
+    * `whatever` - wybierana jest losowo jakaś strategia;
 * `fallbackContacts` - lista zapasowych kontaktów, w formacie `hostname:port, hostname:port, ...`; domyślnie pusta;
 
 Uruchamianie agentów w sieci
@@ -48,7 +63,7 @@ Przed uruchomieniem agenta na zdalnej maszynie należy w odpowiednim pliku konfi
 odpowiednio wartość opcji `host` - możliwe jest podanie zarówno nazwy hosta `somename` jak i adres IP `192.168.0.123`. Ustawienie
 wartości `0.0.0.0` lub `127.0.0.1` skutkuje różnymi błędami w komunikacji, zarówno między agentami, jak i agentem i klientem.
 Zaobserwowane błędy to m.in. `IOException: Zły argument`, który skutkuje wywaleniem procesu agenta, gdy ten nasłuchuje na adresie `localhost`
-i jednocześnie wykorzytuje to samo gniazdo sieciowe do komunikacji z innymi agentami, którzy nie są uruchomieni lokalnie.
+i jednocześnie wykorzystuje to samo gniazdo sieciowe do komunikacji z innymi agentami, którzy nie są uruchomieni lokalnie.
 W przypadku połączenia klienta z agentem źle ustawiona nazwa hosta prowadzi do błędu `Connection refused` na etapie wywoływania
 zdalnych metod - samo nawiązanie połączenia nie powoduje błędu.
 
@@ -62,10 +77,10 @@ Aby instalować zapytania i obserwować ich wyniki najlepiej wykonać komendę `
 wprowadzać w trybie interaktywnym. Wszystkie polecenia są rozsyłane do podanych agentów. Przykładowo instalację zapytania można
 dokonać poprzez:
 
-`>: installQuery &num_processes "SELECT sum(num_processes) AS num_processes"`
+    >: installQuery &num_processes "SELECT sum(num_processes) AS num_processes"
 
 Po przeliczeniu ZMI wykonanie polecenia
 
-`>: getAttributeValue / num_processes`
+    >: getAttributeValue / num_processes
 
 powinno wypisać dla każdego agenta zagregowaną wartość atrybutu `num_processes` w korzeniu.

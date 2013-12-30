@@ -103,7 +103,7 @@ public class StateIsland extends PluggableIsland implements
 	}
 	
 	private void refreshZones() {
-		log.debug("Refreshing zones");
+		log.info("Refreshing zones");
 		zoneSiblingsPurger.purgeSiblings(rootZone);
 		zoneAncestorsRefresher.refreshAncestors(rootZone);
 		myZone.getZMI().setAttribute("timestamp", TimeValue.now());

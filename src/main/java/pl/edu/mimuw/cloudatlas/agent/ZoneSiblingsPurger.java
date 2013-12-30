@@ -36,7 +36,7 @@ public class ZoneSiblingsPurger {
 						!ZoneNames.isAncestorOrSelf(myZoneName, childZone.getGlobalName()) &&
 						getTimestamp(childZone) < timestampThreshold
 				) {
-					log.debug("Purging old zone %s", childZone.getGlobalName());
+					log.info("Purging old zone %s", childZone.getGlobalName());
 					zone.removeChild(childName);
 				}
 			}

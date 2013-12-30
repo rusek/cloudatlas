@@ -16,7 +16,7 @@ public class Parsers {
 		try {
 			symbol = parser.parse();
 		} catch (Exception e) {
-			throw new ParseException(e);
+			throw new ParseException(e.getMessage(), e);
 		}
 		return (List<Stmt>) symbol.value;
 	}
