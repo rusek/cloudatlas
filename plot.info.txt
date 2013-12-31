@@ -1,0 +1,5 @@
+Wykres zmiany liczby procesów w czasie został wygenerowany podczas rozruchu systemu. Najpierw wystartowany
+został jeden agent z zainstalowanym zapytaniem "SELECT sum(num_processes) AS num_processes" i od tego momentu
+rozpoczęło się zbieranie statystyk. Przez następne kilka minut uruchamiane były dalsze węzły sieci. Znaczne skoki
+liczby procesów na wykresie wskazują chwile, gdy początkowy agent uzyskał w wyniku plotkowania ZMI innych agentów.
+Po upływie 300 s od początku pomiaru liczba procesów na maszynach była zwiększana.
