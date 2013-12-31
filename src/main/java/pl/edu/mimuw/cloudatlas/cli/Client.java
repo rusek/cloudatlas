@@ -223,7 +223,7 @@ public class Client {
 		@Override
 		public void prepare(List<String> args) throws Exception {
 			if (args.size() != 0) {
-				throw new IllegalArgumentException("showStats command takes no arguments");
+				throw new IllegalArgumentException("sendStats command takes no arguments");
 			}
 			stats = new StatsCollector().collectStats();
 		}
@@ -321,7 +321,7 @@ public class Client {
 		@Override
 		public void prepare(List<String> args) throws Exception {
 			if (args.size() == 0) {
-				throw new IllegalArgumentException("setFallbackContacts takes at least one argument");
+				throw new IllegalArgumentException("setFallbackContacts command takes at least one argument");
 			}
 			contacts = new ArrayList<ContactValue>();
 			for (String arg : args) {
@@ -589,7 +589,7 @@ public class Client {
 		@Override
 		public void prepare(List<String> args) throws Exception {
 			if (args.size() != 3) {
-				throw new IllegalArgumentException("installQuery command takes exactly 3 arguments");
+				throw new IllegalArgumentException("installQueryAt command takes exactly 3 arguments");
 			}
 			zoneName = args.get(0);
 			attributeName = args.get(1);

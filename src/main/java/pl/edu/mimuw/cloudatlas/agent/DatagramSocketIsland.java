@@ -172,7 +172,7 @@ public class DatagramSocketIsland extends PluggableIsland implements
 			
 			socket.send(packet);
 		} catch (IOException e) {
-			throw new IslandException(e);
+			log.warn("Could not send packet to %s (error: %s)", packet.getSocketAddress(), e.getMessage());
 		}
 	}
 	
@@ -303,10 +303,10 @@ public class DatagramSocketIsland extends PluggableIsland implements
 			}
 			
 			Map<String, TimeValue> timestamps = new HashMap<String, TimeValue>();
-			long timeDiff = stream.getSenderTimeDiff();
+			long timeDiff = stream.getTimeDiff();
 			for (int i = 0; i < size; i++) {
 				String zoneName = input.readUTF();
-				TimeValue timestamp = SimpleType.TIME.compactReadValue(input).addDuration(timeDiff);
+				TimeValue timestamp = SimpleType.TIME.compactReadValue(input).addDuration(-timeDiff);
 				timestamps.put(zoneName, timestamp);
 			}
 			
@@ -345,7 +345,7 @@ public class DatagramSocketIsland extends PluggableIsland implements
 			if (size < 0) {
 				throw new IOException("Negative length");
 			}
-			long timeDiff = stream.getSenderTimeDiff();
+			long timeDiff = stream.getTimeDiff();
 			Map<String, ZMI> zmis = new HashMap<String, ZMI>();
 			for (int i = 0; i < size; i++) {
 				String zoneName = input.readUTF();
@@ -353,7 +353,7 @@ public class DatagramSocketIsland extends PluggableIsland implements
 					throw new IOException("Not a global name: " + zoneName);
 				}
 				ZMI zmi = ZMI.compactRead(input);
-				zmi.setAttribute("timestamp", getTimestamp(zmi).addDuration(timeDiff));
+				zmi.setAttribute("timestamp", getTimestamp(zmi).addDuration(-timeDiff));
 				zmis.put(zoneName, zmi);
 			}
 			return zmis;

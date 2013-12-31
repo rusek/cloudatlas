@@ -63,7 +63,7 @@ public abstract class LevelSelectionStrategy {
 			return new WeightedRoundRobinStrategy(zoneName, Math.E);
 		
 		default:
-			throw new IllegalArgumentException("Invalid stragegy: " + strategy);
+			throw new IllegalArgumentException("Invalid strategy: " + strategy);
 		}
 	}
 }

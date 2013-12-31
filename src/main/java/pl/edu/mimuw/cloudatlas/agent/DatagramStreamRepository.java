@@ -56,8 +56,12 @@ public class DatagramStreamRepository {
 		return stream;
 	}
 	
+	protected long now() { // overridden in unittests 
+		return new Date().getTime();
+	}
+	
 	public void tick() {
-		long lastActivityThreshold = new Date().getTime() - MAX_STREAM_IDLE_DURATION;
+		long lastActivityThreshold = now() - MAX_STREAM_IDLE_DURATION;
 		List<Stream> streams = new ArrayList<Stream>();
 		streams.addAll(this.streams.values());
 		
@@ -154,13 +158,14 @@ public class DatagramStreamRepository {
 		private int observedTimeShift = Integer.MIN_VALUE;
 		private Long timeDiff = null;
 		private boolean closed = false;
-		private long lastActivity = new Date().getTime();
+		private long lastActivity = now();
 		
 		private Stream(StreamKey key) {
 			this.key = key;
 		}
 		
-		public long getSenderTimeDiff() {
+		// myTime + timeDiff = peerTime
+		public long getTimeDiff() {
 			if (timeDiff == null) {
 				log.warn("No time difference available yet");
 				return 0;
@@ -181,7 +186,7 @@ public class DatagramStreamRepository {
 			if (closed) {
 				return;
 			}
-			lastActivity = new Date().getTime();
+			lastActivity = now();
 			
 			int offset = 0;
 			while (offset != data.length) {
@@ -191,12 +196,18 @@ public class DatagramStreamRepository {
 				System.arraycopy(data, offset, datagramData, HEADER_SIZE, sentThisTime);
 				offset += sentThisTime;
 				ByteArrays.writeInt(datagramData, 4, outSeqNum | (offset == data.length ? 1 << 31 : 0));
-				ByteArrays.writeLong(datagramData, 8, new Date().getTime());
+				ByteArrays.writeLong(datagramData, 8, now());
 				ByteArrays.writeInt(datagramData, 16, observedTimeShift);
 				outSeqNum++;
 				
-				DatagramPacket packet = new DatagramPacket(datagramData, datagramData.length);
-				packet.setSocketAddress(key.address);
+				DatagramPacket packet;
+				packet = new DatagramPacket(datagramData, datagramData.length);
+				try {
+					packet.setSocketAddress(key.address);
+				} catch (IllegalArgumentException e) {
+					log.warn("Could not construct packet to %s (error: %s)", key.address, e.getMessage());
+					return;
+				}
 				sender.sendPacket(packet);
 			}
 		}
@@ -236,7 +247,7 @@ public class DatagramStreamRepository {
 		
 		private void emitMessage() {
 			log.debug("Emitting message from stream, startSeqNum: %d, endSeqNum: %d", startSeqNum, endSeqNum);
-			lastActivity = new Date().getTime();
+			lastActivity = now();
 			int length = 0;
 			for (int i = startSeqNum; i < endSeqNum; i++) {
 				length += frames.get(i).getLength();
